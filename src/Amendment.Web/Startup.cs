@@ -10,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Amendment.Web.Data;
 using Amendment.Web.Models;
-using Amendment.Web.Services;
 
 namespace Amendment.Web
 {
@@ -34,7 +33,7 @@ namespace Amendment.Web
                 .AddDefaultTokenProviders();
 
             // Add application services.
-            services.AddTransient<IEmailSender, EmailSender>();
+            //https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity-custom-storage-providers?view=aspnetcore-2.1
 
             services.AddMvc();
         }
