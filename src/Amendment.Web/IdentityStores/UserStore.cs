@@ -147,7 +147,7 @@ namespace Amendment.Web.IdentityStores
             return (await _roleService.GetRolesForUserAsync(user.UserId))?.Select(r => r.Name).ToList();
         }
 
-        public async Task<bool> IsInRoleAsync(User user, string roleName, CancellationToken cancellationToken)
+        public Task<bool> IsInRoleAsync(User user, string roleName, CancellationToken cancellationToken)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (roleName == null) throw new ArgumentNullException(nameof(roleName));

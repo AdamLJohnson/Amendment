@@ -35,5 +35,12 @@ namespace Amendment.Repository.Infrastructure
                 $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.Delete}", selector,
                 commandType: CommandType.StoredProcedure);
         }
+
+        public Task<int> DeleteAsync(int id)
+        {
+            return _dbConnection.ExecuteAsync(
+                $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.DeleteById}", new { id },
+                commandType: CommandType.StoredProcedure);
+        }
     }
 }

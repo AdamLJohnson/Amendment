@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Amendment.Repository;
+using Amendment.Repository.Infrastructure;
 using Amendment.Service;
 using Autofac;
 using Module = Autofac.Module;

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
+﻿using System.Data;
 using Amendment.Model.Infrastructure;
-using Amendment.Repository.Infrastructure;
 
-namespace Amendment.Repository
+namespace Amendment.Repository.Infrastructure
 {
     public class GenericRepository<TModel, TSelector> : BaseRepository<TModel, TSelector> where TModel : BaseModel
     {

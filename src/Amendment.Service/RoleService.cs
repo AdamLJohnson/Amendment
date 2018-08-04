@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
+using Amendment.Repository;
 
 namespace Amendment.Service
 {
@@ -11,35 +13,43 @@ namespace Amendment.Service
         Task AddUserToRoleAsync(int userId, string roleName);
         Task RemoveUserFromRoleAsync(int userId, string roleName);
         Task<List<Role>> GetRolesForUserAsync(int userId);
-        bool IsInRoleAsync(int userId, string roleName);
+        Task<bool> IsInRoleAsync(int userId, string roleName);
         Task<List<Role>> GetAllAsync();
     }
 
     public class RoleService : IRoleService
     {
+        private readonly IRoleRepository _repository;
+
+        public RoleService(IRoleRepository repository)
+        {
+            _repository = repository;
+        }
+
         public Task AddUserToRoleAsync(int userId, string roleName)
         {
-            throw new NotImplementedException();
+            return _repository.AddUserToRoleAsync(userId, roleName);
         }
 
         public Task RemoveUserFromRoleAsync(int userId, string roleName)
         {
-            throw new NotImplementedException();
+            return _repository.RemoveUserFromRoleAsync(userId, roleName);
         }
 
-        public Task<List<Role>> GetRolesForUserAsync(int userId)
+        public async Task<List<Role>> GetRolesForUserAsync(int userId)
         {
-            throw new NotImplementedException();
+            return (await _repository.GetRolesForUserAsync(userId))?.ToList();
         }
 
-        public bool IsInRoleAsync(int userId, string roleName)
+        public async Task<bool> IsInRoleAsync(int userId, string roleName)
         {
-            throw new NotImplementedException();
+            var roles = await _repository.GetRolesForUserAsync(userId);
+            return roles.Any(r => r.Name == roleName);
         }
 
         public Task<List<Role>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return _repository.SelectAllAsync();
         }
     }
 }

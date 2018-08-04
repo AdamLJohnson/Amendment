@@ -6,5 +6,6 @@ namespace Amendment.Model.Selectors
 {
     public class UserSelector
     {
+        public string Username { get; set; }
     }
 }
