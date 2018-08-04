@@ -27,5 +27,12 @@ namespace Amendment.Repository.Infrastructure
         /// <param name="selector"></param>
         /// <returns></returns>
         Task<int> DeleteAsync(TSelector selector);
+
+        /// <summary>
+        /// Deletes a record in the data store by its primary key
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<int> DeleteAsync(int id);
     }
 }

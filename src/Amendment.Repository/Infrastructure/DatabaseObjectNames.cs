@@ -13,6 +13,7 @@ namespace Amendment.Repository.Infrastructure
         public const string SelectSingle = "Select";
         public const string SelectSingleById = "SelectById";
         public const string Delete = "Delete";
+        public const string DeleteById = "DeleteById";
         public const string Update = "Update";
     }
 }

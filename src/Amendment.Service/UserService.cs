@@ -10,9 +10,9 @@ namespace Amendment.Service
 {
     public interface IUserService
     {
-        void CreateAsync(User user);
-        void UpdateAsync(User user);
-        void DeleteAsync(User user);
+        Task CreateAsync(User user);
+        Task UpdateAsync(User user);
+        Task DeleteAsync(User user);
         Task<User> GetAsync(int id);
         Task<User> GetAsync(string userName);
         Task<List<User>> GetAllAsync();
@@ -27,34 +27,35 @@ namespace Amendment.Service
             _repository = repository;
         }
 
-        public void CreateAsync(User user)
+        public Task CreateAsync(User user)
         {
-            throw new NotImplementedException();
+            return _repository.InsertAsync(user);
         }
 
-        public void UpdateAsync(User user)
+        public Task UpdateAsync(User user)
         {
-            throw new NotImplementedException();
+            return _repository.UpdateAsync(user);
         }
 
-        public void DeleteAsync(User user)
+        public Task DeleteAsync(User user)
         {
-            throw new NotImplementedException();
+            return _repository.DeleteAsync(user.UserId);
         }
 
         public Task<User> GetAsync(int id)
         {
-            throw new NotImplementedException();
+            return _repository.SelectSingleAsync(id);
         }
 
         public Task<User> GetAsync(string userName)
         {
-            throw new NotImplementedException();
+            var selector = new UserSelector{ Username = userName };
+            return _repository.SelectSingleAsync(selector);
         }
 
         public Task<List<User>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return _repository.SelectAllAsync();
         }
     }
 }
