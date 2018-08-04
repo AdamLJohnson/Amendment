@@ -5,6 +5,14 @@
     <UserSecretsId>aspnet-Amendment.Web-4ABABFCA-9AA3-435F-A17E-CA0491FAF890</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
