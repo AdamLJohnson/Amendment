@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Amendment.Repository\Amendment.Repository.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Infrastructure\" />
   </ItemGroup>
 

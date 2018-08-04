@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Amendment.Model.DataModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,13 +20,13 @@ namespace Amendment.Web.Controllers
     [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly ILogger _logger;
 
         public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
+            UserManager<User> userManager,
+            SignInManager<User> signInManager,
             ILogger<AccountController> logger)
         {
             _userManager = userManager;
@@ -123,17 +124,17 @@ namespace Amendment.Web.Controllers
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User with ID {UserId} logged in with 2fa.", user.Id);
+                _logger.LogInformation("User with ID {UserId} logged in with 2fa.", user.UserId);
                 return RedirectToLocal(returnUrl);
             }
             else if (result.IsLockedOut)
             {
-                _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
+                _logger.LogWarning("User with ID {UserId} account locked out.", user.UserId);
                 return RedirectToAction(nameof(Lockout));
             }
             else
             {
-                _logger.LogWarning("Invalid authenticator code entered for user with ID {UserId}.", user.Id);
+                _logger.LogWarning("Invalid authenticator code entered for user with ID {UserId}.", user.UserId);
                 ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
                 return View();
             }
@@ -177,17 +178,17 @@ namespace Amendment.Web.Controllers
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User with ID {UserId} logged in with a recovery code.", user.Id);
+                _logger.LogInformation("User with ID {UserId} logged in with a recovery code.", user.UserId);
                 return RedirectToLocal(returnUrl);
             }
             if (result.IsLockedOut)
             {
-                _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
+                _logger.LogWarning("User with ID {UserId} account locked out.", user.UserId);
                 return RedirectToAction(nameof(Lockout));
             }
             else
             {
-                _logger.LogWarning("Invalid recovery code entered for user with ID {UserId}", user.Id);
+                _logger.LogWarning("Invalid recovery code entered for user with ID {UserId}", user.UserId);
                 ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
                 return View();
             }
@@ -216,14 +217,14 @@ namespace Amendment.Web.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new User { Username = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+                    var callbackUrl = Url.EmailConfirmationLink(user.UserId, code, Request.Scheme);
                     //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
@@ -306,7 +307,7 @@ namespace Amendment.Web.Controllers
                 {
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new User { Username = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -366,7 +367,7 @@ namespace Amendment.Web.Controllers
                 // For more information on how to enable account confirmation and password reset please
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
+                var callbackUrl = Url.ResetPasswordCallbackLink(user.UserId, code, Request.Scheme);
                 //await _emailSender.SendEmailAsync(model.Email, "Reset Password",
                 //   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
                 return RedirectToAction(nameof(ForgotPasswordConfirmation));

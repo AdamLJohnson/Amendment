@@ -5,7 +5,7 @@ using Amendment.Model.Infrastructure;
 
 namespace Amendment.Repository.Infrastructure
 {
-    public interface IRepository<TModel, TSelector> : IReadOnlyRepository<TModel, TSelector> where TModel: BaseModel
+    public interface IRepository<TModel, in TSelector> : IReadOnlyRepository<TModel, TSelector> where TModel: BaseModel
     {
         /// <summary>
         /// Inserts a record into the data store

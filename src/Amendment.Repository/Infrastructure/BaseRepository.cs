@@ -8,7 +8,7 @@ using Dapper;
 
 namespace Amendment.Repository.Infrastructure
 {
-    public class BaseRepository<TModel, TSelector> : BaseReadOnlyRepository<TModel, TSelector>, IRepository<TModel, TSelector> where TModel : BaseModel
+    public abstract class BaseRepository<TModel, TSelector> : BaseReadOnlyRepository<TModel, TSelector>, IRepository<TModel, TSelector> where TModel : BaseModel
     {
         protected BaseRepository(IDbConnection dbConnection) : base(dbConnection)
         {

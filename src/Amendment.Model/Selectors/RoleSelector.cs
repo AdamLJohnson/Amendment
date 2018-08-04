@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Amendment.Model
+namespace Amendment.Model.Selectors
 {
-    public class ApplicationUser
+    public class RoleSelector
     {
     }
 }

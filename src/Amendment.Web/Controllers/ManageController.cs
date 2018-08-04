@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Amendment.Model.DataModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,8 +20,8 @@ namespace Amendment.Web.Controllers
     [Route("[controller]/[action]")]
     public class ManageController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
 
@@ -28,8 +29,8 @@ namespace Amendment.Web.Controllers
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
 
         public ManageController(
-          UserManager<ApplicationUser> userManager,
-          SignInManager<ApplicationUser> signInManager,
+          UserManager<User> userManager,
+          SignInManager<User> signInManager,
           ILogger<ManageController> logger,
           UrlEncoder urlEncoder)
         {
@@ -53,10 +54,10 @@ namespace Amendment.Web.Controllers
 
             var model = new IndexViewModel
             {
-                Username = user.UserName,
+                Username = user.Username,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                IsEmailConfirmed = user.EmailConfirmed,
+                //PhoneNumber = user.PhoneNumber,
+                //IsEmailConfirmed = user.EmailConfirmed,
                 StatusMessage = StatusMessage
             };
 
@@ -84,19 +85,19 @@ namespace Amendment.Web.Controllers
                 var setEmailResult = await _userManager.SetEmailAsync(user, model.Email);
                 if (!setEmailResult.Succeeded)
                 {
-                    throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
+                    throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.UserId}'.");
                 }
             }
 
-            var phoneNumber = user.PhoneNumber;
-            if (model.PhoneNumber != phoneNumber)
-            {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, model.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
-                {
-                    throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
-                }
-            }
+            //var phoneNumber = user.PhoneNumber;
+            //if (model.PhoneNumber != phoneNumber)
+            //{
+            //    var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, model.PhoneNumber);
+            //    if (!setPhoneResult.Succeeded)
+            //    {
+            //        throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.UserId}'.");
+            //    }
+            //}
 
             StatusMessage = "Your profile has been updated";
             return RedirectToAction(nameof(Index));
@@ -118,7 +119,7 @@ namespace Amendment.Web.Controllers
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+            var callbackUrl = Url.EmailConfirmationLink(user.UserId, code, Request.Scheme);
             var email = user.Email;
             //await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
 
@@ -263,16 +264,16 @@ namespace Amendment.Web.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var info = await _signInManager.GetExternalLoginInfoAsync(user.Id);
+            var info = await _signInManager.GetExternalLoginInfoAsync(user.UserId.ToString());
             if (info == null)
             {
-                throw new ApplicationException($"Unexpected error occurred loading external login info for user with ID '{user.Id}'.");
+                throw new ApplicationException($"Unexpected error occurred loading external login info for user with ID '{user.UserId}'.");
             }
 
             var result = await _userManager.AddLoginAsync(user, info);
             if (!result.Succeeded)
             {
-                throw new ApplicationException($"Unexpected error occurred adding external login for user with ID '{user.Id}'.");
+                throw new ApplicationException($"Unexpected error occurred adding external login for user with ID '{user.UserId}'.");
             }
 
             // Clear the existing external cookie to ensure a clean login process
@@ -295,7 +296,7 @@ namespace Amendment.Web.Controllers
             var result = await _userManager.RemoveLoginAsync(user, model.LoginProvider, model.ProviderKey);
             if (!result.Succeeded)
             {
-                throw new ApplicationException($"Unexpected error occurred removing external login for user with ID '{user.Id}'.");
+                throw new ApplicationException($"Unexpected error occurred removing external login for user with ID '{user.UserId}'.");
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
@@ -315,7 +316,7 @@ namespace Amendment.Web.Controllers
             var model = new TwoFactorAuthenticationViewModel
             {
                 HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null,
-                Is2faEnabled = user.TwoFactorEnabled,
+                Is2faEnabled = false,//user.TwoFactorEnabled,
                 RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user),
             };
 
@@ -331,10 +332,10 @@ namespace Amendment.Web.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            if (!user.TwoFactorEnabled)
-            {
-                throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
-            }
+            //if (!user.TwoFactorEnabled)
+            //{
+            //    throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.UserId}'.");
+            //}
 
             return View(nameof(Disable2fa));
         }
@@ -352,10 +353,10 @@ namespace Amendment.Web.Controllers
             var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
             if (!disable2faResult.Succeeded)
             {
-                throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
+                throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.UserId}'.");
             }
 
-            _logger.LogInformation("User with ID {UserId} has disabled 2fa.", user.Id);
+            _logger.LogInformation("User with ID {UserId} has disabled 2fa.", user.UserId);
             return RedirectToAction(nameof(TwoFactorAuthentication));
         }
 
@@ -404,7 +405,7 @@ namespace Amendment.Web.Controllers
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
-            _logger.LogInformation("User with ID {UserId} has enabled 2FA with an authenticator app.", user.Id);
+            _logger.LogInformation("User with ID {UserId} has enabled 2FA with an authenticator app.", user.UserId);
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
             TempData[RecoveryCodesKey] = recoveryCodes.ToArray();
 
@@ -442,7 +443,7 @@ namespace Amendment.Web.Controllers
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
-            _logger.LogInformation("User with id '{UserId}' has reset their authentication app key.", user.Id);
+            _logger.LogInformation("User with id '{UserId}' has reset their authentication app key.", user.UserId);
 
             return RedirectToAction(nameof(EnableAuthenticator));
         }
@@ -456,10 +457,10 @@ namespace Amendment.Web.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            if (!user.TwoFactorEnabled)
-            {
-                throw new ApplicationException($"Cannot generate recovery codes for user with ID '{user.Id}' because they do not have 2FA enabled.");
-            }
+            //if (!user.TwoFactorEnabled)
+            //{
+            //    throw new ApplicationException($"Cannot generate recovery codes for user with ID '{user.UserId}' because they do not have 2FA enabled.");
+            //}
 
             return View(nameof(GenerateRecoveryCodes));
         }
@@ -474,13 +475,13 @@ namespace Amendment.Web.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            if (!user.TwoFactorEnabled)
-            {
-                throw new ApplicationException($"Cannot generate recovery codes for user with ID '{user.Id}' as they do not have 2FA enabled.");
-            }
+            //if (!user.TwoFactorEnabled)
+            //{
+            //    throw new ApplicationException($"Cannot generate recovery codes for user with ID '{user.UserId}' as they do not have 2FA enabled.");
+            //}
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            _logger.LogInformation("User with ID {UserId} has generated new 2FA recovery codes.", user.Id);
+            _logger.LogInformation("User with ID {UserId} has generated new 2FA recovery codes.", user.UserId);
 
             var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 
@@ -523,7 +524,7 @@ namespace Amendment.Web.Controllers
                 unformattedKey);
         }
 
-        private async Task LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user, EnableAuthenticatorViewModel model)
+        private async Task LoadSharedKeyAndQrCodeUriAsync(User user, EnableAuthenticatorViewModel model)
         {
             var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             if (string.IsNullOrEmpty(unformattedKey))

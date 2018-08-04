@@ -9,7 +9,7 @@ using Dapper;
 
 namespace Amendment.Repository.Infrastructure
 {
-    public class BaseReadOnlyRepository<TModel, TSelector> : IReadOnlyRepository<TModel, TSelector> where TModel : BaseModel
+    public abstract class BaseReadOnlyRepository<TModel, TSelector> : IReadOnlyRepository<TModel, TSelector> where TModel : BaseModel
     {
         protected readonly IDbConnection _dbConnection;
         protected readonly string _modelName;
@@ -19,6 +19,13 @@ namespace Amendment.Repository.Infrastructure
             _dbConnection = dbConnection;
             _modelName = nameof(TModel);
 
+        }
+
+        public Task<TModel> SelectSingleAsync(int id)
+        {
+            return _dbConnection.QuerySingleAsync<TModel>(
+                $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.SelectSingleById}", new { id },
+                commandType: CommandType.StoredProcedure);
         }
 
         public async Task<List<TModel>> SelectAllAsync()
