@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
@@ -15,6 +16,7 @@ using Amendment.Web.IoC;
 using Amendment.Web.Models;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using MySql.Data.MySqlClient;
 
 namespace Amendment.Web
 {
@@ -34,11 +36,13 @@ namespace Amendment.Web
             //services.AddDbContext<ApplicationDbContext>(options =>
             //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddSingleton<IDbConnection>(new MySqlConnection(Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddIdentity<User, Role>()
                 //.AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             services.AddTransient<IUserStore<User>, UserStore>();
-
+            
             ColumnMappingManager.Register();
 
             // Add application services.
