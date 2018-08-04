@@ -10,14 +10,14 @@ using Dapper;
 
 namespace Amendment.Repository
 {
-    public interface IRoleRepository : IRepository<Role, RoleSelector>
+    public interface IRoleRepository : IReadOnlyRepository<Role, RoleSelector>
     {
         Task AddUserToRoleAsync(int userId, string roleName);
         Task RemoveUserFromRoleAsync(int userId, string roleName);
         Task<IEnumerable<Role>> GetRolesForUserAsync(int userId);
     }
 
-    public class RoleRepository : GenericRepository<Role, RoleSelector>, IRoleRepository
+    public class RoleRepository : BaseReadOnlyRepository<Role, RoleSelector>, IRoleRepository
     {
         public RoleRepository(IDbConnection dbConnection) : base(dbConnection)
         {
