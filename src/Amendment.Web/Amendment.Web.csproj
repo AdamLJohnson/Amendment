@@ -36,6 +36,7 @@
     <Folder Include="Areas\Admin\Controllers\" />
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\Views\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>
