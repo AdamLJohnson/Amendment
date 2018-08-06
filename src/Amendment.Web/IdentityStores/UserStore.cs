@@ -124,7 +124,8 @@ namespace Amendment.Web.IdentityStores
         public async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             if (normalizedUserName == null) throw new ArgumentNullException(nameof(normalizedUserName));
-            return await _userService.GetAsync(normalizedUserName);
+            var output = await _userService.GetAsync(normalizedUserName);
+            return output;
         }
 
         public async Task AddToRoleAsync(User user, string roleName, CancellationToken cancellationToken)

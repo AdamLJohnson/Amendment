@@ -55,7 +55,7 @@ namespace Amendment.Service
 
         public Task<User> GetAsync(string userName)
         {
-            return _repository.GetAsync(u => u.Username == userName);
+            return _repository.GetAsync(u => String.Equals(u.Username, userName, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public async Task<List<User>> GetAllAsync()

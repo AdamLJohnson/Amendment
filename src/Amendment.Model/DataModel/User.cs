@@ -14,8 +14,8 @@ namespace Amendment.Model.DataModel
         public string Email { get; set; }
         public string Password { get; set; }
 
-        public int EntryBy { get; set; }
-        public DateTime EntryDate { get; set; }
+        public int EnteredBy { get; set; }
+        public DateTime EnteredDate { get; set; }
         public int LastUpdatedBy { get; set; }
         public DateTime LastUpdated { get; set; }
 

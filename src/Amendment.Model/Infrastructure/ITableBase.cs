@@ -4,11 +4,10 @@ using System.Text;
 
 namespace Amendment.Model.Infrastructure
 {
-    public interface ITableBase
+    public interface ITableBase : IReadOnlyTable
     {
-        int Id { get; }
-        int EntryBy { get; set; }
-        DateTime EntryDate { get; set; }
+        int EnteredBy { get; set; }
+        DateTime EnteredDate { get; set; }
         int LastUpdatedBy { get; set; }
         DateTime LastUpdated { get; set; }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Threading.Tasks;
 using Amendment.Model.DataModel;
 using Amendment.Repository;
 using Amendment.Web.IdentityStores;
@@ -70,13 +71,15 @@ namespace Amendment.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
+                var seeder = new SeedDatabase(app.ApplicationServices);
+                await seeder.Seed();
             }
             else
             {

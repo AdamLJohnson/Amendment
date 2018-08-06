@@ -10,7 +10,7 @@ namespace Amendment.Repository.Infrastructure
 {
     internal static class QueryableHelper
     {
-        public static IQueryable<T> WhereMany<T>(this IQueryable<T> q, params Expression<Func<T, bool>>[] where) where T : class, ITableBase
+        public static IQueryable<T> WhereMany<T>(this IQueryable<T> q, params Expression<Func<T, bool>>[] where)
         {
             if (@where == null) return q;
 
