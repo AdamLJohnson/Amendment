@@ -1,38 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Amendment.Model.Infrastructure;
 
 namespace Amendment.Repository.Infrastructure
 {
-    public interface IRepository<TModel, in TSelector> : IReadOnlyRepository<TModel, TSelector> where TModel: BaseModel
+    public interface IRepository<T> where T: class, ITableBase
     {
-        /// <summary>
-        /// Inserts a record into the data store
-        /// </summary>
-        /// <param name="model">The record to insert</param>
-        /// <returns>The newly inserted row</returns>
-        Task<int> InsertAsync(TModel model);
-
-        /// <summary>
-        /// Update a record in the data store
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns>The number of rows updated</returns>
-        Task<int> UpdateAsync(TModel model);
-
-        /// <summary>
-        /// Deletes a record in the data store
-        /// </summary>
-        /// <param name="selector"></param>
-        /// <returns></returns>
-        Task<int> DeleteAsync(TSelector selector);
-
-        /// <summary>
-        /// Deletes a record in the data store by its primary key
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<int> DeleteAsync(int id);
+        // Marks an entity as new
+        void Add(T entity);
+        // Marks an entity as modified
+        void Update(T entity);
+        // Marks an entity to be removed
+        void Delete(T entity);
+        void Delete(params Expression<Func<T, bool>>[] where);
+        // Get an entity by int id
+        Task<T> GetByIdAsync(int id);
+        // Get an entity using delegate
+        Task<T> GetAsync(params Expression<Func<T, bool>>[] where);
+        // Gets all entities of type T
+        Task<IEnumerable<T>> GetAllAsync();
+        // Gets entities using delegate
+        Task<ListResults<T>> GetManyAsync(string orderBy, int pageNumber, int pageSize, params Expression<Func<T, bool>>[] where);
+        Task<int> CountAsync(params Expression<Func<T, bool>>[] where);
+        Task<int> CountAsync();
     }
 }

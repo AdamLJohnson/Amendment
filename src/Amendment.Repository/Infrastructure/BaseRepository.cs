@@ -1,46 +1,145 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Amendment.Model.Infrastructure;
-using Dapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace Amendment.Repository.Infrastructure
 {
-    public abstract class BaseRepository<TModel, TSelector> : BaseReadOnlyRepository<TModel, TSelector>, IRepository<TModel, TSelector> where TModel : BaseModel
+    public abstract class BaseRepository<T> : IRepository<T> where T : class, ITableBase
     {
-        protected BaseRepository(IDbConnection dbConnection) : base(dbConnection)
+        private AmendmentContext _context;
+        protected DbSet<T> DbSet;
+        protected IQueryable<T> Query;
+
+        protected IDbFactory DbFactory
         {
+            get;
+            private set;
         }
 
-        public Task<int> InsertAsync(TModel model)
+        private AmendmentContext DbContext => _context ?? (_context = DbFactory.Init());
+
+        protected BaseRepository(IDbFactory dbFactory)
         {
-            // Returns ID of inserted record (Use OUTPUT Inserted.<ObjectID> in stored procedure)
-            return _dbConnection.QuerySingleAsync<int>(
-                $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.Insert}", model,
-                commandType: CommandType.StoredProcedure);
+            DbFactory = dbFactory;
+            DbSet = DbContext.Set<T>();
+            Query = DbSet;
         }
 
-        public Task<int> UpdateAsync(TModel model)
+        public virtual void Add(T entity)
         {
-            return _dbConnection.ExecuteAsync(
-                $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.Update}", model,
-                commandType: CommandType.StoredProcedure);
+            DbSet.AddAsync(entity);
         }
 
-        public Task<int> DeleteAsync(TSelector selector)
+        public virtual void Update(T entity)
         {
-            return _dbConnection.ExecuteAsync(
-                $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.Delete}", selector,
-                commandType: CommandType.StoredProcedure);
+            DbSet.Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
         }
 
-        public Task<int> DeleteAsync(int id)
+        public virtual void Delete(T entity)
         {
-            return _dbConnection.ExecuteAsync(
-                $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.DeleteById}", new { id },
-                commandType: CommandType.StoredProcedure);
+            _context.Remove(entity);
+        }
+
+        public virtual void Delete(params Expression<Func<T, bool>>[] where)
+        {
+            IEnumerable<T> objects = DbSet.WhereMany<T>(where).AsEnumerable();
+            foreach (T obj in objects)
+                Delete(obj);
+        }
+
+        public virtual async Task<T> GetByIdAsync(int id)
+        {
+            var results = await Query.SingleOrDefaultAsync(e => e.Id == id);
+            if (results == null)
+                return null;
+
+            return ChildRecordSelector(results);
+        }
+
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await DbSet.ToListAsync();
+        }
+
+        public virtual Task<ListResults<T>> GetManyAsync(string orderBy = "", int pageNumber = 1, int pageSize = int.MaxValue, params Expression<Func<T, bool>>[] @where)
+        {
+            return GetManWithIncludeAsync(Query, orderBy, pageNumber, pageSize, @where);
+        }
+
+        protected async Task<ListResults<T>> GetManWithIncludeAsync(IQueryable<T> query, string orderBy = "", int pageNumber = 1, int pageSize = int.MaxValue, params Expression<Func<T, bool>>[] @where)
+        {
+            if (query == null) throw new ArgumentNullException(nameof(query));
+
+            var output = new ListResults<T>
+            {
+                TotalCount = await CountAsync()
+            };
+
+            if (where != null)
+                query = query.WhereMany(where);
+
+            output.FilteredCount = await CountAsync(query);
+
+            if (!string.IsNullOrEmpty(orderBy))
+                query = query.OrderByJsonApi(orderBy);
+
+            if (pageNumber < 1)
+                pageNumber = 1;
+
+            output.PageNumber = pageNumber;
+            pageNumber = pageNumber - 1;
+
+            query = query.Skip(pageNumber * pageSize);
+            query = query.Take(pageSize);
+
+            output.Results = await query.ToListAsync();
+
+            if (output.FilteredCount == 0)
+                return output;
+
+            output.Results = output.Results.Select(ChildRecordSelector).ToList();
+
+            return output;
+        }
+
+        public virtual Task<T> GetAsync(params Expression<Func<T, bool>>[] where)
+        {
+            return GetAsync(Query, where);
+        }
+
+        protected virtual async Task<T> GetAsync(IQueryable<T> query, params Expression<Func<T, bool>>[] where)
+        {
+            var result = await query.WhereMany(where).FirstOrDefaultAsync<T>();
+            if (result == null)
+                return null;
+            return ChildRecordSelector(result);
+        }
+
+        public virtual async Task<int> CountAsync()
+        {
+            return await DbSet.CountAsync();
+        }
+
+        public virtual async Task<int> CountAsync(params Expression<Func<T, bool>>[] where)
+        {
+            return await DbSet.WhereMany(where).CountAsync();
+        }
+
+        private async Task<int> CountAsync(IQueryable<T> query)
+        {
+            return await query.CountAsync();
+        }
+
+        protected virtual T ChildRecordSelector(T s)
+        {
+            return s;
         }
     }
 }

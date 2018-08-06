@@ -3,9 +3,9 @@ using Amendment.Model.Infrastructure;
 
 namespace Amendment.Repository.Infrastructure
 {
-    public class GenericRepository<TModel, TSelector> : BaseRepository<TModel, TSelector> where TModel : BaseModel
+    public class GenericRepository<T> : BaseRepository<T> where T : class, ITableBase
     {
-        public GenericRepository(IDbConnection dbConnection) : base(dbConnection)
+        public GenericRepository(IDbFactory dbFactory) : base(dbFactory)
         {
         }
     }

@@ -5,9 +5,16 @@ using Amendment.Model.Infrastructure;
 
 namespace Amendment.Model.DataModel
 {
-    public class Role : BaseModel
+    public class Role : ITableBase
     {
-        public int RoleId { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
+
+        public int EntryBy { get; set; }
+        public DateTime EntryDate { get; set; }
+        public int LastUpdatedBy { get; set; }
+        public DateTime LastUpdated { get; set; }
+
+        public List<UserXRole> UserXRoles { get; set; }
     }
 }

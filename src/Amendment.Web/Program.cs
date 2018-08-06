@@ -19,7 +19,7 @@ namespace Amendment.Web
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
+                .UseStartup("Amendment.Web")
                 .Build();
     }
 }

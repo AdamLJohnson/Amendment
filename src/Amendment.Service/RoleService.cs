@@ -5,51 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
 using Amendment.Repository;
+using Amendment.Repository.Infrastructure;
 
 namespace Amendment.Service
 {
     public interface IRoleService
     {
-        Task AddUserToRoleAsync(int userId, string roleName);
-        Task RemoveUserFromRoleAsync(int userId, string roleName);
-        Task<List<Role>> GetRolesForUserAsync(int userId);
-        Task<bool> IsInRoleAsync(int userId, string roleName);
-        Task<List<Role>> GetAllAsync();
+        Task<Role> GetByNameAsync(string roleName);
     }
 
     public class RoleService : IRoleService
     {
-        private readonly IRoleRepository _repository;
+        private readonly IRepository<Role> _repository;
 
-        public RoleService(IRoleRepository repository)
+        public RoleService(IRepository<Role> repository)
         {
             _repository = repository;
         }
 
-        public Task AddUserToRoleAsync(int userId, string roleName)
+        public Task<Role> GetByNameAsync(string roleName)
         {
-            return _repository.AddUserToRoleAsync(userId, roleName);
-        }
-
-        public Task RemoveUserFromRoleAsync(int userId, string roleName)
-        {
-            return _repository.RemoveUserFromRoleAsync(userId, roleName);
-        }
-
-        public async Task<List<Role>> GetRolesForUserAsync(int userId)
-        {
-            return (await _repository.GetRolesForUserAsync(userId))?.ToList();
-        }
-
-        public async Task<bool> IsInRoleAsync(int userId, string roleName)
-        {
-            var roles = await _repository.GetRolesForUserAsync(userId);
-            return roles.Any(r => r.Name == roleName);
-        }
-
-        public async Task<List<Role>> GetAllAsync()
-        {
-            return (await _repository.SelectAllAsync()).ToList();
+            return _repository.GetAsync(r => r.Name == roleName);
         }
     }
 }

@@ -15,10 +15,12 @@ namespace Amendment.Web.IoC
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterGeneric(typeof(GenericRepository<,>)).As(typeof(IRepository<,>)).InstancePerLifetimeScope();
+            builder.RegisterGeneric(typeof(GenericRepository<>)).As(typeof(IRepository<>)).InstancePerLifetimeScope();
+            builder.RegisterType<UnitOfWork>().As<IUnitOfWork>().InstancePerLifetimeScope();
+            builder.RegisterType<DbFactory>().As<IDbFactory>().InstancePerLifetimeScope();
 
             // Repositories
-            builder.RegisterAssemblyTypes(typeof(GenericRepository<,>).GetTypeInfo().Assembly)
+            builder.RegisterAssemblyTypes(typeof(GenericRepository<>).GetTypeInfo().Assembly)
                 .Where(t => t.Name.EndsWith("Repository"))//.Except<InMemoryShapeRepository>().Except<CartoShapeRepository>()
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
             // Services

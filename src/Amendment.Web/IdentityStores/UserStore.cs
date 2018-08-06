@@ -30,7 +30,7 @@ namespace Amendment.Web.IdentityStores
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
 
-            return Task.FromResult(user.UserId.ToString());
+            return Task.FromResult(user.Id.ToString());
         }
 
         public Task<string> GetUserNameAsync(User user, CancellationToken cancellationToken)
@@ -74,7 +74,7 @@ namespace Amendment.Web.IdentityStores
                 if (user == null)
                     throw new ArgumentNullException(nameof(user));
 
-                _userService.CreateAsync(user);
+                await _userService.CreateAsync(user);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace Amendment.Web.IdentityStores
                 if (user == null)
                     throw new ArgumentNullException(nameof(user));
 
-                _userService.UpdateAsync(user);
+                await _userService.UpdateAsync(user);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -106,7 +106,7 @@ namespace Amendment.Web.IdentityStores
                 if (user == null)
                     throw new ArgumentNullException(nameof(user));
 
-                _userService.DeleteAsync(user);
+                await _userService.DeleteAsync(user);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -127,31 +127,47 @@ namespace Amendment.Web.IdentityStores
             return await _userService.GetAsync(normalizedUserName);
         }
 
-        public  Task AddToRoleAsync(User user, string roleName, CancellationToken cancellationToken)
+        public async Task AddToRoleAsync(User user, string roleName, CancellationToken cancellationToken)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (roleName == null) throw new ArgumentNullException(nameof(roleName));
-            return _roleService.AddUserToRoleAsync(user.UserId, roleName);
+
+            var role = await _roleService.GetByNameAsync(roleName);
+            if (role == null) throw new Exception(roleName + " Role Not Found");
+
+            user.UserXRoles.Add(new UserXRole() { RoleId = role.Id, UserId = user.Id, User = user, Role = role });
         }
 
         public Task RemoveFromRoleAsync(User user, string roleName, CancellationToken cancellationToken)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (roleName == null) throw new ArgumentNullException(nameof(roleName));
-            return _roleService.RemoveUserFromRoleAsync(user.UserId, roleName);
+
+            var role = user.UserXRoles.FirstOrDefault(ur => ur.Role.Name == roleName);
+            if (role != null)
+            {
+                var userRole = user.UserXRoles.SingleOrDefault(ur => ur.RoleId == role.RoleId && ur.UserId == user.Id);
+                if (userRole != null)
+                {
+                    user.UserXRoles.Remove(userRole);
+                }
+            }
+
+            return Task.FromResult(0);
         }
 
-        public async Task<IList<string>> GetRolesAsync(User user, CancellationToken cancellationToken)
+        public Task<IList<string>> GetRolesAsync(User user, CancellationToken cancellationToken)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
-            return (await _roleService.GetRolesForUserAsync(user.UserId))?.Select(r => r.Name).ToList();
+            IList<string> output = user.UserXRoles.Select(ur => ur.Role.Name).ToList();
+            return Task.FromResult(output);
         }
 
         public Task<bool> IsInRoleAsync(User user, string roleName, CancellationToken cancellationToken)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (roleName == null) throw new ArgumentNullException(nameof(roleName));
-            return _roleService.IsInRoleAsync(user.UserId, roleName);
+            return Task.FromResult(user.UserXRoles.Any(ur => ur.Role.Name == roleName));
         }
 
         public async Task<IList<User>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)

@@ -21,42 +21,46 @@ namespace Amendment.Service
 
     public class UserService : IUserService
     {
-        private readonly IRepository<User, UserSelector> _repository;
+        private readonly IRepository<User> _repository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UserService(IRepository<User, UserSelector> repository)
+        public UserService(IRepository<User> repository, IUnitOfWork unitOfWork)
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
         public Task CreateAsync(User user)
         {
-            return _repository.InsertAsync(user);
+            _repository.Add(user);
+            return _unitOfWork.SaveChangesAsync();
         }
 
         public Task UpdateAsync(User user)
         {
-            return _repository.UpdateAsync(user);
+            _repository.Update(user);
+            return _unitOfWork.SaveChangesAsync();
         }
 
         public Task DeleteAsync(User user)
         {
-            return _repository.DeleteAsync(user.UserId);
+            _repository.Delete(user);
+            return _unitOfWork.SaveChangesAsync();
         }
 
         public Task<User> GetAsync(int id)
         {
-            return _repository.SelectSingleAsync(id);
+            return _repository.GetByIdAsync(id);
         }
 
         public Task<User> GetAsync(string userName)
         {
-            var selector = new UserSelector{ Username = userName };
-            return _repository.SelectSingleAsync(selector);
+            return _repository.GetAsync(u => u.Username == userName);
         }
 
         public async Task<List<User>> GetAllAsync()
         {
-            return (await _repository.SelectAllAsync()).ToList();
+            return (await _repository.GetAllAsync()).ToList();
         }
     }
 }
