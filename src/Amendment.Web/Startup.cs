@@ -37,10 +37,19 @@ namespace Amendment.Web
             //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddSingleton<IDbConnection>(new MySqlConnection(Configuration.GetConnectionString("DefaultConnection")));
+            var builder = new ContainerBuilder();
+            builder.RegisterModule<RegisterDataServices>();
+
+            services.AddTransient<IUserStore<User>, UserStore>();
+            services.AddTransient<IRoleStore<Role>, RoleStore>();
+            services.AddScoped<IPasswordHasher<User>, IdentityStores.PasswordHasher<User>>();
 
             services.AddIdentity<User, Role>()
-                //.AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddUserManager<UserManager<User>>()
+                .AddSignInManager<SignInManager<User>>()
+                .AddRoleManager<AspNetRoleManager<Role>>()
                 .AddDefaultTokenProviders();
+
             services.AddTransient<IUserStore<User>, UserStore>();
             
             ColumnMappingManager.Register();
@@ -51,9 +60,7 @@ namespace Amendment.Web
 
             services.AddMvc();
 
-            var builder = new ContainerBuilder();
-            builder.RegisterModule<RegisterDataServices>();
-
+            builder.Populate(services);
             this.ApplicationContainer = builder.Build();
 
             //var hasher = ApplicationContainer.Resolve<IPasswordHasher>();

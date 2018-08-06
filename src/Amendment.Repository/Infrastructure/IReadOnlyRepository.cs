@@ -18,7 +18,7 @@ namespace Amendment.Repository.Infrastructure
         /// </summary>
         /// <param name="selector"></param>
         /// <returns></returns>
-        Task<List<TModel>> SelectManyAsync(TSelector selector);
+        Task<IEnumerable<TModel>> SelectManyAsync(TSelector selector);
 
         /// <summary>
         /// Selects a single record using the primary key
@@ -31,6 +31,6 @@ namespace Amendment.Repository.Infrastructure
         /// Selects all records
         /// </summary>
         /// <returns></returns>
-        Task<List<TModel>> SelectAllAsync();
+        Task<IEnumerable<TModel>> SelectAllAsync();
     }
 }

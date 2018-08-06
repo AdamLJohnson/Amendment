@@ -47,9 +47,9 @@ namespace Amendment.Service
             return roles.Any(r => r.Name == roleName);
         }
 
-        public Task<List<Role>> GetAllAsync()
+        public async Task<List<Role>> GetAllAsync()
         {
-            return _repository.SelectAllAsync();
+            return (await _repository.SelectAllAsync()).ToList();
         }
     }
 }

@@ -15,6 +15,8 @@ namespace Amendment.Web.IoC
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterGeneric(typeof(GenericRepository<,>)).As(typeof(IRepository<,>)).InstancePerLifetimeScope();
+
             // Repositories
             builder.RegisterAssemblyTypes(typeof(GenericRepository<,>).GetTypeInfo().Assembly)
                 .Where(t => t.Name.EndsWith("Repository"))//.Except<InMemoryShapeRepository>().Except<CartoShapeRepository>()

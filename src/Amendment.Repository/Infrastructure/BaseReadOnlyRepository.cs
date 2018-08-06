@@ -28,18 +28,18 @@ namespace Amendment.Repository.Infrastructure
                 commandType: CommandType.StoredProcedure);
         }
 
-        public async Task<List<TModel>> SelectAllAsync()
+        public Task<IEnumerable<TModel>> SelectAllAsync()
         {
-            return (await _dbConnection.QueryAsync<TModel>(
+            return _dbConnection.QueryAsync<TModel>(
                 $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.SelectAll}",
-                commandType: CommandType.StoredProcedure)).ToList();
+                commandType: CommandType.StoredProcedure);
         }
 
-        public async Task<List<TModel>> SelectManyAsync(TSelector selector)
+        public Task<IEnumerable<TModel>> SelectManyAsync(TSelector selector)
         {
-            return (await _dbConnection.QueryAsync<TModel>(
+            return _dbConnection.QueryAsync<TModel>(
                 $"{DatabaseObjectNames.Schema}.{_modelName}_{DatabaseObjectNames.SelectMany}", selector,
-                commandType: CommandType.StoredProcedure)).ToList();
+                commandType: CommandType.StoredProcedure);
         }
 
         public Task<TModel> SelectSingleAsync(TSelector selector)

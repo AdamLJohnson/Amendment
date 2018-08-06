@@ -1,8 +1,9 @@
+@using Amendment.Model.DataModel
 @using Microsoft.AspNetCore.Identity
 @using Amendment.Web.Models
 
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
 
 @if (SignInManager.IsSignedIn(User))
 {

@@ -12,7 +12,7 @@ namespace Amendment.Web.IdentityStores
     {
         public void Dispose()
         {
-            throw new NotImplementedException();
+            
         }
 
         public async Task<IdentityResult> CreateAsync(Role role, CancellationToken cancellationToken)

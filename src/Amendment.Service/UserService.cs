@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
@@ -53,9 +54,9 @@ namespace Amendment.Service
             return _repository.SelectSingleAsync(selector);
         }
 
-        public Task<List<User>> GetAllAsync()
+        public async Task<List<User>> GetAllAsync()
         {
-            return _repository.SelectAllAsync();
+            return (await _repository.SelectAllAsync()).ToList();
         }
     }
 }
