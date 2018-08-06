@@ -25,6 +25,8 @@ namespace Amendment.Repository
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<User>();
+            builder.Entity<Role>();
             builder.Entity<UserXRole>()
                 .HasOne(u => u.User)
                 .WithMany(r => r.UserXRoles)
