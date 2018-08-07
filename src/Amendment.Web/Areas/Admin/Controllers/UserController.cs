@@ -15,12 +15,14 @@ namespace Amendment.Web.Areas.Admin.Controllers
         private readonly IUserService _userService;
         private readonly IPasswordHashService _passwordHashService;
         private readonly IMapper _mapper;
+        private readonly IRoleService _roleService;
 
-        public UserController(IUserService userService, IPasswordHashService passwordHashService, IMapper mapper)
+        public UserController(IUserService userService, IPasswordHashService passwordHashService, IMapper mapper, IRoleService roleService)
         {
             _userService = userService;
             _passwordHashService = passwordHashService;
             _mapper = mapper;
+            _roleService = roleService;
         }
 
         // GET: User
@@ -35,18 +37,26 @@ namespace Amendment.Web.Areas.Admin.Controllers
         }
 
         // GET: User/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
-            return View(new UserEditViewModel());
+            var model = new UserCreateViewModel {AvailableRoles = await _roleService.GetAll()};
+            return View(model);
         }
 
         // POST: User/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(UserEditViewModel model)
+        public async Task<ActionResult> Create(UserCreateViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                model.AvailableRoles = await _roleService.GetAll();
+                return View(model);
+            }
+
             var user = _mapper.Map<Model.DataModel.User>(model);
             user.Password = _passwordHashService.HashPassword(model.Password);
+
             await _userService.CreateAsync(user);
 
             return RedirectToAction(nameof(Index));
@@ -60,6 +70,8 @@ namespace Amendment.Web.Areas.Admin.Controllers
                 return NotFound();
 
             var vmUser = _mapper.Map<UserEditViewModel>(user);
+            vmUser.AvailableRoles = await _roleService.GetAll();
+
             return View(vmUser);
         }
 
@@ -72,7 +84,13 @@ namespace Amendment.Web.Areas.Admin.Controllers
             if (user == null)
                 return NotFound();
 
-            user = _mapper.Map<Model.DataModel.User>(model);
+            if (!ModelState.IsValid)
+            {
+                model.AvailableRoles = await _roleService.GetAll();
+                return View(model);
+            }
+
+            user = _mapper.Map(model, user);
 
             if (!string.IsNullOrEmpty(model.Password))
                 user.Password = _passwordHashService.HashPassword(model.Password);

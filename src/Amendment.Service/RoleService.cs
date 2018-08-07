@@ -12,6 +12,7 @@ namespace Amendment.Service
     public interface IRoleService
     {
         Task<Role> GetByNameAsync(string roleName);
+        Task<List<Role>> GetAll();
     }
 
     public class RoleService : IRoleService
@@ -26,6 +27,11 @@ namespace Amendment.Service
         public Task<Role> GetByNameAsync(string roleName)
         {
             return _repository.GetAsync(r => r.Name == roleName);
+        }
+
+        public async Task<List<Role>> GetAll()
+        {
+            return (await _repository.GetAllAsync()).ToList();
         }
     }
 }

@@ -58,6 +58,7 @@ namespace Amendment.Web
                 {
                     Username = "adamlj",
                     Email = "columbus@adamlj.com",
+                    Name = "Adam",
                     Password = passwordHashService.HashPassword("adamlj"),
                     EnteredBy = -1,
                     EnteredDate = DateTime.UtcNow,
