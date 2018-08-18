@@ -79,14 +79,14 @@ namespace Amendment.Web
 
         private async Task SeedDefaultUsers(IPasswordHashService passwordHashService, IRepository<User> userRepository, IRepository<Role> roleRepository)
         {
-            if (await userRepository.CountAsync(u => u.Username == "adamlj") == 0)
+            if (await userRepository.CountAsync(u => u.Username == "admin") == 0)
             {
                 User adamljUser = new User
                 {
-                    Username = "adamlj",
-                    Email = "columbus@adamlj.com",
-                    Name = "Adam",
-                    Password = passwordHashService.HashPassword("adamlj"),
+                    Username = "admin",
+                    Email = "admin@admin.com",
+                    Name = "Admin",
+                    Password = passwordHashService.HashPassword("admin"),
                     EnteredBy = -1,
                     EnteredDate = DateTime.UtcNow,
                     LastUpdatedBy = -1,

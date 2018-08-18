@@ -6,6 +6,7 @@ using Amendment.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Amendment.Web.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Amendment.Web
@@ -19,7 +20,7 @@ namespace Amendment.Web
         protected override DbContextOptions<AmendmentContext> ConfigureContextOptions(IServiceProvider serviceProvider)
         {
             return new DbContextOptionsBuilder<AmendmentContext>()
-                .UseMySQL(Configuration.GetConnectionString("DefaultConnection"))
+                .UseMySql(Configuration.GetConnectionString("DefaultConnection"))
                 .Options;
         }
 
