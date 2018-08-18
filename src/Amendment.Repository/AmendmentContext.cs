@@ -41,6 +41,8 @@ namespace Amendment.Repository
                 .HasKey(x => new {x.UserId, x.RoleId});
 
             builder.Entity<Model.DataModel.Amendment>();
+            builder.Entity<AmendmentBody>()
+                .HasIndex(x => new {x.AmendId, x.LanguageId});
         }
     }
 }

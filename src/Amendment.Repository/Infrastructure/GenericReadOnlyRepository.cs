@@ -2,7 +2,7 @@
 
 namespace Amendment.Repository.Infrastructure
 {
-    public class GenericReadOnlyRepository<T> : BaseReadOnlyRepository<T> where T : class, IReadOnlyTable
+    public sealed class GenericReadOnlyRepository<T> : BaseReadOnlyRepository<T> where T : class, IReadOnlyTable
     {
         public GenericReadOnlyRepository(IDbFactory dbFactory) : base(dbFactory)
         {

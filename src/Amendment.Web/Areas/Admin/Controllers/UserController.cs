@@ -40,7 +40,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
         // GET: User/Create
         public async Task<ActionResult> Create()
         {
-            var availableRoles = (await _roleService.GetAll()).Select(r => new RoleViewModel(){ Id = r.Id, Name = r.Name, IsSelected = false }).ToList();
+            var availableRoles = (await _roleService.GetAllAsync()).Select(r => new RoleViewModel(){ Id = r.Id, Name = r.Name, IsSelected = false }).ToList();
             var model = new UserCreateViewModel { Roles = availableRoles };
             return View(model);
         }
@@ -52,7 +52,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.Roles = (await _roleService.GetAll()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
+                model.Roles = (await _roleService.GetAllAsync()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
                 return View(model);
             }
 
@@ -75,7 +75,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
                 return NotFound();
 
             var vmUser = _mapper.Map<UserEditViewModel>(user);
-            vmUser.Roles = (await _roleService.GetAll()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = vmUser.Roles.Any(ur => ur.Id == r.Id) }).ToList();
+            vmUser.Roles = (await _roleService.GetAllAsync()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = vmUser.Roles.Any(ur => ur.Id == r.Id) }).ToList();
 
             return View(vmUser);
         }
@@ -91,7 +91,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.Roles = (await _roleService.GetAll()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
+                model.Roles = (await _roleService.GetAllAsync()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
                 return View(model);
             }
             

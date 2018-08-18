@@ -76,9 +76,9 @@ namespace Amendment.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AmendId");
-
                     b.HasIndex("LanguageId");
+
+                    b.HasIndex("AmendId", "LanguageId");
 
                     b.ToTable("AmendmentBody");
                 });

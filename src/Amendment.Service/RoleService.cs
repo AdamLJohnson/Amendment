@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 using Amendment.Model.DataModel;
 using Amendment.Repository;
 using Amendment.Repository.Infrastructure;
+using Amendment.Service.Infrastructure;
 
 namespace Amendment.Service
 {
-    public interface IRoleService
+    public interface IRoleService : IReadOnlyDataService<Role>
     {
         Task<Role> GetByNameAsync(string roleName);
-        Task<List<Role>> GetAll();
     }
 
-    public class RoleService : IRoleService
+    public class RoleService : BaseReadOnlyDataService<Role>, IRoleService
     {
         private readonly IRepository<Role> _repository;
 
-        public RoleService(IRepository<Role> repository)
+        public RoleService(IRepository<Role> repository) : base(repository)
         {
             _repository = repository;
         }
@@ -27,11 +27,6 @@ namespace Amendment.Service
         public Task<Role> GetByNameAsync(string roleName)
         {
             return _repository.GetAsync(r => r.Name == roleName);
-        }
-
-        public async Task<List<Role>> GetAll()
-        {
-            return (await _repository.GetAllAsync()).ToList();
         }
     }
 }

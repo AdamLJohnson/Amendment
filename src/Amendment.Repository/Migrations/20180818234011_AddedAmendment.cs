@@ -89,14 +89,14 @@ namespace Amendment.Repository.Migrations
                 column: "PrimaryLanguageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AmendmentBody_AmendId",
-                table: "AmendmentBody",
-                column: "AmendId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AmendmentBody_LanguageId",
                 table: "AmendmentBody",
                 column: "LanguageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AmendmentBody_AmendId_LanguageId",
+                table: "AmendmentBody",
+                columns: new[] { "AmendId", "LanguageId" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

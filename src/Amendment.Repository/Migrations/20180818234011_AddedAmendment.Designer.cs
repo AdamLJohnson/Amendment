@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amendment.Repository.Migrations
 {
     [DbContext(typeof(AmendmentContext))]
-    [Migration("20180818231937_AddedAmendment")]
+    [Migration("20180818234011_AddedAmendment")]
     partial class AddedAmendment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,9 +78,9 @@ namespace Amendment.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AmendId");
-
                     b.HasIndex("LanguageId");
+
+                    b.HasIndex("AmendId", "LanguageId");
 
                     b.ToTable("AmendmentBody");
                 });
