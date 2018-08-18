@@ -22,7 +22,6 @@ namespace Amendment.Model.ViewModel.User
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; }
 
-        public List<Role> AvailableRoles { get; set; }
-        public List<string> SelectedRoles { get; set; } = new List<string>();
+        public List<RoleViewModel> Roles { get; set; }
     }
 }

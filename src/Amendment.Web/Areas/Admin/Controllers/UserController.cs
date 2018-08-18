@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amendment.Model.DataModel;
 using Amendment.Model.ViewModel.User;
 using Amendment.Service;
 using AutoMapper;
@@ -39,7 +40,8 @@ namespace Amendment.Web.Areas.Admin.Controllers
         // GET: User/Create
         public async Task<ActionResult> Create()
         {
-            var model = new UserCreateViewModel {AvailableRoles = await _roleService.GetAll()};
+            var availableRoles = (await _roleService.GetAll()).Select(r => new RoleViewModel(){ Id = r.Id, Name = r.Name, IsSelected = false }).ToList();
+            var model = new UserCreateViewModel { Roles = availableRoles };
             return View(model);
         }
 
@@ -50,11 +52,14 @@ namespace Amendment.Web.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.AvailableRoles = await _roleService.GetAll();
+                model.Roles = (await _roleService.GetAll()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
                 return View(model);
             }
 
             var user = _mapper.Map<Model.DataModel.User>(model);
+            user.UserXRoles = new List<UserXRole>();
+
+            user.UserXRoles.AddRange(model.Roles.Where(sr => sr.IsSelected).Select(o => new UserXRole() { RoleId = o.Id, User = user}));
             user.Password = _passwordHashService.HashPassword(model.Password);
 
             await _userService.CreateAsync(user);
@@ -70,7 +75,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
                 return NotFound();
 
             var vmUser = _mapper.Map<UserEditViewModel>(user);
-            vmUser.AvailableRoles = await _roleService.GetAll();
+            vmUser.Roles = (await _roleService.GetAll()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = vmUser.Roles.Any(ur => ur.Id == r.Id) }).ToList();
 
             return View(vmUser);
         }
@@ -86,12 +91,18 @@ namespace Amendment.Web.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.AvailableRoles = await _roleService.GetAll();
+                model.Roles = (await _roleService.GetAll()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
                 return View(model);
             }
+            
+            int[] addToRoles = model.Roles.Where(r => r.IsSelected && user.UserXRoles.All(ur => ur.RoleId != r.Id)).Select(r => r.Id).ToArray();
+            int[] removeFromRoles = model.Roles.Where(r => !r.IsSelected && user.UserXRoles.Any(ur => ur.RoleId == r.Id)).Select(r => r.Id).ToArray();
+
+            user.UserXRoles.AddRange(addToRoles.Select(ar => new UserXRole(){ RoleId = ar }));
+            user.UserXRoles.RemoveAll(r => removeFromRoles.Any(rr => rr == r.RoleId));
 
             user = _mapper.Map(model, user);
-
+            
             if (!string.IsNullOrEmpty(model.Password))
                 user.Password = _passwordHashService.HashPassword(model.Password);
 

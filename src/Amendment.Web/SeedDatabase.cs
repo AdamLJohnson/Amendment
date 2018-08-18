@@ -37,11 +37,38 @@ namespace Amendment.Web
 
         private async Task seedRoles(IRepository<Role> roleRepository)
         {
-            if (await roleRepository.CountAsync(r => r.Name == "Administrator") == 0)
+            if (await roleRepository.CountAsync(r => r.Name == "System Administrator") == 0)
             {
                 roleRepository.Add(new Role()
                 {
-                    Name = "Administrator",
+                    Name = "System Administrator",
+                    EnteredBy = -1,
+                    EnteredDate = DateTime.UtcNow,
+                    LastUpdatedBy = -1,
+                    LastUpdated = DateTime.UtcNow,
+                });
+
+                roleRepository.Add(new Role()
+                {
+                    Name = "Screen Controller",
+                    EnteredBy = -1,
+                    EnteredDate = DateTime.UtcNow,
+                    LastUpdatedBy = -1,
+                    LastUpdated = DateTime.UtcNow,
+                });
+
+                roleRepository.Add(new Role()
+                {
+                    Name = "Amendment Editor",
+                    EnteredBy = -1,
+                    EnteredDate = DateTime.UtcNow,
+                    LastUpdatedBy = -1,
+                    LastUpdated = DateTime.UtcNow,
+                });
+
+                roleRepository.Add(new Role()
+                {
+                    Name = "Translator",
                     EnteredBy = -1,
                     EnteredDate = DateTime.UtcNow,
                     LastUpdatedBy = -1,
@@ -69,7 +96,7 @@ namespace Amendment.Web
                 adamljUser.UserXRoles.Add(new UserXRole()
                 {
                     User = adamljUser,
-                    Role = await roleRepository.GetAsync(r => r.Name == "Administrator")
+                    Role = await roleRepository.GetAsync(r => r.Name == "System Administrator")
                 });
                 userRepository.Add(adamljUser);
             }

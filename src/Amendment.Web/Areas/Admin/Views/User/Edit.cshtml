@@ -46,11 +46,15 @@
         </div>
         <div class="col-md-6">
             <h3>Roles</h3>
-            @foreach (var role in Model.AvailableRoles)
+            @for (var i = 0; i < Model.Roles.Count(); i++)
             {
+                var role = Model.Roles[i];
+
                 <div class="checkbox">
                     <label>
-                        @Html.CheckBox("SelectedRoles", Model.SelectedRoles.Any(r => r == role.Name), new { value = role.Name }) @role.Name
+                        @Html.HiddenFor(model => model.Roles[i].Id)
+                        @Html.CheckBoxFor(model => model.Roles[i].IsSelected)
+                        @Html.LabelFor(model => model.Roles[i].IsSelected, role.Name)
                     </label>
                 </div>
             }

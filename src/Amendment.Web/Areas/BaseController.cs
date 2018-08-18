@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Amendment.Web.Areas.Admin
 {
     [Area("Admin")]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "System Administrator")]
     public abstract class BaseController : Controller
     {
     }
