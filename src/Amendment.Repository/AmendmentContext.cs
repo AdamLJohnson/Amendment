@@ -39,6 +39,8 @@ namespace Amendment.Repository
 
             builder.Entity<UserXRole>()
                 .HasKey(x => new {x.UserId, x.RoleId});
+
+            builder.Entity<Model.DataModel.Amendment>();
         }
     }
 }
