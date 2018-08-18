@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amendment.Repository.Migrations
 {
     [DbContext(typeof(AmendmentContext))]
-    [Migration("20180818225239_Initial")]
+    [Migration("20180818225638_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,7 +32,8 @@ namespace Amendment.Repository.Migrations
 
                     b.Property<int>("LastUpdatedBy");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.HasKey("Id");
 
@@ -56,9 +57,11 @@ namespace Amendment.Repository.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<string>("Password");
+                    b.Property<string>("Password")
+                        .IsRequired();
 
-                    b.Property<string>("Username");
+                    b.Property<string>("Username")
+                        .IsRequired();
 
                     b.HasKey("Id");
 

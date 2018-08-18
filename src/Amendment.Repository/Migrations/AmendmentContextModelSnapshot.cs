@@ -30,7 +30,8 @@ namespace Amendment.Repository.Migrations
 
                     b.Property<int>("LastUpdatedBy");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.HasKey("Id");
 
@@ -54,9 +55,11 @@ namespace Amendment.Repository.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<string>("Password");
+                    b.Property<string>("Password")
+                        .IsRequired();
 
-                    b.Property<string>("Username");
+                    b.Property<string>("Username")
+                        .IsRequired();
 
                     b.HasKey("Id");
 

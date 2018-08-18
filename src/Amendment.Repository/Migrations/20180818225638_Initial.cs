@@ -14,7 +14,7 @@ namespace Amendment.Repository.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: false),
                     EnteredBy = table.Column<int>(nullable: false),
                     EnteredDate = table.Column<DateTime>(nullable: false),
                     LastUpdatedBy = table.Column<int>(nullable: false),
@@ -31,10 +31,10 @@ namespace Amendment.Repository.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(nullable: true),
+                    Username = table.Column<string>(nullable: false),
                     Email = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    Password = table.Column<string>(nullable: true),
+                    Password = table.Column<string>(nullable: false),
                     EnteredBy = table.Column<int>(nullable: false),
                     EnteredDate = table.Column<DateTime>(nullable: false),
                     LastUpdatedBy = table.Column<int>(nullable: false),

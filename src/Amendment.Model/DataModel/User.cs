@@ -10,9 +10,11 @@ namespace Amendment.Model.DataModel
     {
         [Key]
         public int Id { get; set; }
+        [Required]
         public string Username { get; set; }
         public string Email { get; set; }
         public string Name { get; set; }
+        [Required]
         public string Password { get; set; }
 
         public int EnteredBy { get; set; }
