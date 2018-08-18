@@ -1,5 +1,6 @@
 ﻿using System;
 using Amendment.Repository;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +10,7 @@ namespace Amendment.Web
 {
     public class StartupDevelopment : StartupBase
     {
-        public StartupDevelopment(IConfiguration configuration) : base(configuration)
+        public StartupDevelopment(IHostingEnvironment env) : base(env)
         {
         }
 

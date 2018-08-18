@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.IO;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
 using Amendment.Repository;
@@ -9,6 +10,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,8 +27,14 @@ namespace Amendment.Web
         protected abstract DbContextOptions<AmendmentContext> ConfigureContextOptions(IServiceProvider serviceProvider);
         protected abstract void SetupEnvSpecificServices(IServiceCollection services);
 
-        protected StartupBase(IConfiguration configuration)
+        protected StartupBase(IHostingEnvironment env)
         {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
             Configuration = configuration;
         }
 
@@ -85,6 +93,11 @@ namespace Amendment.Web
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             app.UseStaticFiles();
 

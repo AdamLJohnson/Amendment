@@ -12,7 +12,7 @@ namespace Amendment.Web
 {
     public class Startup : StartupBase
     {
-        public Startup(IConfiguration configuration) : base(configuration)
+        public Startup(IHostingEnvironment env) : base(env)
         {
         }
 

@@ -14,12 +14,17 @@ namespace Amendment.Web
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
-        }
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
 
-        public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup("Amendment.Web")
-                .Build();
+                .UseUrls(configuration["ASPNETCORE_URLS"] == null ? new[] { "http://*:5000" } : configuration["ASPNETCORE_URLS"].Split(','))
+                .Build().Run();
+        }
     }
 }
