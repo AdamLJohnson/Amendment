@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -83,7 +84,9 @@
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
-
+    <script>
+        var usersRoles = @Json.Serialize(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList());
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

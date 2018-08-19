@@ -41,7 +41,7 @@ namespace Amendment.Web.Controllers
         [Authorize(Roles = "System Administrator, Amendment Editor")]
         public async Task<ActionResult> Create()
         {
-            return View();
+            return View(new AmendmentCreateViewModel());
         }
 
         [HttpPost]

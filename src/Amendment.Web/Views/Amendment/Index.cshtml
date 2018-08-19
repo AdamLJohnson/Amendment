@@ -1,4 +1,5 @@
-﻿@model System.Collections.Generic.List<Amendment.Model.ViewModel.Amendment.AmendmentDetailsViewModel>
+﻿@using System.Security.Claims
+@model System.Collections.Generic.List<Amendment.Model.ViewModel.Amendment.AmendmentDetailsViewModel>
 
 @{
     ViewBag.Title = "Amendments";
@@ -26,7 +27,7 @@
                 <td data-bind="text: motion"></td>
                 <td class="text-center">
                     <a data-bind="attr: { href: editUrl + '/' + id }" class="btn btn-primary">Edit</a>
-                    <a href="#" class="btn btn-danger">Delete</a>                
+                    <a data-bind="attr: { href: deleteUrl + '/' + id }" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         </tbody>
@@ -41,13 +42,15 @@
     <script>
         var initialData = @Json.Serialize(Model);
         var editUrl = '@Url.Action("Edit")';
-
+        var deleteUrl = '@Url.Action("Delete")';
+        
         var AmendmentModel = function(amendments) {
             var self = this;
             //self.contacts = ko.observableArray(ko.utils.arrayMap(contacts, function(contact) {
             //    return { firstName: contact.firstName, lastName: contact.lastName, phones: ko.observableArray(contact.phones) };
             //}));
             self.amendments = ko.observableArray(amendments);
+            self.userRoles = usersRoles
 
             //self.addContact = function() {
             //    self.contacts.push({

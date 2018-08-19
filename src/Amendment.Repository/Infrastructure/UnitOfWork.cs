@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Amendment.Model.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -71,23 +72,22 @@ namespace Amendment.Repository.Infrastructure
             return await DbContext.Database.BeginTransactionAsync();
         }
 
-        //private void UpdateMetadataFields(int userId)
-        //{
-        //    //Todo: Code Update metadata fields
-        //    foreach (var ent in DbContext.ChangeTracker.Entries().Where(p => p.State == EntityState.Added || p.State == EntityState.Deleted || p.State == EntityState.Modified))
-        //    {
-        //        if (ent.Entity != null && ent.Entity is ITableBase)
-        //        {
-        //            ITableBase entity = (ITableBase)ent.Entity;
-        //            if (ent.State == EntityState.Added)
-        //            {
-        //                entity.EntryBy = userId;
-        //                entity.EntryDate = DateTime.UtcNow;
-        //            }
-        //            entity.ModifiedBy = userId;
-        //            entity.ModifiedDate = DateTime.UtcNow;
-        //        }
-        //    }
-        //}
+        private void UpdateMetadataFields(int userId)
+        {
+            foreach (var ent in DbContext.ChangeTracker.Entries().Where(p => p.State == EntityState.Added || p.State == EntityState.Deleted || p.State == EntityState.Modified))
+            {
+                if (ent.Entity != null && ent.Entity is ITableBase)
+                {
+                    ITableBase entity = (ITableBase)ent.Entity;
+                    if (ent.State == EntityState.Added)
+                    {
+                        entity.EnteredBy = userId;
+                        entity.EnteredDate = DateTime.UtcNow;
+                    }
+                    entity.LastUpdatedBy = userId;
+                    entity.LastUpdated = DateTime.UtcNow;
+                }
+            }
+        }
     }
 }
