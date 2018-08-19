@@ -47,6 +47,7 @@
                 @Html.DropDownListFor(f => f.PrimaryLanguageId, Model.Languages.Select(l => new SelectListItem() { Text = l.LanguageName, Value = l.Id.ToString() }).ToList(), new { @class = "form-control" })
             </div>
             <h2>Amendment Texts</h2>
+            @Html.ActionLink("Create New", "Create", "AmendmentBody", new { amendmentId = ViewContext.RouteData.Values["id"] }, new { @class = "btn btn-success" })
             <div class="row">
                 <div class="col-md-12">
                     <table class="table table-striped">
@@ -64,6 +65,10 @@
                                     <td class="text-center">
                                         @Html.ActionLink("View", "Detail", "AmendmentBody", new { amendmentId = ViewContext.RouteData.Values["id"], id = amendmentBody.Id }, new { @class = "btn btn-info" })
                                         @Html.ActionLink("Edit", "Edit", "AmendmentBody", new { amendmentId = ViewContext.RouteData.Values["id"], id = amendmentBody.Id }, new { @class = "btn btn-primary" })
+                                        @if (amendmentBody.LanguageId != Model.PrimaryLanguageId)
+                                        {
+                                            @Html.ActionLink("Delete", "Delete", "AmendmentBody", new { amendmentId = ViewContext.RouteData.Values["id"], id = amendmentBody.Id }, new { @class = "btn btn-danger" })
+                                        }
                                     </td>
                                 </tr>
                             }

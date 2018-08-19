@@ -34,7 +34,6 @@ namespace Amendment.Web
         {
             amendmentRepository.Add(new Model.DataModel.Amendment()
             {
-                Id = 1,
                 AmendTitle = "Test Amendment 1",
                 Author = "Some Author",
                 Motion = "WC-1",
@@ -53,7 +52,6 @@ namespace Amendment.Web
 
             amendmentRepository.Add(new Model.DataModel.Amendment()
             {
-                Id = 2,
                 AmendTitle = "Test Amendment 2",
                 Author = "Another Author",
                 Motion = "WC-2",

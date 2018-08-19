@@ -75,7 +75,7 @@ namespace Amendment.Repository.Infrastructure
                 if (ent.Entity != null && ent.Entity is IReadOnlyTable)
                 {
                     IReadOnlyTable entity = (IReadOnlyTable)ent.Entity;
-                    _logger.LogTrace("Entity Saving: {id}, {state}", entity.Id, ent.State);
+                    _logger.LogTrace("Saving Entity: {name}, {id}, {state}", ent.Metadata.Name, entity.Id, ent.State);
                 }
             }
         }

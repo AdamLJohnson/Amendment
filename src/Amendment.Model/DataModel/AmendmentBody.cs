@@ -13,7 +13,6 @@ namespace Amendment.Model.DataModel
         public int AmendId { get; set; }
         [Required]
         public int LanguageId { get; set; }
-        public string AmendTitle { get; set; }
         [Required]
         public string AmendBody { get; set; }
         public AmendmentBodyStatus AmendStatus { get; set; }

@@ -20,6 +20,11 @@ namespace Amendment.Web.Controllers
             return View();
         }
 
+        public async Task<ActionResult> Detail()
+        {
+            return View();
+        }
+
         public async Task<ActionResult> Create()
         {
             return View();

@@ -1,0 +1,34 @@
+﻿@model Amendment.Model.ViewModel.AmendmentBody.AmendmentBodyEditViewModel
+
+@{
+    ViewBag.Title = "Edit Amendment Body";
+    Layout = "_Layout";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@if (ViewData.ModelState != null && ViewData.ModelState.ErrorCount > 0)
+{
+    <div class="alert alert-danger">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        @Html.ValidationSummary()
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(m => m.AmendId)
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                @Html.LabelFor(f => f.LanguageId)
+                @Html.DropDownListFor(f => f.LanguageId, Model.Languages.Select(l => new SelectListItem() { Text = l.LanguageName, Value = l.Id.ToString() }).ToList(), "", new { @class = "form-control" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(f => f.AmendBody)
+                @Html.TextAreaFor(f => f.AmendBody, new { @class = "form-control", rows = "10" })
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+}

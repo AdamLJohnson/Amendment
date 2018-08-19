@@ -7,13 +7,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D93ED188-980
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{80D57FF3-F691-46C8-A6A7-461AE5D10DB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amendment.Web", "src\Amendment.Web\Amendment.Web.csproj", "{ECA93622-0AD0-43E5-8BCB-3B83B16649DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Web", "src\Amendment.Web\Amendment.Web.csproj", "{ECA93622-0AD0-43E5-8BCB-3B83B16649DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amendment.Model", "src\Amendment.Model\Amendment.Model.csproj", "{826530C2-F830-480C-8D38-23E30AE21E1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Model", "src\Amendment.Model\Amendment.Model.csproj", "{826530C2-F830-480C-8D38-23E30AE21E1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amendment.Service", "src\Amendment.Service\Amendment.Service.csproj", "{73D9177C-8B5C-4415-AE71-0028A0E05656}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Service", "src\Amendment.Service\Amendment.Service.csproj", "{73D9177C-8B5C-4415-AE71-0028A0E05656}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amendment.Repository", "src\Amendment.Repository\Amendment.Repository.csproj", "{DA028E93-31C4-4363-994E-73C25AFAC7A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Repository", "src\Amendment.Repository\Amendment.Repository.csproj", "{DA028E93-31C4-4363-994E-73C25AFAC7A0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AC590BD5-4BCE-4E1C-B87D-F5B3B1FB52DA}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

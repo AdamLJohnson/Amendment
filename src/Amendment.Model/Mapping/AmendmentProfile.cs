@@ -12,7 +12,8 @@ namespace Amendment.Model.Mapping
         {
             CreateMap<DataModel.Amendment, AmendmentDetailsViewModel>();
             CreateMap<DataModel.Amendment, AmendmentEditViewModel>();
-            CreateMap<AmendmentEditViewModel, DataModel.Amendment>();
+            CreateMap<AmendmentEditViewModel, DataModel.Amendment>()
+                .ForMember(dest => dest.AmendmentBodies, opt => opt.Ignore());
             CreateMap<AmendmentCreateViewModel, DataModel.Amendment>();
         }
     }

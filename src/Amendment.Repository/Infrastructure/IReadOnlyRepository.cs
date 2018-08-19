@@ -16,7 +16,7 @@ namespace Amendment.Repository.Infrastructure
         // Gets all entities of type T
         Task<IEnumerable<T>> GetAllAsync();
         // Gets entities using delegate
-        Task<ListResults<T>> GetManyAsync(string orderBy, int pageNumber, int pageSize, params Expression<Func<T, bool>>[] where);
+        Task<ListResults<T>> GetManyAsync(string orderBy = "", int pageNumber = 1, int pageSize = int.MaxValue, params Expression<Func<T, bool>>[] @where);
         Task<int> CountAsync(params Expression<Func<T, bool>>[] where);
         Task<int> CountAsync();
     }

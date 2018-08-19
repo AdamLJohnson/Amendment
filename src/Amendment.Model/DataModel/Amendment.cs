@@ -23,7 +23,7 @@ namespace Amendment.Model.DataModel
         [Required]
         public Language PrimaryLanguage { get; set; }
         [ForeignKey("AmendId")]
-        public List<AmendmentBody> AmendmentBodies { get; set; }
+        public List<AmendmentBody> AmendmentBodies { get; set; } = new List<AmendmentBody>();
 
         public int EnteredBy { get; set; }
         public DateTime EnteredDate { get; set; }

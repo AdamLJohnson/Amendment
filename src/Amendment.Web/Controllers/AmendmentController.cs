@@ -61,6 +61,15 @@ namespace Amendment.Web.Controllers
                 return View(model);
             }
 
+            var amendment = _mapper.Map<Model.DataModel.Amendment>(model);
+            amendment.AmendmentBodies.Add(new AmendmentBody
+            {
+                AmendBody = model.AmendBody,
+                LanguageId = model.PrimaryLanguageId
+            });
+
+            await _amendmentService.CreateAsync(amendment);
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -86,13 +95,28 @@ namespace Amendment.Web.Controllers
             if (amendment == null)
                 return NotFound();
 
+            if (!ModelState.IsValid)
+            {
+                model.Languages = await _languageDataService.GetAllAsync();
+                return View(model);
+            }
+
+            amendment = _mapper.Map(model, amendment);
+            await _amendmentService.UpdateAsync(amendment);
+
             return RedirectToAction(nameof(Index));
         }
 
         [Authorize(Roles = "System Administrator, Amendment Editor")]
         public async Task<ActionResult> Delete(int id)
         {
-            return View(new AmendmentDetailsViewModel());
+            var amendment = await _amendmentService.GetAsync(id);
+            if (amendment == null)
+                return NotFound();
+
+            var model = _mapper.Map<AmendmentDetailsViewModel>(amendment);
+
+            return View(model);
         }
 
         [HttpPost]
@@ -100,6 +124,12 @@ namespace Amendment.Web.Controllers
         [Authorize(Roles = "System Administrator, Amendment Editor")]
         public async Task<ActionResult> Delete(int id, IFormCollection collection)
         {
+            var amendment = await _amendmentService.GetAsync(id);
+            if (amendment == null)
+                return NotFound();
+
+            await _amendmentService.DeleteAsync(amendment);
+
             return RedirectToAction(nameof(Index));
         }
     }
