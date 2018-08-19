@@ -15,38 +15,43 @@ namespace Amendment.Web.Controllers
             return View();
         }
 
-        public async Task<ActionResult> Create()
+        public async Task<ActionResult> Detail(int amendmentId, int id)
+        {
+            return View(new AmendmentBodyDetailsViewModel());
+        }
+
+        public async Task<ActionResult> Create(int amendmentId)
         {
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(AmendmentBodyCreateViewModel model)
+        public async Task<ActionResult> Create(AmendmentBodyCreateViewModel model, int amendmentId)
         {
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<ActionResult> Edit(int id)
+        public async Task<ActionResult> Edit(int amendmentId, int id)
         {
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(int id, AmendmentBodyEditViewModel model)
+        public async Task<ActionResult> Edit(int amendmentId, int id, AmendmentBodyEditViewModel model)
         {
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int amendmentId, int id)
         {
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Delete(int id, IFormCollection collection)
+        public async Task<ActionResult> Delete(int amendmentId, int id, IFormCollection collection)
         {
             return RedirectToAction(nameof(Index));
         }

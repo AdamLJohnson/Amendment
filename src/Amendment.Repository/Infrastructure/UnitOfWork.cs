@@ -58,12 +58,25 @@ namespace Amendment.Repository.Infrastructure
             try
             {
                 //UpdateMetadataFields();
+                LogChangedEntities();
                 await DbContext.SaveChangesAsync();
             }
             catch (Exception e)
             {
                 _logger.LogError(e.ToString());
                 throw;
+            }
+        }
+
+        private void LogChangedEntities()
+        {
+            foreach (var ent in DbContext.ChangeTracker.Entries().Where(p => p.State == EntityState.Added || p.State == EntityState.Deleted || p.State == EntityState.Modified))
+            {
+                if (ent.Entity != null && ent.Entity is IReadOnlyTable)
+                {
+                    IReadOnlyTable entity = (IReadOnlyTable)ent.Entity;
+                    _logger.LogTrace("Entity Saving: {id}, {state}", entity.Id, ent.State);
+                }
             }
         }
 

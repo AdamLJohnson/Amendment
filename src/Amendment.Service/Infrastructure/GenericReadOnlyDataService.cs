@@ -6,7 +6,7 @@ using Amendment.Repository.Infrastructure;
 
 namespace Amendment.Service.Infrastructure
 {
-    public sealed class GenericReadOnlyDataService<T> : BaseReadOnlyDataService<T> where T : class, ITableBase
+    public sealed class GenericReadOnlyDataService<T> : BaseReadOnlyDataService<T> where T : class, IReadOnlyTable
     {
         public GenericReadOnlyDataService(IReadOnlyRepository<T> repository) : base(repository)
         {

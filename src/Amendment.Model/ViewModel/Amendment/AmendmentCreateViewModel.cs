@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using Amendment.Model.DataModel;
 
 namespace Amendment.Model.ViewModel.Amendment
 {
@@ -14,8 +15,10 @@ namespace Amendment.Model.ViewModel.Amendment
         public string Source { get; set; }
         public string LegisId { get; set; }
         [Required]
-        public int PrimaryLanguageId { get; set; }
+        public int PrimaryLanguageId { get; set; } = 1;
         [Required]
         public string AmendBody { get; set; }
+
+        public List<Language> Languages { get; set; }
     }
 }
