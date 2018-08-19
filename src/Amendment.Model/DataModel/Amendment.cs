@@ -19,6 +19,8 @@ namespace Amendment.Model.DataModel
         public string LegisId { get; set; }
 
         [Required]
+        public int PrimaryLanguageId { get; set; }
+        [Required]
         public Language PrimaryLanguage { get; set; }
         [ForeignKey("AmendId")]
         public List<AmendmentBody> AmendmentBodies { get; set; }

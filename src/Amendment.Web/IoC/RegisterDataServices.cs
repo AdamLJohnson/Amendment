@@ -16,6 +16,7 @@ namespace Amendment.Web.IoC
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterGeneric(typeof(GenericRepository<>)).As(typeof(IRepository<>)).InstancePerLifetimeScope();
+            builder.RegisterGeneric(typeof(GenericReadOnlyRepository<>)).As(typeof(IReadOnlyRepository<>)).InstancePerLifetimeScope();
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>().InstancePerLifetimeScope();
             builder.RegisterType<DbFactory>().As<IDbFactory>().InstancePerLifetimeScope();
 

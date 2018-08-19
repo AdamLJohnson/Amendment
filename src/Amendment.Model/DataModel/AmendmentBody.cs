@@ -18,7 +18,6 @@ namespace Amendment.Model.DataModel
         public string AmendBody { get; set; }
         public AmendmentBodyStatus AmendStatus { get; set; }
 
-        public Amendment Amendment { get; set; }
         public Language Language { get; set; }
 
 

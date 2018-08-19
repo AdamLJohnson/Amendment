@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Amendment.Repository.Infrastructure
 {
-    public abstract class BaseReadOnlyRepository<T> where T : class, IReadOnlyTable
+    public abstract class BaseReadOnlyRepository<T> : IReadOnlyRepository<T> where T : class, IReadOnlyTable
     {
         protected AmendmentContext _context;
         protected DbSet<T> DbSet;
@@ -41,7 +41,7 @@ namespace Amendment.Repository.Infrastructure
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await DbSet.ToListAsync();
+            return await Query.ToListAsync();
         }
 
         public virtual Task<ListResults<T>> GetManyAsync(string orderBy = "", int pageNumber = 1, int pageSize = int.MaxValue, params Expression<Func<T, bool>>[] @where)

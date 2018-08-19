@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
 using Amendment.Repository;
+using Amendment.Repository.Infrastructure;
 using Amendment.Web.IdentityStores;
 using Amendment.Web.IoC;
 using Autofac;
@@ -79,13 +80,15 @@ namespace Amendment.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IDbFactory dbContext)
         {
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
+                await dbContext.Init().Database.EnsureCreatedAsync();
+
                 var seeder = new SeedDatabase(app.ApplicationServices);
                 await seeder.Seed();
             }
@@ -109,6 +112,14 @@ namespace Amendment.Web
                     name: "areas",
                     template: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
                 );
+
+                routes.MapRoute(
+                    name: "amendmentBody",
+                    template: "amendment/{amendmentId:int}/Body/{action=Index}/{id?}",
+                    defaults: new
+                    {
+                        controller = "AmendmentBody"
+                    });
 
                 routes.MapRoute(
                     name: "default",

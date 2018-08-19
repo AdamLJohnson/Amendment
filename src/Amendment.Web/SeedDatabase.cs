@@ -22,84 +22,55 @@ namespace Amendment.Web
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var unitOfWork = _serviceProvider.GetRequiredService<IUnitOfWork>();
-                var passwordHashService = _serviceProvider.GetRequiredService<IPasswordHashService>();
-                var userRepository = _serviceProvider.GetRequiredService<IRepository<User>>();
-                var roleRepository = _serviceProvider.GetRequiredService<IRepository<Role>>();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var amendmentRepository = scope.ServiceProvider.GetRequiredService<IRepository<Model.DataModel.Amendment>>();
 
-                await seedRoles(roleRepository);
-                await unitOfWork.SaveChangesAsync();
-
-                await SeedDefaultUsers(passwordHashService, userRepository, roleRepository);
-                await unitOfWork.SaveChangesAsync();
+                await SeedSampleAmendment(unitOfWork, amendmentRepository);
+                //await unitOfWork.SaveChangesAsync();
             }
         }
 
-        private async Task seedRoles(IRepository<Role> roleRepository)
+        private async Task SeedSampleAmendment(IUnitOfWork unitOfWork, IRepository<Model.DataModel.Amendment> amendmentRepository)
         {
-            if (await roleRepository.CountAsync(r => r.Name == "System Administrator") == 0)
+            amendmentRepository.Add(new Model.DataModel.Amendment()
             {
-                roleRepository.Add(new Role()
+                Id = 1,
+                AmendTitle = "Test Amendment 1",
+                Author = "Some Author",
+                Motion = "WC-1",
+                LegisId = "Legid 2",
+                PrimaryLanguageId = 1,
+                Source = "Conference Floor",
+                EnteredBy = -1,
+                EnteredDate = DateTime.UtcNow,
+                LastUpdatedBy = -1,
+                LastUpdated = DateTime.UtcNow,
+                AmendmentBodies = new List<AmendmentBody>()
                 {
-                    Name = "System Administrator",
-                    EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
-                    LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
-                });
+                    new AmendmentBody(){ AmendBody = "Just look at all this text. It boggles the mind.", LanguageId = 1 }
+                }
+            });
 
-                roleRepository.Add(new Role()
-                {
-                    Name = "Screen Controller",
-                    EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
-                    LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
-                });
-
-                roleRepository.Add(new Role()
-                {
-                    Name = "Amendment Editor",
-                    EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
-                    LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
-                });
-
-                roleRepository.Add(new Role()
-                {
-                    Name = "Translator",
-                    EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
-                    LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
-                });
-            }
-        }
-
-        private async Task SeedDefaultUsers(IPasswordHashService passwordHashService, IRepository<User> userRepository, IRepository<Role> roleRepository)
-        {
-            if (await userRepository.CountAsync(u => u.Username == "admin") == 0)
+            amendmentRepository.Add(new Model.DataModel.Amendment()
             {
-                User adamljUser = new User
+                Id = 2,
+                AmendTitle = "Test Amendment 2",
+                Author = "Another Author",
+                Motion = "WC-2",
+                LegisId = "Legid 3",
+                PrimaryLanguageId = 1,
+                Source = "Conference Floor",
+                EnteredBy = -1,
+                EnteredDate = DateTime.UtcNow,
+                LastUpdatedBy = -1,
+                LastUpdated = DateTime.UtcNow,
+                AmendmentBodies = new List<AmendmentBody>()
                 {
-                    Username = "admin",
-                    Email = "admin@admin.com",
-                    Name = "Admin",
-                    Password = passwordHashService.HashPassword("admin"),
-                    EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
-                    LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
-                    UserXRoles = new List<UserXRole>()
-                };
-                adamljUser.UserXRoles.Add(new UserXRole()
-                {
-                    User = adamljUser,
-                    Role = await roleRepository.GetAsync(r => r.Name == "System Administrator")
-                });
-                userRepository.Add(adamljUser);
-            }
+                    new AmendmentBody(){ AmendBody = "This is the body of the amendment. It sure is neat", LanguageId = 1 }
+                }
+            });
+
+            await unitOfWork.SaveChangesAsync();
         }
     }
 }

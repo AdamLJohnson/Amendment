@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Amendment.Model.DataModel;
+using Amendment.Repository;
 using Amendment.Repository.Infrastructure;
 using Amendment.Service.Infrastructure;
 
@@ -16,7 +17,7 @@ namespace Amendment.Service
         private readonly IRepository<Model.DataModel.Amendment> _repository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public AmendmentService(IRepository<Model.DataModel.Amendment> repository, IUnitOfWork unitOfWork) : base(repository, unitOfWork)
+        public AmendmentService(IAmendmentRepository repository, IUnitOfWork unitOfWork) : base(repository, unitOfWork)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
