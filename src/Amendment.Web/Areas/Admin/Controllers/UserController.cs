@@ -50,6 +50,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(UserCreateViewModel model)
         {
+            //Check for duplicates here
             if (!ModelState.IsValid)
             {
                 model.Roles = (await _roleService.GetAllAsync()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
@@ -62,7 +63,14 @@ namespace Amendment.Web.Areas.Admin.Controllers
             user.UserXRoles.AddRange(model.Roles.Where(sr => sr.IsSelected).Select(o => new UserXRole() { RoleId = o.Id, User = user}));
             user.Password = _passwordHashService.HashPassword(model.Password);
 
-            await _userService.CreateAsync(user, User.UserId());
+            var result = await _userService.CreateAsync(user, User.UserId());
+            if (!result.Succeeded)
+            {
+                model.Roles = (await _roleService.GetAllAsync()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
+                result.Errors.ForEach(e => ModelState.AddModelError("", e));
+                return View(model);
+            }
+                
 
             return RedirectToAction(nameof(Index));
         }
@@ -89,6 +97,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
             if (user == null)
                 return NotFound();
 
+            //Check for duplicates here
             if (!ModelState.IsValid)
             {
                 model.Roles = (await _roleService.GetAllAsync()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
@@ -106,7 +115,13 @@ namespace Amendment.Web.Areas.Admin.Controllers
             if (!string.IsNullOrEmpty(model.Password))
                 user.Password = _passwordHashService.HashPassword(model.Password);
 
-            await _userService.UpdateAsync(user, User.UserId());
+            var result = await _userService.UpdateAsync(user, User.UserId());
+            if (!result.Succeeded)
+            {
+                model.Roles = (await _roleService.GetAllAsync()).Select(r => new RoleViewModel() { Id = r.Id, Name = r.Name, IsSelected = model.Roles.Any(ur => ur.Id == r.Id) }).ToList();
+                result.Errors.ForEach(e => ModelState.AddModelError("", e));
+                return View(model);
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -132,7 +147,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
             if (user == null)
                 return NotFound();
 
-            await _userService.DeleteAsync(user, User.UserId());
+            var result = await _userService.DeleteAsync(user, User.UserId());
 
             return RedirectToAction(nameof(Index));
         }

@@ -17,22 +17,25 @@ namespace Amendment.Service.Infrastructure
             _unitOfWork = unitOfWork;
         }
 
-        public virtual Task CreateAsync(T item, int userId)
+        public virtual async Task<IOperationResult> CreateAsync(T item, int userId)
         {
             _repository.Add(item);
-            return _unitOfWork.SaveChangesAsync(userId);
+            await _unitOfWork.SaveChangesAsync(userId);
+            return new OperationResult(true);
         }
 
-        public virtual Task DeleteAsync(T item, int userId)
+        public virtual async Task<IOperationResult> DeleteAsync(T item, int userId)
         {
             _repository.Delete(item);
-            return _unitOfWork.SaveChangesAsync(userId);
+            await _unitOfWork.SaveChangesAsync(userId);
+            return new OperationResult(true);
         }
 
-        public virtual Task UpdateAsync(T item, int userId)
+        public virtual async Task<IOperationResult> UpdateAsync(T item, int userId)
         {
             _repository.Update(item);
-            return _unitOfWork.SaveChangesAsync(userId);
+            await _unitOfWork.SaveChangesAsync(userId);
+            return new OperationResult(true);
         }
     }
 }

@@ -30,5 +30,21 @@ namespace Amendment.Service
         {
             return _repository.GetAsync(u => String.Equals(u.Username, userName, StringComparison.CurrentCultureIgnoreCase));
         }
+
+        public override async Task<IOperationResult> CreateAsync(User item, int userId)
+        {
+            var dupeCount = await _repository.CountAsync(u => u.Username == item.Username);
+            if (dupeCount > 0)
+                return new OperationResult(false, $"A user is already present with the username '{item.Username}'");
+            return await base.CreateAsync(item, userId);
+        }
+
+        public override async Task<IOperationResult> UpdateAsync(User item, int userId)
+        {
+            var dupeCount = await _repository.CountAsync(u => u.Username == item.Username && u.Id != item.Id);
+            if (dupeCount > 0)
+                return new OperationResult(false, $"A user is already present with the username '{item.Username}'");
+            return await base.UpdateAsync(item, userId);
+        }
     }
 }
