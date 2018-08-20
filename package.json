@@ -1,0 +1,23 @@
+{
+  "name": "amendment",
+  "version": "1.0.0",
+  "description": "To build a publish release. Run this command from the project's root folder: `dotnet publish --configuration Release`\r  - Once the build is done you will find the files to be copied to the server at `\\src\\Amendment.Web\\bin\\Release\\netcoreapp2.0\\publish\\`",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdamLJohnson/Amendment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AdamLJohnson/Amendment/issues"
+  },
+  "homepage": "https://github.com/AdamLJohnson/Amendment#readme"
+}

@@ -26,8 +26,8 @@
                 <td data-bind="text: author"></td>
                 <td data-bind="text: motion"></td>
                 <td class="text-center">
-                    <a data-bind="attr: { href: editUrl + '/' + id }" class="btn btn-primary">Edit</a>
-                    <a data-bind="attr: { href: deleteUrl + '/' + id }" class="btn btn-danger">Delete</a>
+                    <a data-bind="attr: { href: editUrl + '/' + id() }" class="btn btn-primary">Edit</a>
+                    <a data-bind="attr: { href: deleteUrl + '/' + id() }" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         </tbody>
@@ -46,8 +46,32 @@
         
         var AmendmentModel = function(amendments) {
             var self = this;
-            self.amendments = ko.observableArray(amendments);
-            self.userRoles = usersRoles
+            self.amendments = ko.observableArray(convertArrayToObservable(amendments));
+            self.userRoles = usersRoles;
+
+            $(document).on( "AmendmentChange", function(evt, results) {
+                console.log(results);
+                switch (results.results.operationType) {
+                    case 1:
+                        self.amendments.push(convertToObservable(results.data));
+                        break;    
+                    case 2:
+                        var upIx = arrayFirstIndexOf(self.amendments(),
+                            function (item) {
+                                return item.id() === results.id;
+                            });
+                        if (upIx > -1) {
+                            var oldItem = self.amendments()[upIx];
+                            var newItem = convertToObservable(results.data);
+                            self.amendments.replace(oldItem, newItem);
+                        }
+                        break;
+                    case 3:
+                        self.amendments.remove(function (item) { return item.id() === results.id; });
+                        break;
+                    default:
+                }
+            });
         };
  
         ko.applyBindings(new AmendmentModel(initialData), document.getElementById("amendmentList"));

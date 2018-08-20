@@ -8,27 +8,32 @@ namespace Amendment.Service.Infrastructure
     {
         bool Succeeded { get; }
         List<string> Errors { get; }
+        OperationType OperationType { get; }
     }
 
     public class OperationResult : IOperationResult
     {
         public bool Succeeded { get; set; }
         public List<string> Errors { get; }
+        public OperationType OperationType { get; }
 
-        public OperationResult()
+        public OperationResult(OperationType operationType)
         {
+            OperationType = operationType;
             Succeeded = true;
             Errors = new List<string>();
         }
 
-        public OperationResult(bool succeeded)
+        public OperationResult(OperationType operationType, bool succeeded)
         {
+            OperationType = operationType;
             Succeeded = succeeded;
             Errors = new List<string>();
         }
 
-        public OperationResult(bool succeeded, string message)
+        public OperationResult(OperationType operationType, bool succeeded, string message)
         {
+            OperationType = operationType;
             Succeeded = succeeded;
             Errors = new List<string>() { message };
         }
@@ -38,5 +43,12 @@ namespace Amendment.Service.Infrastructure
             if (result != null)
                 Errors.Add(result);
         }
+    }
+
+    public enum OperationType
+    {
+        Create = 1,
+        Update = 2,
+        Delete = 3
     }
 }

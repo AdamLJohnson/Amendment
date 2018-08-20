@@ -9,8 +9,11 @@ using Amendment.Model.DataModel;
 using Amendment.Model.Infrastructure;
 using Amendment.Repository;
 using Amendment.Repository.Infrastructure;
+using Amendment.Service.Infrastructure;
+using Amendment.Web.Hubs;
 using Amendment.Web.IdentityStores;
 using Amendment.Web.IoC;
+using Amendment.Web.Notifiers;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -18,6 +21,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,13 +71,20 @@ namespace Amendment.Web
                 .AddRoleManager<AspNetRoleManager<Role>>()
                 .AddDefaultTokenProviders();
 
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromDays(1);
+                options.SlidingExpiration = true;
+            });
+
             services.AddTransient<IUserStore<User>, UserStore>();
 
             // Add application services.
             //https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity-custom-storage-providers?view=aspnetcore-2.1
 
-
-            services.AddMvc();
+            services.AddSignalR();
+            services.AddSingleton<IClientNotifier, ClientNotifier>();
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             builder.Populate(services);
             this.ApplicationContainer = builder.Build();
@@ -114,6 +125,11 @@ namespace Amendment.Web
 
             var logger = loggerFactory.CreateLogger("Amendment.Web");
             app.Use(LogHttpTraffic(logger));
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<AmendmentHub>("/amendmentHub");
+            });
 
             app.UseMvc(routes =>
             {

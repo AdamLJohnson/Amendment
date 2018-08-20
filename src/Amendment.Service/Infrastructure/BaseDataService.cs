@@ -21,21 +21,21 @@ namespace Amendment.Service.Infrastructure
         {
             _repository.Add(item);
             await _unitOfWork.SaveChangesAsync(userId);
-            return new OperationResult(true);
+            return new OperationResult(OperationType.Create);
         }
 
         public virtual async Task<IOperationResult> DeleteAsync(T item, int userId)
         {
             _repository.Delete(item);
             await _unitOfWork.SaveChangesAsync(userId);
-            return new OperationResult(true);
+            return new OperationResult(OperationType.Delete);
         }
 
         public virtual async Task<IOperationResult> UpdateAsync(T item, int userId)
         {
             _repository.Update(item);
             await _unitOfWork.SaveChangesAsync(userId);
-            return new OperationResult(true);
+            return new OperationResult(OperationType.Update);
         }
     }
 }

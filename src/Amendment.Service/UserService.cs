@@ -35,7 +35,7 @@ namespace Amendment.Service
         {
             var dupeCount = await _repository.CountAsync(u => u.Username == item.Username);
             if (dupeCount > 0)
-                return new OperationResult(false, $"A user is already present with the username '{item.Username}'");
+                return new OperationResult(OperationType.Create, false, $"A user is already present with the username '{item.Username}'");
             return await base.CreateAsync(item, userId);
         }
 
@@ -43,7 +43,7 @@ namespace Amendment.Service
         {
             var dupeCount = await _repository.CountAsync(u => u.Username == item.Username && u.Id != item.Id);
             if (dupeCount > 0)
-                return new OperationResult(false, $"A user is already present with the username '{item.Username}'");
+                return new OperationResult(OperationType.Update, false, $"A user is already present with the username '{item.Username}'");
             return await base.UpdateAsync(item, userId);
         }
     }
