@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Amendment.Web.IdentityStores
 {
-    public class UserStore : IUserStore<User>, IUserRoleStore<User>, IUserPasswordStore<User>
+    public class UserStore : IUserStore<User>, IUserRoleStore<User>, IUserPasswordStore<User>, IUserSecurityStampStore<User>
     {
         private readonly IUserService _userService;
         private readonly IRoleService _roleService;
@@ -194,6 +194,16 @@ namespace Amendment.Web.IdentityStores
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             return Task.FromResult(string.IsNullOrEmpty(user.Password));
+        }
+
+        public Task SetSecurityStampAsync(User user, string stamp, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(0);
+        }
+
+        public Task<string> GetSecurityStampAsync(User user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult("fake security stamp");
         }
     }
 }
