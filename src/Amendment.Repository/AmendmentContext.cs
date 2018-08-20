@@ -33,9 +33,9 @@ namespace Amendment.Repository
                     Name = "Admin",
                     Password = "$2b$12$HbvEC6UaeXiGGlv8ztvzL.SB6oBXKi2QoBkJsjwQvDJGpQ59CmWrq",
                     EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
+                    EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
+                    LastUpdated = DateTime.Parse("2018-01-01"),
                 });
 
             builder.Entity<Role>()
@@ -44,36 +44,36 @@ namespace Amendment.Repository
                     Id = 1,
                     Name = "System Administrator",
                     EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
+                    EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
+                    LastUpdated = DateTime.Parse("2018-01-01"),
                 },
                 new Role()
                 {
                     Id = 2,
                     Name = "Screen Controller",
                     EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
+                    EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
+                    LastUpdated = DateTime.Parse("2018-01-01"),
                 },
                 new Role()
                 {
                     Id = 3,
                     Name = "Amendment Editor",
                     EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
+                    EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
+                    LastUpdated = DateTime.Parse("2018-01-01"),
                 },
                 new Role()
                 {
                     Id = 4,
                     Name = "Translator",
                     EnteredBy = -1,
-                    EnteredDate = DateTime.UtcNow,
+                    EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
-                    LastUpdated = DateTime.UtcNow,
+                    LastUpdated = DateTime.Parse("2018-01-01"),
                 });
             builder.Entity<UserXRole>()
                 .HasOne(u => u.User)
