@@ -24,11 +24,12 @@ namespace Amendment.Repository.Infrastructure
 
         public bool InMemory => !DbContext.HasConnection;
 
-        public void SaveChanges()
+        public void SaveChanges(int userId)
         {
             try
             {
-                //UpdateMetadataFields();
+                UpdateMetadataFields(userId);
+                LogChangedEntities(userId);
                 DbContext.SaveChanges();
             }
             catch (Exception e)
@@ -53,12 +54,12 @@ namespace Amendment.Repository.Infrastructure
             DbContext.Database.RollbackTransaction();
         }
 
-        public async Task SaveChangesAsync()
+        public async Task SaveChangesAsync(int userId)
         {
             try
             {
-                //UpdateMetadataFields();
-                LogChangedEntities();
+                UpdateMetadataFields(userId);
+                LogChangedEntities(userId);
                 await DbContext.SaveChangesAsync();
             }
             catch (Exception e)
@@ -68,14 +69,14 @@ namespace Amendment.Repository.Infrastructure
             }
         }
 
-        private void LogChangedEntities()
+        private void LogChangedEntities(int userId)
         {
             foreach (var ent in DbContext.ChangeTracker.Entries().Where(p => p.State == EntityState.Added || p.State == EntityState.Deleted || p.State == EntityState.Modified))
             {
                 if (ent.Entity != null && ent.Entity is IReadOnlyTable)
                 {
                     IReadOnlyTable entity = (IReadOnlyTable)ent.Entity;
-                    _logger.LogTrace("Saving Entity: {name}, {id}, {state}", ent.Metadata.Name, entity.Id, ent.State);
+                    _logger.LogTrace("Saving Entity: {name}, {id}, {state}, {userId}", ent.Metadata.Name, entity.Id, ent.State, userId);
                 }
             }
         }

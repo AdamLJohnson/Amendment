@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
+using Amendment.Model.Infrastructure;
 using Amendment.Repository;
 using Amendment.Repository.Infrastructure;
 using Amendment.Web.IdentityStores;
@@ -11,11 +15,13 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 
 namespace Amendment.Web
@@ -80,7 +86,7 @@ namespace Amendment.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IDbFactory dbContext)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IDbFactory dbContext, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -106,6 +112,9 @@ namespace Amendment.Web
 
             app.UseAuthentication();
 
+            var logger = loggerFactory.CreateLogger("Amendment.Web");
+            app.Use(LogHttpTraffic(logger));
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -125,6 +134,19 @@ namespace Amendment.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private static Func<HttpContext, Func<Task>, Task> LogHttpTraffic(ILogger logger)
+        {
+            return async (context, next) =>
+            {
+                var sw = Stopwatch.StartNew();
+
+                await next();
+
+                sw.Stop();
+                logger.LogInformation("{Method} {Path} {Status} {RequestTime}ms {Username}", context.Request.Method, context.Request.Path, context.Response.StatusCode, sw.ElapsedMilliseconds, context.User.Identity.Name);
+            };
         }
     }
 }

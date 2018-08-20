@@ -66,7 +66,7 @@ namespace Amendment.Web.Controllers
             }
 
             var body = _mapper.Map<AmendmentBody>(model);
-            await _amendmentBodyService.CreateAsync(body);
+            await _amendmentBodyService.CreateAsync(body, User.UserId());
 
             return RedirectToAction(nameof(Index), "Amendment", new { id = amendmentId });
         }
@@ -105,7 +105,7 @@ namespace Amendment.Web.Controllers
             }
 
             body = _mapper.Map(model, body);
-            await _amendmentBodyService.UpdateAsync(body);
+            await _amendmentBodyService.UpdateAsync(body, User.UserId());
 
             return RedirectToAction(nameof(Index), "Amendment", new { id = amendmentId });
         }
@@ -130,7 +130,7 @@ namespace Amendment.Web.Controllers
             if (body == null)
                 return NotFound();
 
-            await _amendmentBodyService.DeleteAsync(body);
+            await _amendmentBodyService.DeleteAsync(body, User.UserId());
 
             return RedirectToAction(nameof(Index), "Amendment", new {id = amendmentId});
         }

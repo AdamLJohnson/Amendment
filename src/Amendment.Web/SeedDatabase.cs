@@ -68,7 +68,7 @@ namespace Amendment.Web
                 }
             });
 
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(-999);
         }
     }
 }

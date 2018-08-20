@@ -5,8 +5,8 @@ namespace Amendment.Service.Infrastructure
 {
     public interface IDataService<T> : IReadOnlyDataService<T> where T : ITableBase
     {
-        Task CreateAsync(T item);
-        Task UpdateAsync(T item);
-        Task DeleteAsync(T item);
+        Task CreateAsync(T item, int userId);
+        Task UpdateAsync(T item, int userId);
+        Task DeleteAsync(T item, int userId);
     }
 }

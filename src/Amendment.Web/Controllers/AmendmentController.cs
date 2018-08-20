@@ -68,7 +68,7 @@ namespace Amendment.Web.Controllers
                 LanguageId = model.PrimaryLanguageId
             });
 
-            await _amendmentService.CreateAsync(amendment);
+            await _amendmentService.CreateAsync(amendment, User.UserId());
 
             return RedirectToAction(nameof(Index));
         }
@@ -102,7 +102,7 @@ namespace Amendment.Web.Controllers
             }
 
             amendment = _mapper.Map(model, amendment);
-            await _amendmentService.UpdateAsync(amendment);
+            await _amendmentService.UpdateAsync(amendment, User.UserId());
 
             return RedirectToAction(nameof(Index));
         }
@@ -128,7 +128,7 @@ namespace Amendment.Web.Controllers
             if (amendment == null)
                 return NotFound();
 
-            await _amendmentService.DeleteAsync(amendment);
+            await _amendmentService.DeleteAsync(amendment, User.UserId());
 
             return RedirectToAction(nameof(Index));
         }

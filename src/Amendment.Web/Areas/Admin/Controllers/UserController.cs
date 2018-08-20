@@ -62,7 +62,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
             user.UserXRoles.AddRange(model.Roles.Where(sr => sr.IsSelected).Select(o => new UserXRole() { RoleId = o.Id, User = user}));
             user.Password = _passwordHashService.HashPassword(model.Password);
 
-            await _userService.CreateAsync(user);
+            await _userService.CreateAsync(user, User.UserId());
 
             return RedirectToAction(nameof(Index));
         }
@@ -106,7 +106,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
             if (!string.IsNullOrEmpty(model.Password))
                 user.Password = _passwordHashService.HashPassword(model.Password);
 
-            await _userService.UpdateAsync(user);
+            await _userService.UpdateAsync(user, User.UserId());
 
             return RedirectToAction(nameof(Index));
         }
@@ -132,7 +132,7 @@ namespace Amendment.Web.Areas.Admin.Controllers
             if (user == null)
                 return NotFound();
 
-            await _userService.DeleteAsync(user);
+            await _userService.DeleteAsync(user, User.UserId());
 
             return RedirectToAction(nameof(Index));
         }

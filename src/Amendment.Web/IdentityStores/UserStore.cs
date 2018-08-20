@@ -74,7 +74,7 @@ namespace Amendment.Web.IdentityStores
                 if (user == null)
                     throw new ArgumentNullException(nameof(user));
 
-                await _userService.CreateAsync(user);
+                await _userService.CreateAsync(user, -998);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace Amendment.Web.IdentityStores
                 if (user == null)
                     throw new ArgumentNullException(nameof(user));
 
-                await _userService.UpdateAsync(user);
+                await _userService.UpdateAsync(user, -998);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -106,7 +106,7 @@ namespace Amendment.Web.IdentityStores
                 if (user == null)
                     throw new ArgumentNullException(nameof(user));
 
-                await _userService.DeleteAsync(user);
+                await _userService.DeleteAsync(user, -998);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
