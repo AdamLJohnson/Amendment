@@ -1,28 +1,80 @@
-﻿// Write your JavaScript code.
-$(function () {
-    const amendmentUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/amendmentHub").build();
+﻿
+const amendmentUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/amendmentHub").build();
+const screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub").build();
+
+if (_isAuthenticated) {
+    ManageAmendmentHub();
+}
+
+ManageScreenHub();
+
+
+
+function ManageAmendmentHub() {
+    amendmentUpdatesConnection.onclose((err) => {
+        toastr.error("Lost Connection", null, { closeButton: true });
+    });
+
     amendmentUpdatesConnection.on("AmendmentChange",
         (results) => {
             toastr.options.escapeHtml = true;
             var message = "Amendment " + results.id;
             switch (results.results.operationType) {
-                case 1:
-                    message += " Created";
-                    break;    
-                case 2:
-                    message += " Updated";
-                    break;
-                case 3:
-                    message += " Deleted";
-                    break;
-                default:
+            case 1:
+                message += " Created";
+                break;
+            case 2:
+                message += " Updated";
+                break;
+            case 3:
+                message += " Deleted";
+                break;
+            default:
             }
-            toastr.info(message, "Amendment Changed");
+            toastr.info(message);
 
             jQuery.event.trigger("AmendmentChange", results);
         });
+
+    amendmentUpdatesConnection.on("AmendmentBodyChange",
+        (results) => {
+            toastr.options.escapeHtml = true;
+            var message = "Amendment Body " + results.id;
+            switch (results.results.operationType) {
+            case 1:
+                message += " Created";
+                break;
+            case 2:
+                message += " Updated";
+                break;
+            case 3:
+                message += " Deleted";
+                break;
+            default:
+            }
+            toastr.info(message);
+
+            jQuery.event.trigger("AmendmentBodyChange", results);
+        });
+    
     amendmentUpdatesConnection.start().catch(err => console.error(err.toString()));
-});
+}
+
+function ManageScreenHub()
+{
+    screenUpdatesConnection.on("screenChange",
+        (results) => {
+            if (_usersRoles.indexOf('System Administrator') > -1) {
+                toastr.options.escapeHtml = true;
+                var message = "screen " + results.id;
+                toastr.info(message);
+            }
+
+            jQuery.event.trigger("screenChange", results);
+        });
+
+    screenUpdatesConnection.start().catch(err => console.error(err.toString()));
+}
 
 
 function convertArrayToObservable(list) {

@@ -68,7 +68,7 @@ namespace Amendment.Web.Controllers
             var body = _mapper.Map<AmendmentBody>(model);
             await _amendmentBodyService.CreateAsync(body, User.UserId());
 
-            return RedirectToAction(nameof(Index), "Amendment", new { id = amendmentId });
+            return RedirectToAction(nameof(Index), "Amendment");
         }
 
         [Authorize(Roles = "System Administrator, Amendment Editor, Translator")]
@@ -107,7 +107,7 @@ namespace Amendment.Web.Controllers
             body = _mapper.Map(model, body);
             await _amendmentBodyService.UpdateAsync(body, User.UserId());
 
-            return RedirectToAction(nameof(Index), "Amendment", new { id = amendmentId });
+            return RedirectToAction(nameof(Index), "Amendment");
         }
 
         [Authorize(Roles = "System Administrator, Amendment Editor, Translator")]
@@ -132,7 +132,7 @@ namespace Amendment.Web.Controllers
 
             await _amendmentBodyService.DeleteAsync(body, User.UserId());
 
-            return RedirectToAction(nameof(Index), "Amendment", new {id = amendmentId});
+            return RedirectToAction(nameof(Index), "Amendment");
         }
     }
 }

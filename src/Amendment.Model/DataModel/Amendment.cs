@@ -17,6 +17,7 @@ namespace Amendment.Model.DataModel
         public string Motion { get; set; }
         public string Source { get; set; }
         public string LegisId { get; set; }
+        public bool IsLive { get; set; }
 
         [Required]
         public int PrimaryLanguageId { get; set; }

@@ -23,6 +23,8 @@ namespace Amendment.Web.Notifiers
             {
                 case DestinationHub.Amendment:
                     return _amendmentHub.Clients.All.SendAsync(method, obj);
+                case DestinationHub.Screen:
+                    return _amendmentHub.Clients.All.SendAsync(method, obj);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(destinationHub), destinationHub, null);
             }

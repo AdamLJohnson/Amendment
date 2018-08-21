@@ -12,6 +12,7 @@ namespace Amendment.Service.Infrastructure
 
     public enum DestinationHub
     {
-        Amendment
+        Amendment,
+        Screen
     }
 }

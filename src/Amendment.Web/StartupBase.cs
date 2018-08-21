@@ -126,13 +126,14 @@ namespace Amendment.Web
 
             app.UseAuthentication();
 
-            var logger = loggerFactory.CreateLogger("Amendment.Web");
-            app.Use(LogHttpTraffic(logger));
-
             app.UseSignalR(routes =>
             {
                 routes.MapHub<AmendmentHub>("/amendmentHub");
+                routes.MapHub<ScreenHub>("/screenHub");
             });
+
+            var logger = loggerFactory.CreateLogger("Amendment.Web");
+            app.Use(LogHttpTraffic(logger));
 
             app.UseMvc(routes =>
             {

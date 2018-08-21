@@ -16,6 +16,7 @@ namespace Amendment.Model.DataModel
         [Required]
         public string AmendBody { get; set; }
         public AmendmentBodyStatus AmendStatus { get; set; }
+        public bool IsLive { get; set; }
 
         public Language Language { get; set; }
 
