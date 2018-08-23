@@ -1,0 +1,46 @@
+﻿@model Amendment.Model.DataModel.Amendment
+
+@{
+    ViewBag.Title = "Screen Control";
+    Layout = "_Layout";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<div id="screenControl">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- ko if: bodies().length > 0 -->
+            <div data-bind="foreach: bodies">
+                <div class="row">
+                    <div data-bind="foreach: $data">
+                        <div class="col-md-4">
+                            <div data-bind="text: amendBody"></div>
+                            <div class="text-center">
+                                <button>test</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /ko -->
+            <!-- ko ifnot: bodies().length > 0 -->
+            <h3>No amendments are currently live</h3>
+            @Html.ActionLink("Go to Amendments", "Index", "Amendment", null, new { @class = "btn btn-primary" })
+            <!-- /ko -->
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        var initialData = @Json.Serialize(Model);
+        @*var editUrl = '@Url.Action("Edit")';
+        var deleteUrl = '@Url.Action("Delete")';
+        var goLiveUrl = '@Url.Action("GoLive", "ScreenControl")';
+        var screenControlUrl = '@Url.Action("Index", "ScreenControl")';*@
+    </script>
+    <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
+    <script type="text/javascript" src="~/js/screenControl.js"></script>
+}

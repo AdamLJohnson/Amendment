@@ -8,7 +8,7 @@ namespace Amendment.Repository
 {
     public interface IAmendmentRepository : IRepository<Model.DataModel.Amendment>
     {
-
+        void SetIsLive(bool isLive, Model.DataModel.Amendment amendment);
     }
 
     public class AmendmentRepository : BaseRepository<Model.DataModel.Amendment>, IAmendmentRepository
@@ -19,5 +19,19 @@ namespace Amendment.Repository
                 .Include(e => e.AmendmentBodies)
                 .ThenInclude(e => e.Language);
         }
+
+        public void SetIsLive(bool isLive, Model.DataModel.Amendment amendment)
+        {
+            amendment.IsLive = isLive;
+            Update(amendment, nameof(Model.DataModel.Amendment.IsLive));
+        }
     }
 }
+
+
+/*
+ * var contact = new Contact{Id = 1};
+contact.FirstName = "Something new";
+context.Entry(contact).Property("FirstName").IsModified = true;
+context.SaveChanges();
+ */

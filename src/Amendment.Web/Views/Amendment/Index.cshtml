@@ -10,7 +10,7 @@
 
 <div id="amendmentList">
     <!-- ko if: liveAmendment() > -1 -->
-    <button type="button" class="btn btn-danger">Clear Screens</button>
+    <button data-bind="click: clearScreens" type="button" class="btn btn-danger">Clear Screens</button>
     <!-- /ko -->
     
     @Html.ActionLink("Create", "Create", null, null, new { @class = "btn btn-success pull-right" })
@@ -30,10 +30,10 @@
                 <td data-bind="text: motion"></td>
                 <td class="text-center">
                     <!-- ko if: $root.liveAmendment() == -1 -->
-                    <button type="button" class="btn btn-warning">Go Live</button>
+                    <button type="button" data-bind="click: $parent.amendmentGoLive" class="btn btn-warning">Go Live</button>
                     <!-- /ko -->
                     <!-- ko if: $root.liveAmendment() == id() -->
-                    <button type="button" class="btn btn-success">Manage Screens</button>
+                    <a data-bind="attr: { href: screenControlUrl }" class="btn btn-success">Manage Screens</a>
                     <!-- /ko -->
                     <a data-bind="attr: { href: editUrl + '/' + id() }" class="btn btn-primary">Edit</a>
                     <a data-bind="attr: { href: deleteUrl + '/' + id() }" class="btn btn-danger">Delete</a>
@@ -50,6 +50,8 @@
         var initialData = @Json.Serialize(Model);
         var editUrl = '@Url.Action("Edit")';
         var deleteUrl = '@Url.Action("Delete")';
+        var goLiveUrl = '@Url.Action("GoLive", "ScreenControl")';
+        var screenControlUrl = '@Url.Action("Index", "ScreenControl")';
     </script>
     <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
     <script type="text/javascript" src="~/js/amendmentList.js"></script>

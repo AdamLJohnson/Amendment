@@ -11,10 +11,12 @@ namespace Amendment.Web.Notifiers
     public class ClientNotifier : IClientNotifier
     {
         private readonly IHubContext<AmendmentHub> _amendmentHub;
+        private readonly IHubContext<ScreenHub> _screenhHubContext;
 
-        public ClientNotifier(IHubContext<AmendmentHub> amendmentHub)
+        public ClientNotifier(IHubContext<AmendmentHub> amendmentHub, IHubContext<ScreenHub> screenhHubContext)
         {
             _amendmentHub = amendmentHub;
+            _screenhHubContext = screenhHubContext;
         }
 
         public Task SendAsync(DestinationHub destinationHub, string method, object obj)
@@ -24,7 +26,7 @@ namespace Amendment.Web.Notifiers
                 case DestinationHub.Amendment:
                     return _amendmentHub.Clients.All.SendAsync(method, obj);
                 case DestinationHub.Screen:
-                    return _amendmentHub.Clients.All.SendAsync(method, obj);
+                    return _screenhHubContext.Clients.All.SendAsync(method, obj);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(destinationHub), destinationHub, null);
             }

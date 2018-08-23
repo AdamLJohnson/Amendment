@@ -1,21 +1,10 @@
-﻿
-const amendmentUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/amendmentHub").build();
-const screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub").build();
-
-if (_isAuthenticated) {
-    ManageAmendmentHub();
-}
-
-ManageScreenHub();
-
-
-
-function ManageAmendmentHub() {
+﻿function ManageAmendmentHub() {
+    const amendmentUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/amendmentHub").build();
     amendmentUpdatesConnection.onclose((err) => {
         toastr.error("Lost Connection", null, { closeButton: true });
     });
 
-    amendmentUpdatesConnection.on("AmendmentChange",
+    amendmentUpdatesConnection.on(_clientNotifierMethods.amendmentChange,
         (results) => {
             toastr.options.escapeHtml = true;
             var message = "Amendment " + results.id;
@@ -33,10 +22,10 @@ function ManageAmendmentHub() {
             }
             toastr.info(message);
 
-            jQuery.event.trigger("AmendmentChange", results);
+            jQuery.event.trigger("amendment.amendmentChange", results);
         });
 
-    amendmentUpdatesConnection.on("AmendmentBodyChange",
+    amendmentUpdatesConnection.on(_clientNotifierMethods.amendmentBodyChange,
         (results) => {
             toastr.options.escapeHtml = true;
             var message = "Amendment Body " + results.id;
@@ -54,28 +43,74 @@ function ManageAmendmentHub() {
             }
             toastr.info(message);
 
-            jQuery.event.trigger("AmendmentBodyChange", results);
+            jQuery.event.trigger("amendment.amendmentBodyChange", results);
         });
     
     amendmentUpdatesConnection.start().catch(err => console.error(err.toString()));
+    return amendmentUpdatesConnection;
 }
 
 function ManageScreenHub()
 {
-    screenUpdatesConnection.on("screenChange",
+    const screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub").build();
+    screenUpdatesConnection.on(_clientNotifierMethods.goLive,
         (results) => {
             if (_usersRoles.indexOf('System Administrator') > -1) {
                 toastr.options.escapeHtml = true;
                 var message = "screen " + results.id;
-                toastr.info(message);
+                toastr.info(message, _clientNotifierMethods.goLive);
             }
 
-            jQuery.event.trigger("screenChange", results);
+            jQuery.event.trigger("screen.goLive", results);
+        });
+
+    screenUpdatesConnection.on(_clientNotifierMethods.goLiveBody,
+        (results) => {
+            if (_usersRoles.indexOf('System Administrator') > -1) {
+                toastr.options.escapeHtml = true;
+                var message = "screen " + results.id;
+                toastr.info(message, _clientNotifierMethods.goLiveBody);
+            }
+
+            jQuery.event.trigger("screen.goLiveBody", results);
+        });
+
+    screenUpdatesConnection.on(_clientNotifierMethods.clearScreens,
+        (results) => {
+            if (_usersRoles.indexOf('System Administrator') > -1) {
+                toastr.options.escapeHtml = true;
+                var message = "screen " + results.id;
+                toastr.info(message, _clientNotifierMethods.clearScreens);
+            }
+
+            jQuery.event.trigger("screen.clearScreens", results);
+        });
+
+    screenUpdatesConnection.on(_clientNotifierMethods.amendmentBodyChange,
+        (results) => {
+            if (_usersRoles.indexOf('System Administrator') > -1) {
+                toastr.options.escapeHtml = true;
+                var message = "screen " + results.id;
+                toastr.info(message, _clientNotifierMethods.amendmentBodyChange);
+            }
+
+            jQuery.event.trigger("screen.amendmentBodyChange", results);
+        });
+
+    screenUpdatesConnection.on(_clientNotifierMethods.amendmentChange,
+        (results) => {
+            if (_usersRoles.indexOf('System Administrator') > -1) {
+                toastr.options.escapeHtml = true;
+                var message = "screen " + results.id;
+                toastr.info(message, _clientNotifierMethods.amendmentChange);
+            }
+
+            jQuery.event.trigger("screen.amendmentChange", results);
         });
 
     screenUpdatesConnection.start().catch(err => console.error(err.toString()));
+    return screenUpdatesConnection;
 }
-
 
 function convertArrayToObservable(list) {
     var newList = [];
@@ -90,7 +125,7 @@ function convertToObservable(obj) {
     var newObj = {};
     Object.keys(obj).forEach(function (key) {
         if (Array.isArray(obj[key])) {
-            newObj[key] = ko.observableArray(obj[key]);
+            newObj[key] = ko.observableArray(convertArrayToObservable(obj[key]));
         } else {
             newObj[key] = ko.observable(obj[key]);
         }

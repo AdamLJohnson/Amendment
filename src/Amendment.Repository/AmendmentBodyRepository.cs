@@ -9,7 +9,7 @@ namespace Amendment.Repository
 {
     public interface IAmendmentBodyRepository : IRepository<AmendmentBody>
     {
-
+        void SetIsLive(bool isLive, AmendmentBody amendmentBody);
     }
 
     public class AmendmentBodyRepository : BaseRepository<AmendmentBody>, IAmendmentBodyRepository
@@ -18,6 +18,12 @@ namespace Amendment.Repository
         {
             Query = DbSet
                 .Include(e => e.Language);
+        }
+
+        public void SetIsLive(bool isLive, AmendmentBody amendmentBody)
+        {
+            amendmentBody.IsLive = isLive;
+            Update(amendmentBody, nameof(AmendmentBody.IsLive));
         }
     }
 }

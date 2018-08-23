@@ -27,6 +27,15 @@ namespace Amendment.Repository.Infrastructure
             _context.Entry(entity).State = EntityState.Modified;
         }
 
+        protected virtual void Update(T entity, params string[] properties)
+        {
+            _context.Entry(entity).State = EntityState.Detached;
+            foreach (var property in properties)
+            {
+                _context.Entry(entity).Property(property).IsModified = true;
+            }
+        }
+
         public virtual void Delete(T entity)
         {
             _context.Remove(entity);

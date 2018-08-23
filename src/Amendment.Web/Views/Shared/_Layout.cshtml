@@ -1,4 +1,5 @@
 ﻿@using System.Security.Claims
+@using Amendment.Service.Infrastructure
 <!DOCTYPE html>
 <html>
 <head>
@@ -68,6 +69,7 @@
     <script>
         var _usersRoles = @Json.Serialize(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList());
         var _isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
+        var _clientNotifierMethods = @Json.Serialize(new ClientNotifierMethodsWrapper());
     </script>
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>

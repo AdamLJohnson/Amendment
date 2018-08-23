@@ -19,32 +19,35 @@ namespace Amendment.Service
         private readonly IAmendmentBodyRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IClientNotifier _clientNotifier;
+        private readonly IScreenControlService _screenControlService;
 
-        public AmendmentBodyService(IAmendmentBodyRepository repository, IUnitOfWork unitOfWork, IClientNotifier clientNotifier) : base(repository, unitOfWork)
+        public AmendmentBodyService(IAmendmentBodyRepository repository, IUnitOfWork unitOfWork, IClientNotifier clientNotifier, IScreenControlService screenControlService) : base(repository, unitOfWork)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
             _clientNotifier = clientNotifier;
+            _screenControlService = screenControlService;
         }
 
         public override async Task<IOperationResult> CreateAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.CreateAsync(item, userId);
-            await _clientNotifier.SendAsync(DestinationHub.Amendment, "AmendmentBodyChange", new { id = item.Id, results, data = item });
+            await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
             return results;
         }
 
         public override async Task<IOperationResult> UpdateAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.UpdateAsync(item, userId);
-            await _clientNotifier.SendAsync(DestinationHub.Amendment, "AmendmentBodyChange", new { id = item.Id, results, data = item });
+            await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
+            await _screenControlService.UpdateBodyAsync(item);
             return results;
         }
 
         public override async Task<IOperationResult> DeleteAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.DeleteAsync(item, userId);
-            await _clientNotifier.SendAsync(DestinationHub.Amendment, "AmendmentBodyChange", new { id = item.Id, results, data = item });
+            await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
             return results;
         }
 
