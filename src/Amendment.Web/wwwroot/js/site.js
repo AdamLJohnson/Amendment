@@ -46,7 +46,7 @@
             jQuery.event.trigger("amendment.amendmentBodyChange", results);
         });
     
-    amendmentUpdatesConnection.start().catch(err => console.error(err.toString()));
+    amendmentUpdatesConnection.start().catch(err => console.error(err.toString())).then(() => { jQuery.event.trigger("amendment.ready");});
     return amendmentUpdatesConnection;
 }
 
@@ -140,6 +140,18 @@ function arrayFirstIndexOf(array, predicate, predicateOwner) {
         }
     }
     return -1;
+}
+
+function userIsInRole() {
+    if (arguments.length === 0) return false;
+
+    for (var i = 0; i < arguments.length; i++) {
+        var r = _usersRoles.indexOf(arguments[i]);
+        if (r > -1) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /*

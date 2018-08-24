@@ -34,6 +34,7 @@ namespace Amendment.Web.Controllers
         {
             var amendments = await _amendmentService.GetAllAsync();
             var model = _mapper.Map<List<AmendmentDetailsViewModel>>(amendments);
+            ViewBag.Languages = await _languageDataService.GetAllAsync();
             return View(model);
         }
 

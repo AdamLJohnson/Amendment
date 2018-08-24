@@ -8,9 +8,33 @@
         if (upIx > -1) {
             return self.amendments()[upIx];
         }
-        return {};
+        return self.amendments()[0];
     });
-    console.log(self.amendment());
+    self.isLive = ko.computed(function () {
+        var upIx = arrayFirstIndexOf(self.amendments(),
+            function (item) {
+                return item.isLive();
+            });
+        return upIx > -1;
+    });
+    self.primaryLanguageId = ko.computed(function () {
+        var upIx = arrayFirstIndexOf(self.amendments(),
+            function (item) {
+                return item.isLive();
+            });
+        if (upIx > -1) {
+            return self.amendments()[upIx].primaryLanguageId();
+        }
+        return -1;
+    });
+    self.toggleAmendmentBody = function (amendmentBody) {
+        if (amendmentBody.isLive()) {
+            self.hub.invoke("amendmentBodyGoLive", amendmentBody.amendId(), amendmentBody.id(), false);
+        } else {
+            self.hub.invoke("amendmentBodyGoLive", amendmentBody.amendId(), amendmentBody.id(), true);
+        }
+        
+    };
     self.hub = ManageAmendmentHub();
     self.bodies = ko.computed(function () {
         if (!self.amendment().amendmentBodies) {
@@ -33,7 +57,6 @@
     });
 
     $(document).on("amendment.amendmentChange", function (evt, results) {
-        console.log(results);
         var upIx = arrayFirstIndexOf(self.amendments(),
             function (item) {
                 return item.id() === results.id;

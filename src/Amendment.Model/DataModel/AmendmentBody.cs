@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Amendment.Model.Enums;
 using Amendment.Model.Infrastructure;
+using Markdig;
 
 namespace Amendment.Model.DataModel
 {
@@ -25,5 +26,16 @@ namespace Amendment.Model.DataModel
         public DateTime EnteredDate { get; set; }
         public int LastUpdatedBy { get; set; }
         public DateTime LastUpdated { get; set; }
+
+        public string AmendBodyHtml
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(AmendBody))
+                    return "";
+                var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseSoftlineBreakAsHardlineBreak().Build();
+                return Markdown.ToHtml(AmendBody, pipeline);
+            }
+        }
     }
 }

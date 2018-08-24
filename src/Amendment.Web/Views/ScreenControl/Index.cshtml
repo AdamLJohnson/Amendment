@@ -8,28 +8,67 @@
 <h2>@ViewBag.Title</h2>
 
 <div id="screenControl">
+    <!-- ko if: isLive() -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="control-label">Title</label>
+                <p class="form-control-static" data-bind="text: amendment().amendTitle"></p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="control-label">Author</label>
+                <p class="form-control-static" data-bind="text: amendment().author"></p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="control-label">Motion</label>
+                <p class="form-control-static" data-bind="text: amendment().motion"></p>
+            </div>
+        </div>
+    </div>
+    <hr />
+    <h3>Amendment Texts</h3>
     <div class="row">
         <div class="col-md-12">
-            <!-- ko if: bodies().length > 0 -->
             <div data-bind="foreach: bodies">
                 <div class="row">
                     <div data-bind="foreach: $data">
                         <div class="col-md-4">
-                            <div data-bind="text: amendBody"></div>
-                            <div class="text-center">
-                                <button>test</button>
+
+                            <h4>
+                                <span data-bind="text: language().languageName"></span>
+                                <span data-bind="if: languageId() === primaryLanguageId()" class="label label-info pull-right" style="margin-left: 10px;">PRIMARY</span>
+                                <span data-bind="if: isLive()" class="label label-danger pull-right">LIVE</span>
+                            </h4>
+
+                            <div class="small-screen-container well">
+                                @*<img src="https://via.placeholder.com/1920x1080" class="img-responsive"/>*@
+                                <div data-bind="html: amendBodyHtml"></div>
                             </div>
+
+                            <div class="text-center margin-top-small">
+                                <!-- ko if: isLive() -->
+                                <button class="btn btn-danger" data-bind="click: toggleAmendmentBody">TAKE DOWN</button>
+                                <!-- /ko -->
+                                <!-- ko ifnot: isLive() -->
+                                <button class="btn btn-success" data-bind="click: toggleAmendmentBody">GO LIVE</button>
+                                <!-- /ko -->
+                            </div>
+
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- /ko -->
-            <!-- ko ifnot: bodies().length > 0 -->
-            <h3>No amendments are currently live</h3>
-            @Html.ActionLink("Go to Amendments", "Index", "Amendment", null, new { @class = "btn btn-primary" })
-            <!-- /ko -->
         </div>
     </div>
+    <!-- /ko -->
+    <!-- ko ifnot: isLive() -->
+    <h3>No amendments are currently live</h3>
+    @Html.ActionLink("Go to Amendments", "Index", "Amendment", null, new { @class = "btn btn-primary" })
+    <!-- /ko -->
 </div>
 
 @section Scripts

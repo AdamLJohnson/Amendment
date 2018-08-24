@@ -12,10 +12,8 @@ namespace Amendment.Service
 {
     public interface IScreenControlService
     {
-        Task GoLiveAsync(int userId, int amendmentId);
-        Task GoLiveAsync(int userId, int amendmentId, int amendmentBodyId);
-        Task TakeDownAsync(int userId, int amendmentId);
-        Task TakeDownAsync(int userId, int amendmentId, int amendmentBodyId);
+        Task GoLiveAsync(int userId, int amendmentId, bool isLive);
+        Task GoLiveAsync(int userId, int amendmentId, int amendmentBodyId, bool isLive);
         Task ClearScreensAsync(int userId);
         Task UpdateBodyAsync(AmendmentBody item);
         Task UpdateAmendmentAsync(Model.DataModel.Amendment item);
@@ -36,19 +34,19 @@ namespace Amendment.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task GoLiveAsync(int userId, int amendmentId)
+        public async Task GoLiveAsync(int userId, int amendmentId, bool isLive)
         {
             var amendment = await _amendmentRepository.GetByIdAsync(amendmentId);
             if (amendment != null)
             {
-                _amendmentRepository.SetIsLive(true, amendment);
+                _amendmentRepository.SetIsLive(isLive, amendment);
                 await _unitOfWork.SaveChangesAsync(userId);
                 await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentChange, new { id = amendmentId, results = new OperationResult(OperationType.Update), data = amendment });
                 await _clientNotifier.SendAsync(DestinationHub.Screen, ClientNotifierMethods.GoLive, amendment);
             }
         }
 
-        public async Task GoLiveAsync(int userId, int amendmentId, int amendmentBodyId)
+        public async Task GoLiveAsync(int userId, int amendmentId, int amendmentBodyId, bool isLive)
         {
             var amendment = await _amendmentRepository.GetByIdAsync(amendmentId);
             if (amendment == null || !amendment.IsLive) return;
@@ -56,9 +54,9 @@ namespace Amendment.Service
             var amendmentBody = amendment.AmendmentBodies?.Where(b => b.Id == amendmentBodyId).FirstOrDefault();
             if (amendmentBody != null)
             {
-                _amendmentBodyRepository.SetIsLive(true, amendmentBody);
+                _amendmentBodyRepository.SetIsLive(isLive, amendmentBody);
                 await _unitOfWork.SaveChangesAsync(userId);
-                await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentId, results = new OperationResult(OperationType.Update), data = amendmentBody });
+                await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentBodyId, results = new OperationResult(OperationType.Update), data = amendmentBody });
                 await _clientNotifier.SendAsync(DestinationHub.Screen, ClientNotifierMethods.GoLiveBody, amendmentBody);
             }
         }

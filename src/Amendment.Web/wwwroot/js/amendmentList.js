@@ -13,11 +13,12 @@
         }
         return -1;
     });
+    self.languageData = languageData;
     self.clearScreens = function () {
         amendmentUpdatesConnection.invoke("clearScreens");
     };
     self.amendmentGoLive = function(amendment) {
-        amendmentUpdatesConnection.invoke("amendmentGoLive", amendment.id());
+        amendmentUpdatesConnection.invoke("amendmentGoLive", amendment.id(), true);
     };
 
     $(document).on("amendment.amendmentChange", function (evt, results) {

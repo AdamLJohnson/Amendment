@@ -32,6 +32,7 @@ namespace Amendment.Service
         public override async Task<IOperationResult> CreateAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.CreateAsync(item, userId);
+            item = await GetAsync(item.Id);
             await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
             return results;
         }
@@ -39,6 +40,7 @@ namespace Amendment.Service
         public override async Task<IOperationResult> UpdateAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.UpdateAsync(item, userId);
+            item = await GetAsync(item.Id);
             await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
             await _screenControlService.UpdateBodyAsync(item);
             return results;

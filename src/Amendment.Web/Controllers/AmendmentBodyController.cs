@@ -40,12 +40,13 @@ namespace Amendment.Web.Controllers
         }
 
         [Authorize(Roles = "System Administrator, Amendment Editor, Translator")]
-        public async Task<ActionResult> Create(int amendmentId)
+        public async Task<ActionResult> Create(int amendmentId, int? languageId)
         {
             var bodies = await _amendmentBodyService.GetByAmentmentId(amendmentId);
             var alreadyCreatedLanguageIds = bodies.Select(b => b.LanguageId).ToList();
 
             var model = new AmendmentBodyCreateViewModel() { AmendId = amendmentId };
+            model.LanguageId = languageId ?? 0;
 
             model.Languages = (await _languageDataService.GetAllAsync()).Where(l => alreadyCreatedLanguageIds.All(c => c != l.Id)).ToList();
             return View(model);
