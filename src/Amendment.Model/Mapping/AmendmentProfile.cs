@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Amendment.Model.ViewModel.Amendment;
+using Amendment.Model.ViewModel.ScreenView;
 using AutoMapper;
 
 namespace Amendment.Model.Mapping
@@ -15,6 +16,7 @@ namespace Amendment.Model.Mapping
             CreateMap<AmendmentEditViewModel, DataModel.Amendment>()
                 .ForMember(dest => dest.AmendmentBodies, opt => opt.Ignore());
             CreateMap<AmendmentCreateViewModel, DataModel.Amendment>();
+            CreateMap<DataModel.Amendment, AmendmentViewViewModel>();
         }
     }
 }

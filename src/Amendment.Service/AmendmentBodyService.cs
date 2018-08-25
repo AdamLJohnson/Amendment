@@ -33,7 +33,7 @@ namespace Amendment.Service
         {
             var results = await base.CreateAsync(item, userId);
             item = await GetAsync(item.Id);
-            await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
+            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
             return results;
         }
 
@@ -41,15 +41,15 @@ namespace Amendment.Service
         {
             var results = await base.UpdateAsync(item, userId);
             item = await GetAsync(item.Id);
-            await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
-            await _screenControlService.UpdateBodyAsync(item);
+            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
+            await _screenControlService.UpdateBodyAsync(item, false);
             return results;
         }
 
         public override async Task<IOperationResult> DeleteAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.DeleteAsync(item, userId);
-            await _clientNotifier.SendAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
+            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
             return results;
         }
 

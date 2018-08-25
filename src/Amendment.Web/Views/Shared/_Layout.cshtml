@@ -4,6 +4,9 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <meta name="google" content="notranslate" />
+    <meta http-equiv="Content-Language" content="en" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Amendment.Web</title>
 
@@ -19,6 +22,7 @@
         <link href="~/lib/toastr/toastr.css" rel="stylesheet" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -35,6 +39,14 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">View Amendments <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("English", "View", "Home", new { id = "English" })</li>
+                            <li>@Html.ActionLink("Spanish", "View", "Home", new { id = "Spanish" })</li>
+                            <li>@Html.ActionLink("French", "View", "Home", new { id = "French" })</li>
+                        </ul>
+                    </li>
                     @if (User.Identity.IsAuthenticated)
                     {
                         <li><a asp-area="" asp-controller="Amendment" asp-action="Index">Amendments</a></li>

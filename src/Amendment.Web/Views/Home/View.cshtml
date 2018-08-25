@@ -1,0 +1,43 @@
+﻿@model Amendment.Model.ViewModel.ScreenView.ScreenViewViewModel
+
+@{
+    ViewBag.Title = Model.Language.LanguageName;
+    Layout = "_Layout";
+}
+
+
+
+<h2>@ViewBag.Title</h2>
+
+<div class="row">
+    <div class="col-md-12">
+        <div id="fullscreen">
+            <div id="viewModel">
+                @*<img src="https://via.placeholder.com/1920x1080" class="img-responsive"/>*@
+                <!-- ko if: isLive() -->
+                <div data-bind="html: amendmentBody"></div> 
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <button id="fullscreen-button" class="btn btn-primary">Enter Fullscreen</button>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script>
+        var initialData = @Json.Serialize(Model);
+        @*var editUrl = '@Url.Action("Edit")';
+        var deleteUrl = '@Url.Action("Delete")';
+        var goLiveUrl = '@Url.Action("GoLive", "ScreenControl")';
+        var screenControlUrl = '@Url.Action("Index", "ScreenControl")';*@
+    </script>
+    <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
+    <script type="text/javascript" src="~/js/screenView.js"></script>
+}

@@ -50,40 +50,18 @@
     return amendmentUpdatesConnection;
 }
 
-function ManageScreenHub()
+function ScreenViewHub(languageId)
 {
-    const screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub").build();
-    screenUpdatesConnection.on(_clientNotifierMethods.goLive,
-        (results) => {
-            if (_usersRoles.indexOf('System Administrator') > -1) {
-                toastr.options.escapeHtml = true;
-                var message = "screen " + results.id;
-                toastr.info(message, _clientNotifierMethods.goLive);
-            }
-
-            jQuery.event.trigger("screen.goLive", results);
-        });
-
-    screenUpdatesConnection.on(_clientNotifierMethods.goLiveBody,
-        (results) => {
-            if (_usersRoles.indexOf('System Administrator') > -1) {
-                toastr.options.escapeHtml = true;
-                var message = "screen " + results.id;
-                toastr.info(message, _clientNotifierMethods.goLiveBody);
-            }
-
-            jQuery.event.trigger("screen.goLiveBody", results);
-        });
-
+    const screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub?languageId=" + languageId).build();
     screenUpdatesConnection.on(_clientNotifierMethods.clearScreens,
-        (results) => {
+        () => {
             if (_usersRoles.indexOf('System Administrator') > -1) {
                 toastr.options.escapeHtml = true;
-                var message = "screen " + results.id;
+                var message = "";
                 toastr.info(message, _clientNotifierMethods.clearScreens);
             }
 
-            jQuery.event.trigger("screen.clearScreens", results);
+            jQuery.event.trigger("screen.clearScreens");
         });
 
     screenUpdatesConnection.on(_clientNotifierMethods.amendmentBodyChange,

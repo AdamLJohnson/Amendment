@@ -153,6 +153,15 @@ namespace Amendment.Web
                     });
 
                 routes.MapRoute(
+                    name: "screenView",
+                    template: "View/{id?}",
+                    defaults: new
+                    {
+                        controller = "Home",
+                        action = "View"
+                    });
+
+                routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });

@@ -19,7 +19,7 @@ namespace Amendment.Web.Notifiers
             _screenhHubContext = screenhHubContext;
         }
 
-        public Task SendAsync(DestinationHub destinationHub, string method, object obj)
+        public Task SendToAllAsync(DestinationHub destinationHub, string method, object obj)
         {
             switch (destinationHub)
             {
@@ -30,6 +30,11 @@ namespace Amendment.Web.Notifiers
                 default:
                     throw new ArgumentOutOfRangeException(nameof(destinationHub), destinationHub, null);
             }
+        }
+
+        public Task SendToLanguageScreenAsync(int languageId, string method, object obj)
+        {
+            return _screenhHubContext.Clients.Group($"language_{languageId}").SendAsync(method, obj);
         }
     }
 }

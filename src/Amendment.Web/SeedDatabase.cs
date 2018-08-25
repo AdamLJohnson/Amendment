@@ -64,7 +64,7 @@ namespace Amendment.Web
                 LastUpdated = DateTime.UtcNow,
                 AmendmentBodies = new List<AmendmentBody>()
                 {
-                    new AmendmentBody(){ AmendBody = "This is the body of the amendment. It sure is neat", LanguageId = 1 },
+                    new AmendmentBody(){ AmendBody = "This is the body of the amendment. It sure is neat", LanguageId = 1, IsLive = true },
                     new AmendmentBody(){ AmendBody = "SPANISH This is the body of the amendment. It sure is neat", LanguageId = 2 },
                     new AmendmentBody(){ AmendBody = "FRENCH This is the body of the amendment. It sure is neat", LanguageId = 3 }
                 },

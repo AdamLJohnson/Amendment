@@ -8,7 +8,8 @@ namespace Amendment.Service.Infrastructure
 {
     public interface IClientNotifier
     {
-        Task SendAsync(DestinationHub destinationHub, string method, object obj);
+        Task SendToAllAsync(DestinationHub destinationHub, string method, object obj);
+        Task SendToLanguageScreenAsync(int languageId, string method, object obj);
     }
 
     public enum DestinationHub
@@ -21,8 +22,6 @@ namespace Amendment.Service.Infrastructure
     {
         public const string AmendmentChange = "AmendmentChange";
         public const string AmendmentBodyChange = "AmendmentBodyChange";
-        public const string GoLive = "GoLive";
-        public const string GoLiveBody = "GoLiveBody";
         public const string ClearScreens = "ClearScreens";
     }
 
@@ -30,8 +29,6 @@ namespace Amendment.Service.Infrastructure
     {
         public string AmendmentChange = ClientNotifierMethods.AmendmentChange;
         public string AmendmentBodyChange = ClientNotifierMethods.AmendmentBodyChange;
-        public string GoLive = ClientNotifierMethods.GoLive;
-        public string GoLiveBody = ClientNotifierMethods.GoLiveBody;
         public string ClearScreens = ClientNotifierMethods.ClearScreens;
     }
 }
