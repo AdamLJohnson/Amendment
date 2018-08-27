@@ -27,9 +27,23 @@ namespace Amendment.Web.Controllers
             _languageService = languageService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var languageList = await _languageService.GetAllAsync();
+
+            var amendment = await _amendmentService.GetLiveAsync() ?? new Model.DataModel.Amendment();
+            var amendmentBody = amendment.AmendmentBodies;
+
+            var amendmentModel = _mapper.Map<AmendmentViewViewModel>(amendment);
+            var amendmentBodyModel = _mapper.Map<List<AmendmentBodyViewViewModel>>(amendmentBody);
+
+            var model = new HomeScreenViewViewModel()
+            {
+                Languages = languageList,
+                Amendment = amendmentModel,
+                AmendmentBodies = amendmentBodyModel
+            };
+            return View(model);
         }
 
         public async Task<IActionResult> View(string id) //id = languageName

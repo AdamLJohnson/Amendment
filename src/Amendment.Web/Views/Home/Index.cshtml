@@ -1,13 +1,70 @@
-﻿@{
+﻿@model Amendment.Model.ViewModel.ScreenView.HomeScreenViewViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
 
 <h1>Amendments</h1>
 
-<h3>View Amendments</h3>
-<ul>
-    <li>@Html.ActionLink("English", "View", "Home", new { id = "English" })</li>
-    <li>@Html.ActionLink("Spanish", "View", "Home", new { id = "Spanish" })</li>
-    <li>@Html.ActionLink("French", "View", "Home", new { id = "French" })</li>
-</ul>
+@*<h3>View Amendments</h3>
+    <ul>
+        <li>@Html.ActionLink("English", "View", "Home", new { id = "English" })</li>
+        <li>@Html.ActionLink("Spanish", "View", "Home", new { id = "Spanish" })</li>
+        <li>@Html.ActionLink("French", "View", "Home", new { id = "French" })</li>
+    </ul>*@
+
+
+<div class="row">
+    @foreach (var language in Model.Languages)
+    {
+        <div class="col-md-4">
+            <div id="@(language.LanguageName)View">
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <h4>
+                            <span data-bind="text: language"></span>
+                        </h4>
+
+                        <div class="small-screen-container well">
+                            @*<img src="https://via.placeholder.com/1920x1080" class="img-responsive"/>*@
+                            <!-- ko if: isLive() -->
+                            <div data-bind="html: amendmentBody"></div>
+                            <!-- /ko -->
+                            <!-- ko ifnot: isLive() -->
+                            <!-- /ko -->
+                        </div>
+                        <div class="text-center">
+                            <a data-bind="attr: { href: viewUrl + '/' + language }" class="btn btn-primary">View</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+@section Scripts
+{
+    <script>
+        var initialData = @Json.Serialize(Model);
+        var viewUrl = '@Url.Action("View", "Home")';
+    </script>
+    <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
+    <script type="text/javascript" src="~/js/screenAllView.js"></script>
+    <script>
+        $(function(){
+            for (var i = 0; i < initialData.languages.length; i++) {
+                var language = initialData.languages[i];
+                var amendmentBodyIdx = arrayFirstIndexOf(initialData.amendmentBodies,
+                    function (item) {
+                        return item.languageId == language.id;
+                    });
+                var amendmentBody = amendmentBodyIdx > -1 ? initialData.amendmentBodies[amendmentBodyIdx] : { };
+                initScreenViewModel(language.languageName + "View", language.id, initialData.amendment, amendmentBody, language.languageName);
+            }
+        });
+    </script>
+}
