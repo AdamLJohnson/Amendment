@@ -71,13 +71,20 @@
             </div>
         </div>
     </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2018 - Amendment.Web</p>
-        </footer>
+<div class="container body-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div id="connection-error" class="alert alert-danger margin-top-small hidden" role="alert">
+                <h3 style="margin: 0;">Connection to server lost <a href="javascript:location.reload();" class="alert-link">please refresh</a>.</h3>
+            </div>
+        </div>
     </div>
+    @RenderBody()
+    <hr/>
+    <footer>
+        <p>&copy; 2018 - Amendment.Web</p>
+    </footer>
+</div>
     <script>
         var _usersRoles = @Json.Serialize(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList());
         var _isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
@@ -86,6 +93,7 @@
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
         <script src="~/lib/signalr/signalr.min.js"></script>
         <script src="~/lib/toastr/toastr.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
@@ -103,6 +111,7 @@
                 crossorigin="anonymous"
                 integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
         </script>
+        <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
         <script src="~/lib/signalr/signalr.min.js"></script>
         <script src="~/lib/toastr/toastr.min.js"></script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>

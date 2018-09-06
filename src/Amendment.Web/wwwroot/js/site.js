@@ -1,8 +1,6 @@
 ﻿function ManageAmendmentHub() {
     const amendmentUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/amendmentHub").build();
-    amendmentUpdatesConnection.onclose((err) => {
-        toastr.error("Lost Connection", null, { closeButton: true });
-    });
+    amendmentUpdatesConnection.onclose((e) => { showConnectionError(); });
 
     amendmentUpdatesConnection.on(_clientNotifierMethods.amendmentChange,
         (results) => {
@@ -53,6 +51,7 @@
 function ScreenViewHub(languageId)
 {
     const screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub?languageId=" + languageId).build();
+    screenUpdatesConnection.onclose((e) => { showConnectionError(); });
     screenUpdatesConnection.on(_clientNotifierMethods.clearScreens,
         () => {
             if (_usersRoles.indexOf('System Administrator') > -1) {
@@ -61,7 +60,7 @@ function ScreenViewHub(languageId)
                 toastr.info(message, _clientNotifierMethods.clearScreens);
             }
 
-            jQuery.event.trigger("screen.clearScreens");
+            jQuery.event.trigger("screen.clearScreens." + languageId);
         });
 
     screenUpdatesConnection.on(_clientNotifierMethods.amendmentBodyChange,
@@ -72,7 +71,7 @@ function ScreenViewHub(languageId)
                 toastr.info(message, _clientNotifierMethods.amendmentBodyChange);
             }
 
-            jQuery.event.trigger("screen.amendmentBodyChange", results);
+            jQuery.event.trigger("screen.amendmentBodyChange." + languageId, results);
         });
 
     screenUpdatesConnection.on(_clientNotifierMethods.amendmentChange,
@@ -83,7 +82,7 @@ function ScreenViewHub(languageId)
                 toastr.info(message, _clientNotifierMethods.amendmentChange);
             }
 
-            jQuery.event.trigger("screen.amendmentChange", results);
+            jQuery.event.trigger("screen.amendmentChange." + languageId, results);
         });
 
     screenUpdatesConnection.start().catch(err => console.error(err.toString()));
@@ -130,6 +129,10 @@ function userIsInRole() {
         }
     }
     return false;
+}
+
+function showConnectionError() {
+    $("#connection-error").removeClass("hidden");
 }
 
 /*

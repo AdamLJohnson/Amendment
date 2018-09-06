@@ -12,19 +12,16 @@ function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, langu
             return self.amendmentIsLive() && self.amendmentBodyIsLive();
         });
 
-        $(document).on("screen.amendmentBodyChange", function (evt, results) {
-            if (results.languageId !== self.languageId) {
-                return;
-            }
+        $(document).on("screen.amendmentBodyChange." + self.languageId, function (evt, results) {
             self.amendmentBody(results.amendBodyHtml);
             self.amendmentBodyIsLive(results.isLive);
         });
 
-        $(document).on("screen.amendmentChange", function (evt, results) {
+        $(document).on("screen.amendmentChange." + self.languageId, function (evt, results) {
             self.amendmentIsLive(results.isLive);
         });
 
-        $(document).on("screen.clearScreens", function (evt) {
+        $(document).on("screen.clearScreens." + self.languageId, function (evt) {
             self.amendmentIsLive(false);
             self.amendmentBodyIsLive(false);
         });

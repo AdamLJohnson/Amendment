@@ -10,19 +10,20 @@ var ScreenViewModel = function(initialData) {
     self.isLive = ko.computed(function () {
         return self.amendmentIsLive() && self.amendmentBodyIsLive();
     });
+    var languageId = initialData.language.id;
 
-    $(document).on("screen.amendmentBodyChange", function (evt, results) {
+    $(document).on("screen.amendmentBodyChange." + languageId, function (evt, results) {
         console.log(results);
         self.amendmentBody(results.amendBodyHtml);
         self.amendmentBodyIsLive(results.isLive);
     });
 
-    $(document).on("screen.amendmentChange", function (evt, results) {
+    $(document).on("screen.amendmentChange." + languageId, function (evt, results) {
         console.log(results);
         self.amendmentIsLive(results.isLive);
     });
 
-    $(document).on("screen.clearScreens", function (evt) {
+    $(document).on("screen.clearScreens." + languageId, function (evt) {
         self.amendmentIsLive(false);
         self.amendmentBodyIsLive(false);
     });
