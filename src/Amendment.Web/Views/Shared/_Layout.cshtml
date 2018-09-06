@@ -90,6 +90,15 @@
         var _isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
         var _clientNotifierMethods = @Json.Serialize(new ClientNotifierMethodsWrapper());
     </script>
+    
+    <script src="~/lib/ua-parser/ua-parser.min.js"></script>
+    <script>
+        window.UAparser = new UAParser();
+        if (window.UAparser.getResult().browser.name === "IE") {
+            window.location = "http://outdatedbrowser.com";
+        }
+    </script>
+
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
