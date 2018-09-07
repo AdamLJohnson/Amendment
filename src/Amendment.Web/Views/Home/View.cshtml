@@ -11,26 +11,44 @@
 
 <div class="row">
     <div class="col-md-12">
+        <button id="fullscreen-button" class="btn btn-primary">Enter Fullscreen</button>
+    </div>
+</div>
+
+<br/>
+
+<div class="row">
+    <div class="col-md-12">
         <div id="fullscreen">
             <div id="viewModel">
                 @*<img src="https://via.placeholder.com/1920x1080" class="img-responsive"/>*@
                 <!-- ko if: isLive() -->
-                <div data-bind="html: amendmentBody"></div> 
+                <div data-bind="html: amendmentBody"></div>
                 <!-- /ko -->
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <button id="fullscreen-button" class="btn btn-primary">Enter Fullscreen</button>
-    </div>
-</div>
+
+
+@section Styles
+    {
+    <style>
+        .inner {
+            position: relative;
+            top: 0px;
+        }
+
+        .outer {
+            overflow: hidden;
+        }
+    </style>
+}
 
 
 @section Scripts
-{
+    {
     <script>
         var initialData = @Json.Serialize(Model);
         @*var editUrl = '@Url.Action("Edit")';

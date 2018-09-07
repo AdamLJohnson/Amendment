@@ -64,23 +64,35 @@
 }
 
 #fullscreen:-moz-full-screen {
-    background-color: pink;
-    border: 2px solid #f00;
-    font-size: 200%;
+    background-color: #FFFFF0;
+    border: 0px solid #f00;
+    padding-left: 100px;
+    padding-right: 100px;
     width: 100%;
     height: 100%;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 64px;
 }
 #fullscreen:-webkit-full-screen {
-    background-color: pink;
-    border: 2px solid #f00;
-    font-size: 200%;
+    background-color: #FFFFF0;
+    border: 0px solid #f00;
+    padding-left: 100px;
+    padding-right: 100px;
     width: 100%;
     height: 100%;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 64px;
 }
 #fullscreen:fullscreen {
-    background-color: pink;
-    border: 2px solid #f00;
-    font-size: 200%;
+    background-color: #FFFFF0;
+    border: 0px solid #f00;
+    padding-left: 100px;
+    padding-right: 100px;
     width: 100%;
     height: 100%;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 64px;
 }
