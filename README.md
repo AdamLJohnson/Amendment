@@ -1,5 +1,7 @@
 # Amendment.Web
 
+[![Build Status](https://dev.azure.com/columbus0380/columbus/_apis/build/status/AdamLJohnson.Amendment)](https://dev.azure.com/columbus0380/columbus/_build/latest?definitionId=1)
+
 ## Some quick commands
 
 ### Compile a release
