@@ -8,7 +8,13 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
+  Parameters.RestoreBuildProjects: '**/*.csproj'
 
 steps:
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'dotnet build $(buildConfiguration)'
+- script: dotnet publish --configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)
+  displayName: 'Build publish files'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
