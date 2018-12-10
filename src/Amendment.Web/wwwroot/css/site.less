@@ -66,42 +66,52 @@
 
 @screenFontFamily: 'Open Sans', sans-serif;
 
-@fullScreenWidth: 1720px;
+@fullScreenMaxWidth: 1920px;
+
+@fullScreenPadding: 100px;
+@fullScreenWidth: @fullScreenMaxWidth - (@fullScreenPadding * 2);
 @fullScreenHeight: 850px;
 @fullScreenFontSize: 60px;
 @fullScreenFontWeight: 600;
 
 @smallScreenWidth: 320px;
-@smallScreenRatio: unit(@smallScreenWidth) / unit(@fullScreenWidth);
-@smallScreenHeight: @fullScreenHeight * @smallScreenRatio;
+@smallScreenRatio: unit(@smallScreenWidth) / unit(@fullScreenMaxWidth);
+@smallScreenPadding: @fullScreenPadding * @smallScreenRatio;
+@smallScreenHeight: @fullScreenHeight * @smallScreenRatio + (@smallScreenPadding * 2);
 
 .screen-page {
-    width: @smallScreenWidth;
-    height: @smallScreenHeight;
     margin-bottom: 20px;
     box-shadow: 0 0 3pt 2pt rgb(118, 118, 118);
     border-radius: 3px;
+    width: @smallScreenWidth;
+    padding: @smallScreenPadding;
 }
-
-    .screen-page .screen-page-text {
-        width: @fullScreenWidth;
-        margin-bottom: 20px;
-        font-family: @screenFontFamily;
-        font-weight: @fullScreenFontWeight;
-        font-size: @fullScreenFontSize;
-        transform-origin: top left;
-        transform: scale(@smallScreenRatio);
-    }
 
 .activepage {
     box-shadow: 0 0 3pt 2pt red;
     background-color: #ffd0d0;
 }
 
+.screen-page-text {
+    transform-origin: top left;
+    font-family: @screenFontFamily;
+}
+
+.text-preview .screen-page {
+    height: @smallScreenHeight;
+}
+
+.text-preview .screen-page .screen-page-text {
+    width: @fullScreenWidth;
+    font-weight: @fullScreenFontWeight;
+    font-size: @fullScreenFontSize;
+    transform: scale(@smallScreenRatio);
+}
+
 #fullscreen:-moz-full-screen {
     background-color: #FFFFF0;
     border: 0px solid #f00;
-    padding: 100px;
+    padding: @fullScreenPadding;
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
@@ -110,7 +120,7 @@
 #fullscreen:-webkit-full-screen {
     background-color: #FFFFF0;
     border: 0px solid #f00;
-    padding: 100px;
+    padding: @fullScreenPadding;
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
@@ -119,7 +129,7 @@
 #fullscreen:fullscreen {
     background-color: #FFFFF0;
     border: 0px solid #f00;
-    padding: 100px;
+    padding: @fullScreenPadding;
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;

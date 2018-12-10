@@ -53,24 +53,28 @@
   overflow-x: -webkit-marquee;
 }
 .screen-page {
-  width: 320px;
-  height: 158.13953488px;
   margin-bottom: 20px;
   box-shadow: 0 0 3pt 2pt #767676;
   border-radius: 3px;
-}
-.screen-page .screen-page-text {
-  width: 1720px;
-  margin-bottom: 20px;
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 600;
-  font-size: 60px;
-  transform-origin: top left;
-  transform: scale(0.18604651);
+  width: 320px;
+  padding: 16.66666667px;
 }
 .activepage {
   box-shadow: 0 0 3pt 2pt red;
   background-color: #ffd0d0;
+}
+.screen-page-text {
+  transform-origin: top left;
+  font-family: 'Open Sans', sans-serif;
+}
+.text-preview .screen-page {
+  height: 175px;
+}
+.text-preview .screen-page .screen-page-text {
+  width: 1720px;
+  font-weight: 600;
+  font-size: 60px;
+  transform: scale(0.16666667);
 }
 #fullscreen:-moz-full-screen {
   background-color: #FFFFF0;

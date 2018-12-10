@@ -31,6 +31,9 @@
     </div>
     <hr />
     <h3>Amendment Texts</h3>
+    <div class="pull-left">
+        <button type="button" class="btn btn-success" data-bind="click: togglePreview">Change Views</button>
+    </div>
     <div class="pull-right">
         <button type="button" class="btn btn-warning" data-bind="click: resetAllPages">Reset All</button>
         <button type="button" class="btn btn-info" data-bind="click: function(data, event) { changeAllPages('prev') }">All Prev</button>
@@ -51,7 +54,7 @@
                                 <span data-bind="if: isLive()" class="label label-danger pull-right">LIVE</span>
                             </h4>
 
-                            <div class="small-screen-container well">
+                            <div class="small-screen-container well preview text-preview">
                                 @*<img src="https://via.placeholder.com/1920x1080" class="img-responsive"/>*@
                                 <div data-bind="template: {name: 'multi-amend-body-template', data: $data}"></div>
                             </div>

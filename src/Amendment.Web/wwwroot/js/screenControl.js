@@ -47,6 +47,10 @@
         self.hub.invoke("amendmentBodyResetAllPages", amendment().id());
     };
 
+    self.togglePreview = function() {
+        $(".preview").toggleClass("text-preview");
+    };
+
     self.hub = ManageAmendmentHub();
     self.bodies = ko.computed(function () {
         if (!self.amendment().amendmentBodies) {
