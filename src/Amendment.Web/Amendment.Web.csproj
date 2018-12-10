@@ -13,6 +13,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
@@ -44,6 +48,10 @@
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,141 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Wrapping element */
+/* Set some basic padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Carousel */
+.carousel-caption p {
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+/* Make .svg files in the carousel display properly in older browsers */
+.carousel-inner .item img[src$=".svg"] {
+    width: 100%;
+}
+
+/* QR code generator */
+#qrCode {
+    margin: 15px;
+}
+
+/* Hide/rearrange for smaller screens */
+@media screen and (max-width: 767px) {
+    /* Hide captions */
+    .carousel-caption {
+        display: none;
+    }
+}
+
+.small-screen-container {
+    position: relative;
+    max-width: 360px;
+}
+
+.centered-small-screen-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    height: 100%;
+}
+
+.margin-top-small {
+    margin-top: 10px;
+}
+
+.margin-left-small {
+    margin-top: 10px;
+}
+
+.scroller {
+    -webkit-marquee: up medium infinite scroll normal;
+    overflow-x: -webkit-marquee;
+}
+
+
+@screenFontFamily: 'Open Sans', sans-serif;
+
+@fullScreenWidth: 1720px;
+@fullScreenHeight: 850px;
+@fullScreenFontSize: 60px;
+@fullScreenFontWeight: 600;
+
+@smallScreenWidth: 320px;
+@smallScreenRatio: unit(@smallScreenWidth) / unit(@fullScreenWidth);
+@smallScreenHeight: @fullScreenHeight * @smallScreenRatio;
+
+.screen-page {
+    width: @smallScreenWidth;
+    height: @smallScreenHeight;
+    margin-bottom: 20px;
+    box-shadow: 0 0 3pt 2pt rgb(118, 118, 118);
+    border-radius: 3px;
+}
+
+    .screen-page .screen-page-text {
+        width: @fullScreenWidth;
+        margin-bottom: 20px;
+        font-family: @screenFontFamily;
+        font-weight: @fullScreenFontWeight;
+        font-size: @fullScreenFontSize;
+        transform-origin: top left;
+        transform: scale(@smallScreenRatio);
+    }
+
+.activepage {
+    box-shadow: 0 0 3pt 2pt red;
+    background-color: #ffd0d0;
+}
+
+#fullscreen:-moz-full-screen {
+    background-color: #FFFFF0;
+    border: 0px solid #f00;
+    padding: 100px;
+    font-family: @screenFontFamily;
+    font-weight: @fullScreenFontWeight;
+    font-size: @fullScreenFontSize;
+}
+
+#fullscreen:-webkit-full-screen {
+    background-color: #FFFFF0;
+    border: 0px solid #f00;
+    padding: 100px;
+    font-family: @screenFontFamily;
+    font-weight: @fullScreenFontWeight;
+    font-size: @fullScreenFontSize;
+}
+
+#fullscreen:fullscreen {
+    background-color: #FFFFF0;
+    border: 0px solid #f00;
+    padding: 100px;
+    font-family: @screenFontFamily;
+    font-weight: @fullScreenFontWeight;
+    font-size: @fullScreenFontSize;
+}
+
+#fullscreen:-moz-full-screen #viewModel {
+    width: @fullScreenWidth;
+    height: @fullScreenHeight;
+}
+
+#fullscreen:-webkit-full-screen #viewModel {
+    width: @fullScreenWidth;
+    height: @fullScreenHeight;
+}
+
+#fullscreen:fullscreen #viewModel {
+    width: @fullScreenWidth;
+    height: @fullScreenHeight;
+}
