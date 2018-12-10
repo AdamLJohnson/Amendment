@@ -19,6 +19,9 @@ namespace Amendment.Service
         Task ClearScreensAsync(int userId);
         Task UpdateBodyAsync(AmendmentBody item, bool forceSend);
         Task UpdateAmendmentAsync(Model.DataModel.Amendment item);
+        Task AmendmentBodyChangePage(int userId, int amendmentBodyId, int dir);
+        Task AmendmentBodyAllPages(int userId, int amendmentId, int dir);
+        Task AmendmentBodyResetAllPages(int userId, int amendmentId);
     }
 
     public class ScreenControlService : IScreenControlService
@@ -85,6 +88,52 @@ namespace Amendment.Service
             if (item.IsLive)
                 return _clientNotifier.SendToAllAsync(DestinationHub.Screen, ClientNotifierMethods.AmendmentChange, _mapper.Map<AmendmentViewViewModel>(item));
             return Task.FromResult(0);
+        }
+
+        public async Task AmendmentBodyChangePage(int userId, int amendmentBodyId, int dir)
+        {
+            var amendmentBody = await _amendmentBodyRepository.GetByIdAsync(amendmentBodyId);
+            if (amendmentBody == null)
+                return;
+
+            var page = amendmentBody.Page + dir;
+            await ChangeBodyPage(userId, amendmentBody, page);
+        }
+
+        public async Task AmendmentBodyAllPages(int userId, int amendmentId, int dir)
+        {
+            var amendment = await _amendmentRepository.GetByIdAsync(amendmentId);
+            if (amendment == null) return;
+
+            foreach (var body in amendment.AmendmentBodies)
+            {
+                var page = body.Page + dir;
+                await ChangeBodyPage(userId, body, page);
+            }
+        }
+
+        public async Task AmendmentBodyResetAllPages(int userId, int amendmentId)
+        {
+            var amendment = await _amendmentRepository.GetByIdAsync(amendmentId);
+            if (amendment == null) return;
+
+            foreach (var body in amendment.AmendmentBodies)
+            {
+                await ChangeBodyPage(userId, body, 0);
+            }
+        }
+
+        private async Task ChangeBodyPage(int userId, AmendmentBody amendmentBody, int page)
+        {
+            if (page < 0 || page > amendmentBody.Pages - 1)
+                page = 0;
+
+            var changed = page != amendmentBody.Page;
+            _amendmentBodyRepository.ChangePage(page, amendmentBody);
+            await _unitOfWork.SaveChangesAsync(userId);
+            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentBody.Id, results = new OperationResult(OperationType.Update), data = amendmentBody });
+            if (changed)
+                await UpdateBodyAsync(amendmentBody, changed);
         }
 
         private async Task ClearAll(int userId)

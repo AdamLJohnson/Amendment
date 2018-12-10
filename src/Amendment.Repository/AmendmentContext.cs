@@ -93,6 +93,8 @@ namespace Amendment.Repository
             builder.Entity<Model.DataModel.Amendment>();
             builder.Entity<AmendmentBody>()
                 .HasIndex(x => new {x.AmendId, x.LanguageId});
+            builder.Entity<AmendmentBody>()
+                .Property(x => x.Page).HasDefaultValue(0);
 
             builder.Entity<Language>()
                 .HasData(new Language() { Id = 1, LanguageName = "English", LanguageCode = "ENG" }

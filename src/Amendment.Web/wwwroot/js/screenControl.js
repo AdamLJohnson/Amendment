@@ -27,7 +27,7 @@
         }
         return -1;
     });
-    self.toggleAmendmentBody = function (amendmentBody) {
+    self.toggleAmendmentBody = function(amendmentBody) {
         if (amendmentBody.isLive()) {
             self.hub.invoke("amendmentBodyGoLive", amendmentBody.amendId(), amendmentBody.id(), false);
         } else {
@@ -35,6 +35,18 @@
         }
         
     };
+    self.changePage = function (direction, amendmentBody) { //next, prev
+        var dir = direction === 'next' ? 1 : -1;
+        self.hub.invoke("amendmentBodyChangePage", amendmentBody.id(), dir);
+    };
+    self.changeAllPages = function (direction) { //next, prev
+        var dir = direction === 'next' ? 1 : -1;
+        self.hub.invoke("amendmentBodyChangeAllPages", amendment().id(), dir);
+    };
+    self.resetAllPages = function () {
+        self.hub.invoke("amendmentBodyResetAllPages", amendment().id());
+    };
+
     self.hub = ManageAmendmentHub();
     self.bodies = ko.computed(function () {
         if (!self.amendment().amendmentBodies) {
@@ -117,6 +129,8 @@
             default:
         }
     });
+
+    testThis = self.bodies();
 };
 
 ko.applyBindings(new ScreenControlModel(initialData), document.getElementById("screenControl"));

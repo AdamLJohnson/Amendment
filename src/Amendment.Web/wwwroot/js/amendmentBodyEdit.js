@@ -51,11 +51,14 @@
         default:
         }
     });
+
+    $('#insertPage').click(function () {
+        insertAtCaret('AmendBody', '**NEWPAGE**');
+    });
 };
 
 
 function newFunction(results, self) {
-    console.log('asdasd', results);
     if (results.id !== amendmentId) {
         return;
     }

@@ -48,6 +48,40 @@
     return amendmentUpdatesConnection;
 }
 
+function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, languageName) {
+    var ScreenViewModel = function () {
+        var self = this;
+        self.hub = ScreenViewHub(languageId);
+        self.amendmentIsLive = ko.observable(amendment.isLive);
+        self.amendmentBodyIsLive = ko.observable(amendmentBody.isLive);
+        self.amendBodyPagedHtml = ko.observable(amendmentBody.amendBodyPagedHtml);
+        self.page = ko.observable(amendmentBody.page);
+        self.pages = ko.observable(amendmentBody.pages);
+        self.language = languageName;
+        self.languageId = languageId;
+        self.isLive = ko.computed(function () {
+            return self.amendmentIsLive() && self.amendmentBodyIsLive();
+        });
+
+        $(document).on("screen.amendmentBodyChange." + self.languageId, function (evt, results) {
+            self.amendBodyPagedHtml(results.amendBodyPagedHtml);
+            self.amendmentBodyIsLive(results.isLive);
+            self.page(results.page);
+            self.pages(results.pages);
+        });
+
+        $(document).on("screen.amendmentChange." + self.languageId, function (evt, results) {
+            self.amendmentIsLive(results.isLive);
+        });
+
+        $(document).on("screen.clearScreens." + self.languageId, function (evt) {
+            self.amendmentIsLive(false);
+            self.amendmentBodyIsLive(false);
+        });
+    };
+    ko.applyBindings(new ScreenViewModel(), document.getElementById(htmlId));
+}
+
 function ScreenViewHub(languageId)
 {
     const screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub?languageId=" + languageId).build();
@@ -94,20 +128,28 @@ function convertArrayToObservable(list) {
     $.each(list, function (i, obj) {
         var newObj = convertToObservable(obj);
         newList.push(newObj);
-    });
+    });;
     return newList;
 }
 
 function convertToObservable(obj) {
     var newObj = {};
-    Object.keys(obj).forEach(function (key) {
-        if (Array.isArray(obj[key])) {
-            newObj[key] = ko.observableArray(convertArrayToObservable(obj[key]));
-        } else {
-            newObj[key] = ko.observable(obj[key]);
-        }
-    });
+    if (typeof obj === 'object' && obj !== null) {
+        Object.keys(obj).forEach(function (key) {
+            if (Array.isArray(obj[key])) {
+                newObj[key] = ko.observableArray(convertArrayToObservable(obj[key]));
+            } else {
+                newObj[key] = ko.observable(obj[key]);
+            }
+        });
+    }
+    else {
+        return ko.observable(obj);
+    }
+
     return newObj;
+
+    
 }
 
 function arrayFirstIndexOf(array, predicate, predicateOwner) {
@@ -135,12 +177,41 @@ function showConnectionError() {
     $("#connection-error").removeClass("hidden");
 }
 
-/*
-console.log(arrayFirstIndexOf(viewModel.items(), function(item) {
-   return item.id === id;
-}));
+function insertAtCaret(areaId, text) {
+    var txtarea = document.getElementById(areaId);
+    if (!txtarea) {
+        return;
+    }
 
-viewModel.items()[1];
+    var scrollPos = txtarea.scrollTop;
+    var strPos = 0;
+    var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ?
+        "ff" : (document.selection ? "ie" : false));
+    if (br == "ie") {
+        txtarea.focus();
+        var range = document.selection.createRange();
+        range.moveStart('character', -txtarea.value.length);
+        strPos = range.text.length;
+    } else if (br == "ff") {
+        strPos = txtarea.selectionStart;
+    }
 
-viewModel.items.replace( oldItem, newItem )
- */
+    var front = (txtarea.value).substring(0, strPos);
+    var back = (txtarea.value).substring(strPos, txtarea.value.length);
+    txtarea.value = front + text + back;
+    strPos = strPos + text.length;
+    if (br == "ie") {
+        txtarea.focus();
+        var ieRange = document.selection.createRange();
+        ieRange.moveStart('character', -txtarea.value.length);
+        ieRange.moveStart('character', strPos);
+        ieRange.moveEnd('character', 0);
+        ieRange.select();
+    } else if (br == "ff") {
+        txtarea.selectionStart = strPos;
+        txtarea.selectionEnd = strPos;
+        txtarea.focus();
+    }
+
+    txtarea.scrollTop = scrollPos;
+}

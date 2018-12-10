@@ -96,3 +96,14 @@
     font-weight: 600;
     font-size: 64px;
 }
+
+.screen-page {
+    outline: 2px rgb(118, 118, 118) solid;
+}
+
+.activepage {
+    /*border: 1px red solid;*/
+    outline: 2px red solid;
+    background-color: #ffd0d0;
+    border-radius: 3px;
+}

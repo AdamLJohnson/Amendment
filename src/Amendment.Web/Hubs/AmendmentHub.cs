@@ -34,6 +34,24 @@ namespace Amendment.Web.Hubs
         }
 
         [Authorize(Roles = "Screen Controller, System Administrator")]
+        public Task AmendmentBodyChangePage(int amendmentBodyId, int dir)
+        {
+            return _screenControlService.AmendmentBodyChangePage(Context.User.UserId(), amendmentBodyId, dir);
+        }
+
+        [Authorize(Roles = "Screen Controller, System Administrator")]
+        public Task AmendmentBodyChangeAllPages(int amendmentId, int dir)
+        {
+            return _screenControlService.AmendmentBodyAllPages(Context.User.UserId(), amendmentId, dir);
+        }
+
+        [Authorize(Roles = "Screen Controller, System Administrator")]
+        public Task AmendmentBodyResetAllPages(int amendmentId)
+        {
+            return _screenControlService.AmendmentBodyResetAllPages(Context.User.UserId(), amendmentId);
+        }
+
+        [Authorize(Roles = "Screen Controller, System Administrator")]
         public Task AmendmentBodyGoLive(int amendmentId, int amendmentBodyId, bool isLive)
         {
             return _screenControlService.GoLiveAsync(Context.User.UserId(), amendmentId, amendmentBodyId, isLive);

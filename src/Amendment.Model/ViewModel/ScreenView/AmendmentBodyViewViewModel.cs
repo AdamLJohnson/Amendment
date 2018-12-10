@@ -17,5 +17,7 @@ namespace Amendment.Model.ViewModel.ScreenView
 
         public Language Language { get; set; } = new Language();
         public string AmendBodyHtml { get; set; }
+        public string AmendBodyPagedHtml { get; set; }
+        public int Page { get; set; }
     }
 }

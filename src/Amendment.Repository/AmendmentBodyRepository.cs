@@ -10,6 +10,7 @@ namespace Amendment.Repository
     public interface IAmendmentBodyRepository : IRepository<AmendmentBody>
     {
         void SetIsLive(bool isLive, AmendmentBody amendmentBody);
+        void ChangePage(int page, AmendmentBody amendmentBody);
     }
 
     public class AmendmentBodyRepository : BaseRepository<AmendmentBody>, IAmendmentBodyRepository
@@ -24,6 +25,12 @@ namespace Amendment.Repository
         {
             amendmentBody.IsLive = isLive;
             Update(amendmentBody, nameof(AmendmentBody.IsLive));
+        }
+
+        public void ChangePage(int page, AmendmentBody amendmentBody)
+        {
+            amendmentBody.Page = page;
+            Update(amendmentBody, nameof(AmendmentBody.Page));
         }
     }
 }

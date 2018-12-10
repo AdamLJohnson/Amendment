@@ -127,6 +127,20 @@
         <script src="~/lib/toastr/toastr.min.js"></script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
-    @RenderSection("Scripts", required: false)
+    
+<script type="text/html" id="single-amend-body-template">
+    <div data-bind="html: amendBodyPagedHtml"></div>
+</script>
+
+<script type="text/html" id="multi-amend-body-template">
+    <!-- ko foreach: { data: amendBodyPages, as: 'item' } -->
+    <div data-bind="css: { activepage: $parent.page() == $index() }", class="screen-page">
+        <div data-bind="html: item"></div>
+    </div>    
+    <!-- /ko -->
+    @*<div data-bind="html: $data"></div>*@
+</script>
+
+@RenderSection("Scripts", required: false)
 </body>
 </html>
