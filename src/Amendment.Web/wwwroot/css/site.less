@@ -123,6 +123,11 @@
         font-weight: @fullScreenFontWeight;
         font-size: @fullScreenFontSize;
     }
+
+    img {
+        max-width: @fullScreenWidth;
+        max-height: @fullScreenHeight;
+    }
 }
 
 #fullscreen:-moz-full-screen {
@@ -144,6 +149,10 @@
         font-weight: @fullScreenFontWeight;
         font-size: @fullScreenFontSize;
     }
+
+    img {
+        max-width: @fullScreenWidth
+    }
 }
 
 #fullscreen:-webkit-full-screen {
@@ -160,10 +169,14 @@
         margin-top: 0px;
         margin-bottom: @fullScreenH1MarBottom;
     }
-    
+
     blockquote {
         font-weight: @fullScreenFontWeight;
         font-size: @fullScreenFontSize;
+    }
+
+    img {
+        max-width: @fullScreenWidth
     }
 }
 
@@ -185,6 +198,10 @@
     blockquote {
         font-weight: @fullScreenFontWeight;
         font-size: @fullScreenFontSize;
+    }
+
+    img {
+        max-width: @fullScreenWidth
     }
 }
 

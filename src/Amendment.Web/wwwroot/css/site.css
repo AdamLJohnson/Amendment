@@ -92,6 +92,10 @@
   font-weight: 600;
   font-size: 60px;
 }
+.text-preview .screen-page .screen-page-text img {
+  max-width: 1720px;
+  max-height: 850px;
+}
 #fullscreen:-moz-full-screen {
   background-color: #FFFFF0;
   border: 0px solid #f00;
@@ -114,6 +118,9 @@
 #fullscreen:-moz-full-screen blockquote {
   font-weight: 600;
   font-size: 60px;
+}
+#fullscreen:-moz-full-screen img {
+  max-width: 1720px;
 }
 #fullscreen:-webkit-full-screen {
   background-color: #FFFFF0;
@@ -138,6 +145,9 @@
   font-weight: 600;
   font-size: 60px;
 }
+#fullscreen:-webkit-full-screen img {
+  max-width: 1720px;
+}
 #fullscreen:fullscreen {
   background-color: #FFFFF0;
   border: 0px solid #f00;
@@ -160,6 +170,9 @@
 #fullscreen:fullscreen blockquote {
   font-weight: 600;
   font-size: 60px;
+}
+#fullscreen:fullscreen img {
+  max-width: 1720px;
 }
 #fullscreen:-moz-full-screen #viewModel {
   width: 1720px;
