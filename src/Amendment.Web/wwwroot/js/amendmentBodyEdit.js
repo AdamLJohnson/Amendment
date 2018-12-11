@@ -60,8 +60,21 @@
         }
     });
 
+    let editors = $(".markdown-editor");
+    if (editors.length > 0) {
+        self.editor = new SimpleMDE({ element: editors[0], forceSync: true, spellChecker: false, hideIcons: ["guide", "preview", "side-by-side", "fullscreen"] });
+        self.editor.codemirror.on("change",
+            function () {
+                self.amendBody($("#AmendBody").val());
+            });
+    }
+
     $('#insertPage').click(function () {
-        insertAtCaret('AmendBody', '**NEWPAGE**');
+        var pos = self.editor.codemirror.getCursor();
+        self.editor.codemirror.setSelection(pos, pos);
+        self.editor.codemirror.replaceSelection("**NEWPAGE**");
+
+        //insertAtCaret('AmendBody', '**NEWPAGE**');
     });
 };
 

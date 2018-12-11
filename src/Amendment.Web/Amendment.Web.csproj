@@ -49,6 +49,7 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="wwwroot\lib\marked\" />
+    <Folder Include="wwwroot\lib\simplemde\" />
   </ItemGroup>
 
   <ItemGroup>

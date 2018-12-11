@@ -15,6 +15,7 @@
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link href="~/lib/toastr/toastr.css" rel="stylesheet" />
+        <link href="~/lib/simplemde/simplemde.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="~/css/site.css" />
     </environment>
     <environment exclude="Development">
@@ -22,6 +23,7 @@
               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link href="~/lib/toastr/toastr.css" rel="stylesheet" />
+        <link href="~/lib/simplemde/simplemde.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
     @RenderSection("Styles", required: false)
@@ -107,6 +109,7 @@
         <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
         <script src="~/lib/signalr/signalr.min.js"></script>
         <script src="~/lib/toastr/toastr.min.js"></script>
+        <script src="~/lib/simplemde/simplemde.min.js"></script>
         <script src="~/lib/marked/marked.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
     </environment>
@@ -126,6 +129,7 @@
         <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
         <script src="~/lib/signalr/signalr.min.js"></script>
         <script src="~/lib/toastr/toastr.min.js"></script>
+        <script src="~/lib/simplemde/simplemde.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>

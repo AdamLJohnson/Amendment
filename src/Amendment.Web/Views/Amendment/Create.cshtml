@@ -48,9 +48,21 @@
             </div>
             <div class="form-group">
                 @Html.LabelFor(f => f.AmendBody)
-                @Html.TextAreaFor(f => f.AmendBody, new { @class = "form-control", rows = "10" })
+                @Html.TextAreaFor(f => f.AmendBody, new { @class = "form-control markdown-editor", rows = "10" })
             </div>
         </div>
     </div>
     <button type="submit" class="btn btn-primary">Save</button>
+}
+
+@section Scripts
+{
+    <script>
+        $(function() {
+            let editors = $(".markdown-editor");
+            if (editors.length > 0) {
+                new SimpleMDE({ element: editors[0], forceSync: true, spellChecker: false, hideIcons: ["guide", "preview", "side-by-side", "fullscreen"] });
+            }
+        });
+    </script>
 }

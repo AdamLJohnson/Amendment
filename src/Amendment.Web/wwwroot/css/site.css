@@ -52,6 +52,7 @@
   -webkit-marquee: up medium infinite scroll normal;
   overflow-x: -webkit-marquee;
 }
+/*H1*/
 .screen-page {
   margin-bottom: 20px;
   box-shadow: 0 0 3pt 2pt #767676;
@@ -76,11 +77,41 @@
   font-size: 60px;
   transform: scale(0.16666667);
 }
+.text-preview .screen-page .screen-page-text h1,
+.text-preview .screen-page .screen-page-text h2,
+.text-preview .screen-page .screen-page-text h3,
+.text-preview .screen-page .screen-page-text h4,
+.text-preview .screen-page .screen-page-text h5,
+.text-preview .screen-page .screen-page-text h6 {
+  font-weight: 900;
+  font-size: 70px;
+  margin-top: 0px;
+  margin-bottom: 40px;
+}
+.text-preview .screen-page .screen-page-text blockquote {
+  font-weight: 600;
+  font-size: 60px;
+}
 #fullscreen:-moz-full-screen {
   background-color: #FFFFF0;
   border: 0px solid #f00;
   padding: 100px;
   font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 60px;
+}
+#fullscreen:-moz-full-screen h1,
+#fullscreen:-moz-full-screen h2,
+#fullscreen:-moz-full-screen h3,
+#fullscreen:-moz-full-screen h4,
+#fullscreen:-moz-full-screen h5,
+#fullscreen:-moz-full-screen h6 {
+  font-weight: 900;
+  font-size: 70px;
+  margin-top: 0px;
+  margin-bottom: 40px;
+}
+#fullscreen:-moz-full-screen blockquote {
   font-weight: 600;
   font-size: 60px;
 }
@@ -92,11 +123,41 @@
   font-weight: 600;
   font-size: 60px;
 }
+#fullscreen:-webkit-full-screen h1,
+#fullscreen:-webkit-full-screen h2,
+#fullscreen:-webkit-full-screen h3,
+#fullscreen:-webkit-full-screen h4,
+#fullscreen:-webkit-full-screen h5,
+#fullscreen:-webkit-full-screen h6 {
+  font-weight: 900;
+  font-size: 70px;
+  margin-top: 0px;
+  margin-bottom: 40px;
+}
+#fullscreen:-webkit-full-screen blockquote {
+  font-weight: 600;
+  font-size: 60px;
+}
 #fullscreen:fullscreen {
   background-color: #FFFFF0;
   border: 0px solid #f00;
   padding: 100px;
   font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 60px;
+}
+#fullscreen:fullscreen h1,
+#fullscreen:fullscreen h2,
+#fullscreen:fullscreen h3,
+#fullscreen:fullscreen h4,
+#fullscreen:fullscreen h5,
+#fullscreen:fullscreen h6 {
+  font-weight: 900;
+  font-size: 70px;
+  margin-top: 0px;
+  margin-bottom: 40px;
+}
+#fullscreen:fullscreen blockquote {
   font-weight: 600;
   font-size: 60px;
 }

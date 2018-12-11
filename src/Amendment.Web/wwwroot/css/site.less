@@ -79,6 +79,11 @@
 @smallScreenPadding: @fullScreenPadding * @smallScreenRatio;
 @smallScreenHeight: @fullScreenHeight * @smallScreenRatio + (@smallScreenPadding * 2);
 
+/*H1*/
+@fullScreenH1Size: @fullScreenFontSize + 10px;
+@fullScreenH1Weight: @fullScreenFontWeight + 300;
+@fullScreenH1MarBottom: 40px;
+
 .screen-page {
     margin-bottom: 20px;
     box-shadow: 0 0 3pt 2pt rgb(118, 118, 118);
@@ -106,6 +111,18 @@
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
     transform: scale(@smallScreenRatio);
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: @fullScreenH1Weight;
+        font-size: @fullScreenH1Size;
+        margin-top: 0px;
+        margin-bottom: @fullScreenH1MarBottom;
+    }
+
+    blockquote {
+        font-weight: @fullScreenFontWeight;
+        font-size: @fullScreenFontSize;
+    }
 }
 
 #fullscreen:-moz-full-screen {
@@ -115,6 +132,18 @@
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: @fullScreenH1Weight;
+        font-size: @fullScreenH1Size;
+        margin-top: 0px;
+        margin-bottom: @fullScreenH1MarBottom;
+    }
+
+    blockquote {
+        font-weight: @fullScreenFontWeight;
+        font-size: @fullScreenFontSize;
+    }
 }
 
 #fullscreen:-webkit-full-screen {
@@ -124,6 +153,18 @@
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: @fullScreenH1Weight;
+        font-size: @fullScreenH1Size;
+        margin-top: 0px;
+        margin-bottom: @fullScreenH1MarBottom;
+    }
+    
+    blockquote {
+        font-weight: @fullScreenFontWeight;
+        font-size: @fullScreenFontSize;
+    }
 }
 
 #fullscreen:fullscreen {
@@ -133,6 +174,18 @@
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: @fullScreenH1Weight;
+        font-size: @fullScreenH1Size;
+        margin-top: 0px;
+        margin-bottom: @fullScreenH1MarBottom;
+    }
+
+    blockquote {
+        font-weight: @fullScreenFontWeight;
+        font-size: @fullScreenFontSize;
+    }
 }
 
 #fullscreen:-moz-full-screen #viewModel {

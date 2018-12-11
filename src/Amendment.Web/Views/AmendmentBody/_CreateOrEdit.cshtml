@@ -33,7 +33,7 @@
                     </div>
                     <div class="form-group">
                         @Html.LabelFor(f => f.AmendBody)
-                        @Html.TextAreaFor(f => f.AmendBody, new { @class = "form-control", rows = "10", data_bind = "textInput: amendBody" })
+                        @Html.TextAreaFor(f => f.AmendBody, new { @class = "form-control markdown-editor", rows = "10", data_bind = "textInput: amendBody" })
                     </div>
                 </div>
             </div>
