@@ -1,7 +1,15 @@
-﻿var AmendmentModel = function () {
+﻿var AmendmentModel = function (initData) {
     var amendmentUpdatesConnection = ManageAmendmentHub();
     var self = this;
     self.amendments = ko.observableArray();
+    self.amendBody = ko.observable(initData.amendBody);
+    self.page = ko.observable(-1);
+    self.amendBodyPages = ko.computed(function() {
+        return { amendBodyPages: self.amendBody().split("**NEWPAGE**").map(function(b) {
+            return marked(b, { breaks: true });
+        })
+        };
+    });
 
     amendmentUpdatesConnection.on("amendment.amendmentReturn", function (results) {
         newFunction(results, self);
@@ -76,4 +84,4 @@ function newFunction(results, self) {
 }
 
 
-ko.applyBindings(new AmendmentModel());
+ko.applyBindings(new AmendmentModel(initialData));

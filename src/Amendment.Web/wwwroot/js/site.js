@@ -214,4 +214,12 @@ function insertAtCaret(areaId, text) {
     }
 
     txtarea.scrollTop = scrollPos;
+
+    if ("createEvent" in document) {
+        var evt = document.createEvent("HTMLEvents");
+        evt.initEvent("change", false, true);
+        txtarea.dispatchEvent(evt);
+    }
+    else
+        txtarea.fireEvent("onchange");
 }

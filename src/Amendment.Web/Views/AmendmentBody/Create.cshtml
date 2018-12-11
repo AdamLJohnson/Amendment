@@ -1,57 +1,12 @@
 ﻿@using Amendment.Model.Enums
-@model Amendment.Model.ViewModel.AmendmentBody.AmendmentBodyCreateViewModel
+@model Amendment.Model.ViewModel.AmendmentBody.AmendmentBodyEditViewModel
 
 @{
     ViewBag.Title = "Create Amendment Body";
     Layout = "_Layout";
-    var enumStatuses = EnumHelper<AmendmentBodyStatus>.GetValues(AmendmentBodyStatus.New).ToList();
-    List<SelectListItem> statusList = enumStatuses.Select(s => new SelectListItem() { Text = EnumHelper<AmendmentBodyStatus>.GetDisplayValue(s), Value = ((int)s).ToString() }).ToList();
 }
 
-<h2>@ViewBag.Title</h2>
-
-@if (ViewData.ModelState != null && ViewData.ModelState.ErrorCount > 0)
-{
-    <div class="alert alert-danger">
-        <button type="button" class="close" data-dismiss="alert">×</button>
-        @Html.ValidationSummary()
-    </div>
-}
-
-@using (Html.BeginForm())
-{
-    @Html.HiddenFor(m => m.AmendId)
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.LabelFor(f => f.AmendStatus)
-                @Html.DropDownListFor(f => f.AmendStatus, statusList, new { @class = "form-control" })
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(f => f.LanguageId)
-                @Html.DropDownListFor(f => f.LanguageId, Model.Languages.Select(l => new SelectListItem() { Text = l.LanguageName, Value = l.Id.ToString() }).ToList(), "", new { @class = "form-control" })
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(f => f.AmendBody)
-                @Html.TextAreaFor(f => f.AmendBody, new { @class = "form-control", rows = "10" })
-            </div>
-        </div>
-        <div class="col-md-6">
-            <!-- ko if: amendments().length > 0 -->
-            <p class="form-control-static" data-bind="text: amendments()[0].amendTitle"></p>
-            <!-- ko with: amendments()[0].amendmentBodies()[arrayFirstIndexOf(amendments()[0].amendmentBodies(), function(item){return item.languageId() === amendments()[0].primaryLanguageId();})] -->
-            <div data-bind="template: {name: 'multi-amend-body-template', data: $data}"></div>
-            <!-- /ko -->
-            <!-- /ko -->
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <button type="submit" class="btn btn-primary">Save</button>
-            <button type="button" class="btn btn-info pull-right" id="#insertPage">Insert Page</button>
-        </div>
-    </div>
-}
+@Html.Partial("_CreateOrEdit", Model)
 
 @section Scripts
     {
@@ -59,7 +14,7 @@
         var initialData = @Json.Serialize(Model);
         var amendmentId = @ViewContext.RouteData.Values["amendmentId"];
     </script>
-    
+
     <environment include="Development">
         <script src="~/js/amendmentBodyEdit.js" asp-append-version="true"></script>
     </environment>

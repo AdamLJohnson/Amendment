@@ -45,7 +45,7 @@ namespace Amendment.Web.Controllers
             var bodies = await _amendmentBodyService.GetByAmentmentId(amendmentId);
             var alreadyCreatedLanguageIds = bodies.Select(b => b.LanguageId).ToList();
 
-            var model = new AmendmentBodyCreateViewModel() { AmendId = amendmentId };
+            var model = new AmendmentBodyEditViewModel() { AmendId = amendmentId };
             model.LanguageId = languageId ?? 0;
 
             model.Languages = (await _languageDataService.GetAllAsync()).Where(l => alreadyCreatedLanguageIds.All(c => c != l.Id)).ToList();
@@ -55,7 +55,7 @@ namespace Amendment.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "System Administrator, Amendment Editor, Translator")]
-        public async Task<ActionResult> Create(AmendmentBodyCreateViewModel model, int amendmentId)
+        public async Task<ActionResult> Create(AmendmentBodyEditViewModel model, int amendmentId)
         {
             if (!ModelState.IsValid)
             {

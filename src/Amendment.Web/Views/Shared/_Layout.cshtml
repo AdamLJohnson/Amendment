@@ -107,6 +107,7 @@
         <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
         <script src="~/lib/signalr/signalr.min.js"></script>
         <script src="~/lib/toastr/toastr.min.js"></script>
+        <script src="~/lib/marked/marked.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
     </environment>
     <environment exclude="Development">
@@ -125,6 +126,7 @@
         <script type='text/javascript' src='~/lib/knockout/knockout-3.4.2.js'></script>
         <script src="~/lib/signalr/signalr.min.js"></script>
         <script src="~/lib/toastr/toastr.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
     
@@ -134,11 +136,18 @@
 
 <script type="text/html" id="multi-amend-body-template">
     <!-- ko foreach: { data: amendBodyPages, as: 'item' } -->
-    <div data-bind="css: { activepage: $parent.page() == $index() }", class="screen-page screen-border">
+    <div data-bind="css: { activepage: $parent.page() == $index() }" class="screen-page screen-border">
         <div data-bind="html: item" class="screen-page-text"></div>
     </div>    
     <!-- /ko -->
-    @*<div data-bind="html: $data"></div>*@
+</script>
+
+<script type="text/html" id="edit-amend-body-template">
+    <!-- ko foreach: { data: amendBodyPages, as: 'item' } -->
+    <div class="screen-page screen-border">
+        <div data-bind="html: item" class="screen-page-text"></div>
+    </div>
+    <!-- /ko -->
 </script>
 
 @RenderSection("Scripts", required: false)
