@@ -121,6 +121,7 @@
 }
 #fullscreen:-moz-full-screen img {
   max-width: 1720px;
+  max-height: 850px;
 }
 #fullscreen:-webkit-full-screen {
   background-color: #FFFFF0;
@@ -147,6 +148,7 @@
 }
 #fullscreen:-webkit-full-screen img {
   max-width: 1720px;
+  max-height: 850px;
 }
 #fullscreen:fullscreen {
   background-color: #FFFFF0;
@@ -173,6 +175,7 @@
 }
 #fullscreen:fullscreen img {
   max-width: 1720px;
+  max-height: 850px;
 }
 #fullscreen:-moz-full-screen #viewModel {
   width: 1720px;
