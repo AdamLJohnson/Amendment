@@ -15,7 +15,6 @@ namespace Amendment.Model.Mapping
             CreateMap<AmendmentBody, AmendmentBodyDetailsViewModel>();
             CreateMap<AmendmentBody, AmendmentBodyEditViewModel>();
             CreateMap<AmendmentBodyEditViewModel, AmendmentBody>();
-            CreateMap<AmendmentBodyCreateViewModel, AmendmentBody>();
             CreateMap<AmendmentBody, AmendmentBodyViewViewModel>();
         }
     }

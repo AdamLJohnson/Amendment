@@ -2,5 +2,29 @@
   {
     "outputFile": "wwwroot/css/site.css",
     "inputFile": "wwwroot/css/site.less"
+  },
+  {
+    "outputFile": "wwwroot/js/site.es5.js",
+    "inputFile": "wwwroot/js/site.js"
+  },
+  {
+    "outputFile": "wwwroot/js/screenView.es5.js",
+    "inputFile": "wwwroot/js/screenView.js"
+  },
+  {
+    "outputFile": "wwwroot/js/screenControl.es5.js",
+    "inputFile": "wwwroot/js/screenControl.js"
+  },
+  {
+    "outputFile": "wwwroot/js/screenAllView.es5.js",
+    "inputFile": "wwwroot/js/screenAllView.js"
+  },
+  {
+    "outputFile": "wwwroot/js/amendmentList.es5.js",
+    "inputFile": "wwwroot/js/amendmentList.js"
+  },
+  {
+    "outputFile": "wwwroot/js/amendmentBodyEdit.es5.js",
+    "inputFile": "wwwroot/js/amendmentBodyEdit.js"
   }
 ]

@@ -34,11 +34,6 @@ namespace Amendment.Web.Controllers
             return View(model);
         }
 
-        public async Task<ActionResult> Detail(int amendmentId, int id)
-        {
-            return View(new AmendmentBodyDetailsViewModel());
-        }
-
         [Authorize(Roles = "System Administrator, Amendment Editor, Translator")]
         public async Task<ActionResult> Create(int amendmentId, int? languageId)
         {

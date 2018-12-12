@@ -38,16 +38,13 @@ namespace Amendment.Web.Controllers
             return View(model);
         }
 
-        public async Task<ActionResult> Detail(int id)
-        {
-            return View(new AmendmentDetailsViewModel());
-        }
-
         [Authorize(Roles = "System Administrator, Amendment Editor")]
         public async Task<ActionResult> Create()
         {
-            var model = new AmendmentCreateViewModel();
-            model.Languages = await _languageDataService.GetAllAsync();
+            var model = new AmendmentCreateViewModel
+            {
+                Languages = await _languageDataService.GetAllAsync()
+            };
             return View(model);
         }
 

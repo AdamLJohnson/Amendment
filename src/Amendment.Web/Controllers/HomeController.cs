@@ -46,7 +46,7 @@ namespace Amendment.Web.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> View(string id) //id = languageName
+        public new async Task<IActionResult> View(string id) //id = languageName
         {
             var languageList = await _languageService.GetAllAsync();
             var language = languageList.FirstOrDefault(l => l.LanguageName?.ToLower() == id?.ToLower());

@@ -171,7 +171,7 @@ namespace Amendment.Web.IdentityStores
             return Task.FromResult(user.UserXRoles.Any(ur => ur.Role.Name == roleName));
         }
 
-        public async Task<IList<User>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        public Task<IList<User>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
             if (roleName == null) throw new ArgumentNullException(nameof(roleName));
             throw new NotImplementedException();

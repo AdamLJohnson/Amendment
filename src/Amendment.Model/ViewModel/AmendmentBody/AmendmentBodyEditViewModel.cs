@@ -12,9 +12,12 @@ namespace Amendment.Model.ViewModel.AmendmentBody
         [Required]
         public int AmendId { get; set; }
         [Required]
+        [Display(Name = "Language")]
         public int LanguageId { get; set; }
         [Required]
+        [Display(Name = "Amendment Body")]
         public string AmendBody { get; set; }
+        [Display(Name = "Status")]
         public AmendmentBodyStatus AmendStatus { get; set; }
         public List<Language> Languages { get; set; }
     }

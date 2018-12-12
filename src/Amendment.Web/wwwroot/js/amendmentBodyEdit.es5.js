@@ -1,4 +1,6 @@
-﻿var AmendmentModel = function (initData) {
+﻿"use strict";
+
+var AmendmentModel = function AmendmentModel(initData) {
     var amendmentUpdatesConnection = ManageAmendmentHub();
     var self = this;
     self.amendments = ko.observableArray();
@@ -31,46 +33,44 @@
         console.log(results);
         var amendmentId = results.data.amendId;
 
-        var upIx = arrayFirstIndexOf(self.amendments(),
-            function (item) {
-                return item.id() === amendmentId;
-            });
+        var upIx = arrayFirstIndexOf(self.amendments(), function (item) {
+            return item.id() === amendmentId;
+        });
         if (upIx === -1) {
             return;
         }
 
         var amendment = self.amendments()[upIx];
 
-
         switch (results.results.operationType) {
-        case 1:
-            amendment.amendmentBodies.push(convertToObservable(results.data));
-            break;
-        case 2:
-            var upIx2 = arrayFirstIndexOf(amendment.amendmentBodies(),
-                function (item) {
+            case 1:
+                amendment.amendmentBodies.push(convertToObservable(results.data));
+                break;
+            case 2:
+                var upIx2 = arrayFirstIndexOf(amendment.amendmentBodies(), function (item) {
                     return item.id() === results.id;
                 });
-            if (upIx2 > -1) {
-                var oldItem = amendment.amendmentBodies()[upIx2];
-                var newItem = convertToObservable(results.data);
-                amendment.amendmentBodies.replace(oldItem, newItem);
-            }
-            break;
-        case 3:
-            amendment.amendmentBodies.remove(function (item) { return item.id() === results.id; });
-            break;
-        default:
+                if (upIx2 > -1) {
+                    var oldItem = amendment.amendmentBodies()[upIx2];
+                    var newItem = convertToObservable(results.data);
+                    amendment.amendmentBodies.replace(oldItem, newItem);
+                }
+                break;
+            case 3:
+                amendment.amendmentBodies.remove(function (item) {
+                    return item.id() === results.id;
+                });
+                break;
+            default:
         }
     });
 
-    let editors = $(".markdown-editor");
+    var editors = $(".markdown-editor");
     if (editors.length > 0) {
         self.editor = new SimpleMDE({ element: editors[0], forceSync: true, spellChecker: false, hideIcons: ["guide", "preview", "side-by-side", "fullscreen"] });
-        self.editor.codemirror.on("change",
-            function () {
-                self.amendBody($("#AmendBody").val());
-            });
+        self.editor.codemirror.on("change", function () {
+            self.amendBody($("#AmendBody").val());
+        });
     }
 
     $('#insertPage').click(function () {
@@ -82,15 +82,13 @@
     });
 };
 
-
 function newFunction(results, self) {
     if (results.id !== amendmentId) {
         return;
     }
-    var upIx = arrayFirstIndexOf(self.amendments(),
-        function (item) {
-            return item.id() === results.id;
-        });
+    var upIx = arrayFirstIndexOf(self.amendments(), function (item) {
+        return item.id() === results.id;
+    });
     if (upIx > -1) {
         var oldItem = self.amendments()[upIx];
         var newItem = convertToObservable(results);
@@ -100,5 +98,5 @@ function newFunction(results, self) {
     }
 }
 
-
 ko.applyBindings(new AmendmentModel(initialData));
+
