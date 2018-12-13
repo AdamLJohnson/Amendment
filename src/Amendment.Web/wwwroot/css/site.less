@@ -1,4 +1,34 @@
-﻿body {
+﻿/*SLIDE IMAGES*/
+/*@slideBackground: url("//via.placeholder.com/1920X1080/FFFFF0/000000?text=Slide+Background");*/
+/*@slideOfflineBackground: url("../images/500ColorCircle.png");*/
+@slideBackground: url("//via.placeholder.com/1920X1080/FFFFF0/FFFFF0?text=Slide+Background");
+@slideOfflineBackground: url("../images/Standby.jpg");
+@slideBackgroundTest: url("../images/1080test.png");
+
+
+@screenFontFamily: 'Open Sans', sans-serif;
+
+
+@fullScreenMaxWidth: 1920px;
+@fullScreenMaxHeight: 1080px;
+
+@fullScreenPadding: 100px;
+@fullScreenWidth: @fullScreenMaxWidth - (@fullScreenPadding * 2);
+@fullScreenHeight: 850px;
+@fullScreenFontSize: 60px;
+@fullScreenFontWeight: 600;
+
+@smallScreenWidth: 320px;
+@smallScreenRatio: unit(@smallScreenWidth) / unit(@fullScreenMaxWidth);
+@smallScreenPadding: @fullScreenPadding * @smallScreenRatio;
+@smallScreenHeight: @fullScreenHeight * @smallScreenRatio + (@smallScreenPadding * 2);
+
+/*H1*/
+@fullScreenH1Size: @fullScreenFontSize + 10px;
+@fullScreenH1Weight: @fullScreenFontWeight + 300;
+@fullScreenH1MarBottom: 40px;
+
+body {
     padding-top: 50px;
     padding-bottom: 20px;
 }
@@ -63,27 +93,6 @@
     overflow-x: -webkit-marquee;
 }
 
-
-@screenFontFamily: 'Open Sans', sans-serif;
-
-@fullScreenMaxWidth: 1920px;
-
-@fullScreenPadding: 100px;
-@fullScreenWidth: @fullScreenMaxWidth - (@fullScreenPadding * 2);
-@fullScreenHeight: 850px;
-@fullScreenFontSize: 60px;
-@fullScreenFontWeight: 600;
-
-@smallScreenWidth: 320px;
-@smallScreenRatio: unit(@smallScreenWidth) / unit(@fullScreenMaxWidth);
-@smallScreenPadding: @fullScreenPadding * @smallScreenRatio;
-@smallScreenHeight: @fullScreenHeight * @smallScreenRatio + (@smallScreenPadding * 2);
-
-/*H1*/
-@fullScreenH1Size: @fullScreenFontSize + 10px;
-@fullScreenH1Weight: @fullScreenFontWeight + 300;
-@fullScreenH1MarBottom: 40px;
-
 .screen-page {
     margin-bottom: 20px;
     box-shadow: 0 0 3pt 2pt rgb(118, 118, 118);
@@ -104,6 +113,7 @@
 
 .text-preview .screen-page {
     height: @smallScreenHeight;
+    background-size: cover;
 }
 
 .text-preview .screen-page .screen-page-text {
@@ -111,85 +121,104 @@
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
     transform: scale(@smallScreenRatio);
-
-    h1, h2, h3, h4, h5, h6 {
-        font-weight: @fullScreenH1Weight;
-        font-size: @fullScreenH1Size;
-        margin-top: 0px;
-        margin-bottom: @fullScreenH1MarBottom;
-    }
-
-    blockquote {
-        font-weight: @fullScreenFontWeight;
-        font-size: @fullScreenFontSize;
-    }
-
-    img {
-        max-width: @fullScreenWidth;
-        max-height: @fullScreenHeight;
-    }
+    
+    .mixin-fullscreen-special-elements()
 }
 
 #fullscreen:-moz-full-screen {
-    background-color: #FFFFF0;
-    border: 0px solid #f00;
-    padding: @fullScreenPadding;
-    font-family: @screenFontFamily;
-    font-weight: @fullScreenFontWeight;
-    font-size: @fullScreenFontSize;
-
-    h1, h2, h3, h4, h5, h6 {
-        font-weight: @fullScreenH1Weight;
-        font-size: @fullScreenH1Size;
-        margin-top: 0px;
-        margin-bottom: @fullScreenH1MarBottom;
-    }
-
-    blockquote {
-        font-weight: @fullScreenFontWeight;
-        font-size: @fullScreenFontSize;
-    }
-
-    img {
-        max-width: @fullScreenWidth;
-        max-height: @fullScreenHeight;
-    }
+    .mixin-fullscreen-for-vendors
 }
 
 #fullscreen:-webkit-full-screen {
-    background-color: #FFFFF0;
-    border: 0px solid #f00;
-    padding: @fullScreenPadding;
-    font-family: @screenFontFamily;
-    font-weight: @fullScreenFontWeight;
-    font-size: @fullScreenFontSize;
-
-    h1, h2, h3, h4, h5, h6 {
-        font-weight: @fullScreenH1Weight;
-        font-size: @fullScreenH1Size;
-        margin-top: 0px;
-        margin-bottom: @fullScreenH1MarBottom;
-    }
-
-    blockquote {
-        font-weight: @fullScreenFontWeight;
-        font-size: @fullScreenFontSize;
-    }
-
-    img {
-        max-width: @fullScreenWidth;
-        max-height: @fullScreenHeight;
-    }
+    .mixin-fullscreen-for-vendors
 }
 
 #fullscreen:fullscreen {
+    .mixin-fullscreen-for-vendors
+}
+
+#fullscreen:-moz-full-screen #viewModel {
+    .mixin-fullscreen-viewModel
+}
+
+#fullscreen:-webkit-full-screen #viewModel {
+    .mixin-fullscreen-viewModel
+}
+
+#fullscreen:fullscreen #viewModel {
+    .mixin-fullscreen-viewModel
+}
+
+.notLiveSlide > img {
+    max-width: 100%;
+}
+
+.fullscreen .notLiveSlide > img {
+    width: @fullScreenMaxWidth !important;
+    max-width: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+.small-screen-container.well {
+    min-height: 202.5px;
+}
+
+#fullscreen.fullscreen, .text-preview .screen-page {
+    .mixin-slide-text-background
+}
+
+.small-screen-container.well.slideoffline, #fullscreen.fullscreen.slideoffline {
+    .mixin-slide-text-background-offline
+}
+
+.small-screen-container.well.slideoffline {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+
+
+
+.test-background {
+    background-image: @slideBackgroundTest !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+/*MIXINS*/
+
+.mixin-slide-text-background-offline {
+    background-image: @slideOfflineBackground;
+}
+
+.mixin-slide-text-background {
     background-color: #FFFFF0;
+    background-image: @slideBackground;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.mixin-fullscreen-viewModel {
+    width: @fullScreenWidth;
+    height: @fullScreenHeight;
+}
+
+.mixin-fullscreen-for-vendors {
     border: 0px solid #f00;
     padding: @fullScreenPadding;
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
 
+    .screen-page-text {
+        .mixin-fullscreen-special-elements
+    }
+}
+
+.mixin-fullscreen-special-elements {
     h1, h2, h3, h4, h5, h6 {
         font-weight: @fullScreenH1Weight;
         font-size: @fullScreenH1Size;
@@ -202,23 +231,8 @@
         font-size: @fullScreenFontSize;
     }
 
-    img {
+    .img {
         max-width: @fullScreenWidth;
         max-height: @fullScreenHeight;
     }
-}
-
-#fullscreen:-moz-full-screen #viewModel {
-    width: @fullScreenWidth;
-    height: @fullScreenHeight;
-}
-
-#fullscreen:-webkit-full-screen #viewModel {
-    width: @fullScreenWidth;
-    height: @fullScreenHeight;
-}
-
-#fullscreen:fullscreen #viewModel {
-    width: @fullScreenWidth;
-    height: @fullScreenHeight;
 }

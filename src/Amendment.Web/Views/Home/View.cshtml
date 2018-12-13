@@ -19,12 +19,9 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div id="fullscreen">
-            <div id="viewModel">
-                @*<img src="https://via.placeholder.com/1920x1080" class="img-responsive"/>*@
-                <!-- ko if: isLive() -->
+        <div id="viewModel">
+            <div id="fullscreen" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }">
                 <div data-bind="template: {name: 'single-amend-body-template', data: $data}"></div>
-                <!-- /ko -->
             </div>
         </div>
     </div>

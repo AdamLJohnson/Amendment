@@ -10,7 +10,7 @@ namespace Amendment.Model.DataModel
 {
     public class AmendmentBody : ITableBase
     {
-        private const string PageSplit = "**NEWPAGE**";
+        private const string PageSplit = "**NEWSLIDE**";
 
         [Key]
         public int Id { get; set; }

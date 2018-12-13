@@ -175,4 +175,5 @@ function userIsInRole() {
 
 function showConnectionError() {
     $("#connection-error").removeClass("hidden");
+    jQuery.event.trigger("connection.error");
 }

@@ -9,7 +9,7 @@
             return { amendBodyPages: [""] };
         }
         return {
-            amendBodyPages: self.amendBody().split("**NEWPAGE**").map(function (b) {
+            amendBodyPages: self.amendBody().split("**NEWSLIDE**").map(function (b) {
                 return marked(b, { breaks: true });
             })
         };
@@ -76,9 +76,9 @@
     $('#insertPage').click(function () {
         var pos = self.editor.codemirror.getCursor();
         self.editor.codemirror.setSelection(pos, pos);
-        self.editor.codemirror.replaceSelection("**NEWPAGE**");
+        self.editor.codemirror.replaceSelection("**NEWSLIDE**");
 
-        //insertAtCaret('AmendBody', '**NEWPAGE**');
+        //insertAtCaret('AmendBody', '**NEWSLIDE**');
     });
 };
 

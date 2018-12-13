@@ -26,13 +26,8 @@
                             <span data-bind="text: language"></span>
                         </h4>
 
-                        <div class="small-screen-container well">
-                            @*<img src="https://via.placeholder.com/1920x1080" class="img-responsive"/>*@
-                            <!-- ko if: isLive() -->
+                        <div class="small-screen-container well" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }">
                             <div data-bind="template: {name: 'single-amend-body-template', data: $root}"></div>
-                            <!-- /ko -->
-                            <!-- ko ifnot: isLive() -->
-                            <!-- /ko -->
                         </div>
                         <div class="text-center">
                             <a data-bind="attr: { href: viewUrl + '/' + language }" class="btn btn-primary">View</a>
