@@ -63,7 +63,6 @@
                                 <tr>
                                     <td>@amendmentBody.Language.LanguageName</td>
                                     <td class="text-center">
-                                        @Html.ActionLink("View", "Detail", "AmendmentBody", new { amendmentId = ViewContext.RouteData.Values["id"], id = amendmentBody.Id }, new { @class = "btn btn-info" })
                                         @Html.ActionLink("Edit", "Edit", "AmendmentBody", new { amendmentId = ViewContext.RouteData.Values["id"], id = amendmentBody.Id }, new { @class = "btn btn-primary" })
                                         @if (amendmentBody.LanguageId != Model.PrimaryLanguageId)
                                         {
