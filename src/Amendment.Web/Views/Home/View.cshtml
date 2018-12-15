@@ -21,7 +21,7 @@
     <div class="col-md-12">
         <div id="viewModel">
             <div id="fullscreen" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }">
-                <div data-bind="template: {name: 'single-amend-body-template', data: $data}"></div>
+                <div data-bind="template: {name: 'single-amend-body-template', data: $data}, visible: isLive()"></div>
             </div>
         </div>
     </div>

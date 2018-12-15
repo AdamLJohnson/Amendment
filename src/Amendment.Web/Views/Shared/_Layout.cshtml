@@ -137,21 +137,14 @@
     </environment>
     
 <script type="text/html" id="single-amend-body-template">
-    <div data-bind="html: amendBodyPagedHtml, visible: isLive()" class="screen-page-text"></div>
+    <div data-bind="html: amendBodyPagedHtml" class="screen-page-text"></div>
 </script>
 
 <script type="text/html" id="multi-amend-body-template">
-    <!-- ko foreach: { data: amendBodyPages, as: 'item' } -->
+    <pre data-bind="text: JSON.stringify(ko.toJS($data), null, 2)" class="hidden"></pre>
+    <!-- ko foreach: { data: amendBodyPages, as: 'html' } -->
     <div data-bind="css: { activepage: $parent.page() == $index() }" class="screen-page screen-border">
-        <div data-bind="html: item" class="screen-page-text"></div>
-    </div>    
-    <!-- /ko -->
-</script>
-
-<script type="text/html" id="edit-amend-body-template">
-    <!-- ko foreach: { data: amendBodyPages, as: 'item' } -->
-    <div class="screen-page screen-border">
-        <div data-bind="html: item" class="screen-page-text"></div>
+        <div data-bind="template: {name: 'single-amend-body-template', data: { amendBodyPagedHtml : html }}"></div>
     </div>
     <!-- /ko -->
 </script>

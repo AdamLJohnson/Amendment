@@ -27,7 +27,7 @@
                         </h4>
 
                         <div class="small-screen-container well" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }">
-                            <div data-bind="template: {name: 'single-amend-body-template', data: $root}"></div>
+                            <div data-bind="template: {name: 'single-amend-body-template', data: $root}, visible: isLive()"></div>
                         </div>
                         <div class="text-center">
                             <a data-bind="attr: { href: viewUrl + '/' + language }" class="btn btn-primary">View</a>
