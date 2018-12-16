@@ -27,7 +27,7 @@
                         </h4>
 
                         <div class="small-screen-container well" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }">
-                            <div data-bind="template: {name: 'single-amend-body-template', data: {amendBodyPagedHtml: $data.amendBodyPagedHtml, scale: true}}, visible: isLive()"></div>
+                            <div data-bind="template: {name: 'single-amend-body-template', data: {amendBodyPagedHtml: $data.amendBodyPagedHtml, scale: true, showDeafSigner: ShowDeafSigner, showDeafSignerBox: ShowDeafSignerBox}}, visible: isLive()"></div>
                         </div>
                         <div class="text-center">
                             <a data-bind="attr: { href: viewUrl + '/' + language }" class="btn btn-primary">View</a>
