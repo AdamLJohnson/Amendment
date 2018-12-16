@@ -2,6 +2,20 @@
 /*@slideBackground: url("//via.placeholder.com/1920X1080/FFFFF0/000000?text=Slide+Background");*/
 /*@slideOfflineBackground: url("../images/500ColorCircle.png");*/
 /*H1*/
+.deafSignerPusher {
+  height: 660px;
+  float: right;
+}
+.deafSignerBox {
+  width: 320px;
+  height: 320px;
+  background-color: red;
+  clear: right;
+  float: right;
+  -ms-transform: translateX(100px);
+  -webkit-transform: translateX(100px);
+  transform: translateX(100px);
+}
 body {
   padding-top: 50px;
   padding-bottom: 20px;
@@ -72,7 +86,7 @@ body {
   font-family: 'Open Sans', sans-serif;
 }
 .text-preview .screen-page {
-  height: 175px;
+  height: 180px;
   background-size: cover;
 }
 .text-preview .screen-page .screen-page-text {
@@ -98,7 +112,7 @@ body {
 }
 .text-preview .screen-page .screen-page-text .img {
   max-width: 1720px;
-  max-height: 850px;
+  max-height: 880px;
 }
 #fullscreen:-moz-full-screen {
   border: 0px solid #f00;
@@ -124,7 +138,7 @@ body {
 }
 #fullscreen:-moz-full-screen .screen-page-text .img {
   max-width: 1720px;
-  max-height: 850px;
+  max-height: 880px;
 }
 #fullscreen:-webkit-full-screen {
   border: 0px solid #f00;
@@ -150,7 +164,7 @@ body {
 }
 #fullscreen:-webkit-full-screen .screen-page-text .img {
   max-width: 1720px;
-  max-height: 850px;
+  max-height: 880px;
 }
 #fullscreen:fullscreen {
   border: 0px solid #f00;
@@ -176,19 +190,31 @@ body {
 }
 #fullscreen:fullscreen .screen-page-text .img {
   max-width: 1720px;
-  max-height: 850px;
+  max-height: 880px;
 }
 #fullscreen:-moz-full-screen #viewModel {
   width: 1720px;
-  height: 850px;
+  height: 880px;
 }
 #fullscreen:-webkit-full-screen #viewModel {
   width: 1720px;
-  height: 850px;
+  height: 880px;
 }
 #fullscreen:fullscreen #viewModel {
   width: 1720px;
-  height: 850px;
+  height: 880px;
+}
+#fullscreen .deafSignerBox,
+#fullscreen .deafSignerPusher,
+.screen-page-text .deafSignerBox,
+.screen-page-text .deafSignerPusher {
+  display: none;
+}
+#fullscreen.fullscreen .deafSignerBox,
+#fullscreen.fullscreen .deafSignerPusher,
+.text-preview .screen-page-text .deafSignerBox,
+.text-preview .screen-page-text .deafSignerPusher {
+  display: unset;
 }
 .notLiveSlide > img {
   max-width: 100%;
@@ -236,7 +262,7 @@ body {
 }
 .mixin-fullscreen-viewModel {
   width: 1720px;
-  height: 850px;
+  height: 880px;
 }
 .mixin-fullscreen-for-vendors {
   border: 0px solid #f00;
@@ -262,7 +288,7 @@ body {
 }
 .mixin-fullscreen-for-vendors .screen-page-text .img {
   max-width: 1720px;
-  max-height: 850px;
+  max-height: 880px;
 }
 .mixin-fullscreen-special-elements h1,
 .mixin-fullscreen-special-elements h2,
@@ -281,5 +307,5 @@ body {
 }
 .mixin-fullscreen-special-elements .img {
   max-width: 1720px;
-  max-height: 850px;
+  max-height: 880px;
 }

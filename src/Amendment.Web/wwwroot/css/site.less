@@ -11,10 +11,13 @@
 
 @fullScreenMaxWidth: 1920px;
 @fullScreenMaxHeight: 1080px;
+@deafSignerWidth: 320px;
+@deafSignerHeight: @deafSignerWidth;
+@deafSignerPusherHeight: @fullScreenHeight - @deafSignerHeight + @fullScreenPadding;
 
 @fullScreenPadding: 100px;
 @fullScreenWidth: @fullScreenMaxWidth - (@fullScreenPadding * 2);
-@fullScreenHeight: 850px;
+@fullScreenHeight: @fullScreenMaxHeight - (@fullScreenPadding * 2);
 @fullScreenFontSize: 60px;
 @fullScreenFontWeight: 600;
 
@@ -27,6 +30,23 @@
 @fullScreenH1Size: @fullScreenFontSize + 10px;
 @fullScreenH1Weight: @fullScreenFontWeight + 300;
 @fullScreenH1MarBottom: 40px;
+
+
+.deafSignerPusher {
+    height: @deafSignerPusherHeight;
+    float: right;
+}
+
+.deafSignerBox {
+    width: @deafSignerWidth;
+    height: @deafSignerHeight;
+    background-color: red;
+    clear: right;
+    float: right;
+    -ms-transform: translateX(@fullScreenPadding);
+    -webkit-transform: translateX(@fullScreenPadding);
+    transform: translateX(@fullScreenPadding);
+}
 
 body {
     padding-top: 50px;
@@ -147,6 +167,16 @@ body {
 
 #fullscreen:fullscreen #viewModel {
     .mixin-fullscreen-viewModel
+}
+
+#fullscreen .deafSignerBox, #fullscreen .deafSignerPusher,
+.screen-page-text .deafSignerBox, .screen-page-text .deafSignerPusher {
+    display: none;
+}
+
+#fullscreen.fullscreen .deafSignerBox, #fullscreen.fullscreen .deafSignerPusher,
+.text-preview .screen-page-text .deafSignerBox, .text-preview .screen-page-text .deafSignerPusher {
+    display: unset;
 }
 
 .notLiveSlide > img {
