@@ -79,7 +79,7 @@
     <div class="row">
         <div class="col-md-12">
             <div id="connection-error" class="alert alert-danger margin-top-small hidden" role="alert">
-                <h3 style="margin: 0;">Connection to server lost <a href="javascript:location.reload();" class="alert-link">please refresh</a>.</h3>
+                <h3 style="margin: 0;">Connection to server lost. Attempting to reconnect. You may also <a href="javascript:location.reload();" class="alert-link">refresh</a> the page.</h3>
             </div>
         </div>
     </div>
@@ -138,6 +138,7 @@
     
 <script type="text/html" id="single-amend-body-template">
     <div style="" class="screen-page-text">
+        <div class="connection-error alert alert-danger hidden">Connection to server lost. Attempting to reconnect.</div>
         <div class="deafSignerPusher"></div>
         <div class="deafSignerBox"></div>
         <div data-bind="html: amendBodyPagedHtml"></div>
@@ -146,12 +147,12 @@
     </script>
 
 <script type="text/html" id="multi-amend-body-template">
-    @*<pre data-bind="text: JSON.stringify(ko.toJS($data), null, 2)" class="hidden"></pre>*@
+    <pre data-bind="text: JSON.stringify(ko.toJS($data), null, 2)" class="hidden"></pre>
     <!-- ko foreach: { data: amendBodyPages, as: 'html' } -->
     <div class="row">
         <div class="col-md-12 screen-page-height">
             <div data-bind="css: { activepage: $parent.page() == $index() }">
-                <div data-bind="template: {name: 'single-amend-body-template', data: { amendBodyPagedHtml : html, scale: $parent.scale }, afterRender: $parent.scale ? myPostProcessingLogic : null}" class="screen-page screen-border"></div>        
+                <div data-bind="template: {name: 'single-amend-body-template', data: { amendBodyPagedHtml : html, scale: $parent.scale }}" class="screen-page screen-border"></div>        
             </div>
         </div>
     </div>

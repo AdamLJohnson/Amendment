@@ -1,10 +1,9 @@
 ﻿"use strict";
 
 function ManageAmendmentHub() {
+    var _this = this;
+
     var amendmentUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/amendmentHub").build();
-    amendmentUpdatesConnection.onclose(function (e) {
-        showConnectionError();
-    });
 
     amendmentUpdatesConnection.on(_clientNotifierMethods.amendmentChange, function (results) {
         toastr.options.escapeHtml = true;
@@ -46,12 +45,104 @@ function ManageAmendmentHub() {
         jQuery.event.trigger("amendment.amendmentBodyChange", results);
     });
 
-    amendmentUpdatesConnection.start()["catch"](function (err) {
-        return console.error(err.toString());
-    }).then(function () {
-        jQuery.event.trigger("amendment.ready");
+    function start(reconnect) {
+        var startcon;
+        return regeneratorRuntime.async(function start$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+
+                    if (reconnect) {
+                        console.log("Attempting reconnect");
+                    }
+                    context$2$0.next = 4;
+                    return regeneratorRuntime.awrap(amendmentUpdatesConnection.start());
+
+                case 4:
+                    startcon = context$2$0.sent;
+
+                    startcon.then(function () {
+                        jQuery.event.trigger("amendment.ready");
+                    });
+                    hideConnectionError(reconnect);
+                    console.log("Connected");
+                    context$2$0.next = 14;
+                    break;
+
+                case 10:
+                    context$2$0.prev = 10;
+                    context$2$0.t0 = context$2$0["catch"](0);
+
+                    console.log(context$2$0.t0);
+                    setTimeout(function () {
+                        return start(reconnect);
+                    }, 5000);
+
+                case 14:
+                case "end":
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 10]]);
+    }
+
+    amendmentUpdatesConnection.onclose(function callee$1$0(e) {
+        return regeneratorRuntime.async(function callee$1$0$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    showConnectionError();
+                    context$2$0.next = 3;
+                    return regeneratorRuntime.awrap(start(true));
+
+                case 3:
+                case "end":
+                    return context$2$0.stop();
+            }
+        }, null, _this);
     });
+    start(false);
+    testconn = amendmentUpdatesConnection;
     return amendmentUpdatesConnection;
+}
+
+function ScreenViewHub(languageId) {
+    var screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub?languageId=" + languageId).build();
+    screenUpdatesConnection.on(_clientNotifierMethods.clearScreens, function () {
+        if (_usersRoles.indexOf('System Administrator') > -1) {
+            toastr.options.escapeHtml = true;
+            var message = "";
+            toastr.info(message, _clientNotifierMethods.clearScreens);
+        }
+
+        jQuery.event.trigger("screen.clearScreens." + languageId);
+    });
+
+    screenUpdatesConnection.on(_clientNotifierMethods.amendmentBodyChange, function (results) {
+        if (_usersRoles.indexOf('System Administrator') > -1) {
+            toastr.options.escapeHtml = true;
+            var message = "screen " + results.id;
+            toastr.info(message, _clientNotifierMethods.amendmentBodyChange);
+        }
+
+        jQuery.event.trigger("screen.amendmentBodyChange." + languageId, results);
+    });
+
+    screenUpdatesConnection.on(_clientNotifierMethods.amendmentChange, function (results) {
+        if (_usersRoles.indexOf('System Administrator') > -1) {
+            toastr.options.escapeHtml = true;
+            var message = "screen " + results.id;
+            toastr.info(message, _clientNotifierMethods.amendmentChange);
+        }
+
+        jQuery.event.trigger("screen.amendmentChange." + languageId, results);
+    });
+
+    screenUpdatesConnection.onclose(function (e) {
+        showConnectionError();
+    });
+    screenUpdatesConnection.start()["catch"](function (err) {
+        return console.error(err.toString());
+    });
+    return screenUpdatesConnection;
 }
 
 function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, languageName) {
@@ -86,47 +177,6 @@ function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, langu
         });
     };
     ko.applyBindings(new ScreenViewModel(), document.getElementById(htmlId));
-}
-
-function ScreenViewHub(languageId) {
-    var screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub?languageId=" + languageId).build();
-    screenUpdatesConnection.onclose(function (e) {
-        showConnectionError();
-    });
-    screenUpdatesConnection.on(_clientNotifierMethods.clearScreens, function () {
-        if (_usersRoles.indexOf('System Administrator') > -1) {
-            toastr.options.escapeHtml = true;
-            var message = "";
-            toastr.info(message, _clientNotifierMethods.clearScreens);
-        }
-
-        jQuery.event.trigger("screen.clearScreens." + languageId);
-    });
-
-    screenUpdatesConnection.on(_clientNotifierMethods.amendmentBodyChange, function (results) {
-        if (_usersRoles.indexOf('System Administrator') > -1) {
-            toastr.options.escapeHtml = true;
-            var message = "screen " + results.id;
-            toastr.info(message, _clientNotifierMethods.amendmentBodyChange);
-        }
-
-        jQuery.event.trigger("screen.amendmentBodyChange." + languageId, results);
-    });
-
-    screenUpdatesConnection.on(_clientNotifierMethods.amendmentChange, function (results) {
-        if (_usersRoles.indexOf('System Administrator') > -1) {
-            toastr.options.escapeHtml = true;
-            var message = "screen " + results.id;
-            toastr.info(message, _clientNotifierMethods.amendmentChange);
-        }
-
-        jQuery.event.trigger("screen.amendmentChange." + languageId, results);
-    });
-
-    screenUpdatesConnection.start()["catch"](function (err) {
-        return console.error(err.toString());
-    });
-    return screenUpdatesConnection;
 }
 
 function convertArrayToObservable(list) {
@@ -178,5 +228,13 @@ function userIsInRole() {
 
 function showConnectionError() {
     $("#connection-error").removeClass("hidden");
+    jQuery.event.trigger("connection.error");
+}
+
+function hideConnectionError(reconnect) {
+    $("#connection-error").addClass("hidden");
+    if (reconnect) {
+        jQuery.event.trigger("connection.reconnect");
+    }
 }
 

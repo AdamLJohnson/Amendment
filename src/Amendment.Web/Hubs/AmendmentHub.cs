@@ -62,5 +62,11 @@ namespace Amendment.Web.Hubs
             var amendment = await _amendmentService.GetAsync(amendmentId);
             await Clients.Caller.SendAsync("amendment.amendmentReturn", amendment);
         }
+
+        public async Task GetLiveAmendment()
+        {
+            var amendment = await _amendmentService.GetLiveAsync();
+            await Clients.Caller.SendAsync("amendment.getLiveAmendmentReturn", amendment ?? new Amendment.Model.DataModel.Amendment());
+        }
     }
 }

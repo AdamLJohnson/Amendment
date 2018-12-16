@@ -23,6 +23,7 @@ namespace Amendment.Service.Infrastructure
         public const string AmendmentChange = "AmendmentChange";
         public const string AmendmentBodyChange = "AmendmentBodyChange";
         public const string ClearScreens = "ClearScreens";
+        public const string RefreshLanguage = "RefreshLanguage";
     }
 
     public class ClientNotifierMethodsWrapper
@@ -30,5 +31,6 @@ namespace Amendment.Service.Infrastructure
         public string AmendmentChange = ClientNotifierMethods.AmendmentChange;
         public string AmendmentBodyChange = ClientNotifierMethods.AmendmentBodyChange;
         public string ClearScreens = ClientNotifierMethods.ClearScreens;
+        public string RefreshLanguage = ClientNotifierMethods.RefreshLanguage;
     }
 }

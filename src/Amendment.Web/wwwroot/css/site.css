@@ -31,6 +31,11 @@
   -webkit-transform: translateX(16.66666667px);
   transform: translateX(16.66666667px);
 }
+.fullscreen .connection-error {
+  position: absolute;
+  top: 40px;
+  z-index: 1000;
+}
 body {
   padding-top: 50px;
   padding-bottom: 20px;

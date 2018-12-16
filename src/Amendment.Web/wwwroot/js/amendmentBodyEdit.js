@@ -27,6 +27,10 @@
         amendmentUpdatesConnection.invoke("getAmendment", amendmentId);
     });
 
+    $(document).on("amendment.reconnect", function (evt) {
+        amendmentUpdatesConnection.invoke("getAmendment", amendmentId);
+    });
+
     $(document).on("amendment.amendmentBodyChange", function (evt, results) {
         console.log(results);
         var amendmentId = results.data.amendId;

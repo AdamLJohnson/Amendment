@@ -72,33 +72,44 @@
         return output;
     });
 
+    $(document).on("amendment.reconnect", function (evt) {
+        self.hub.invoke("getLiveAmendment");
+    });
+
+    self.hub.on("amendment.getLiveAmendmentReturn", function (results) {
+        self.amendments(convertArrayToObservable([results]));
+    });
+
     $(document).on("amendment.amendmentChange", function (evt, results) {
+        updateAmendment(results);
+    });
+
+    function updateAmendment(results) {
         var upIx = arrayFirstIndexOf(self.amendments(),
             function (item) {
                 return item.id() === results.id;
             });
         switch (results.results.operationType) {
-            case 1:
+        case 1:
+            self.amendments.push(convertToObservable(results.data));
+            break;
+        case 2:
+            if (upIx > -1) {
+                var oldItem = self.amendments()[upIx];
+                var newItem = convertToObservable(results.data);
+                self.amendments.replace(oldItem, newItem);
+            } else {
                 self.amendments.push(convertToObservable(results.data));
-                break;
-            case 2:
-                if (upIx > -1) {
-                    var oldItem = self.amendments()[upIx];
-                    var newItem = convertToObservable(results.data);
-                    self.amendments.replace(oldItem, newItem);
-                } else {
-                    self.amendments.push(convertToObservable(results.data));
-                }
-                break;
-            case 3:
-                self.amendments.remove(function (item) { return item.id() === results.id; });
-                break;
-            default:
+            }
+            break;
+        case 3:
+            self.amendments.remove(function (item) { return item.id() === results.id; });
+            break;
+        default:
         }
-    });
+    }
 
     $(document).on("amendment.amendmentBodyChange", function (evt, results) {
-        console.log(results);
         var amendmentId = results.data.amendId;
 
         var upIx = arrayFirstIndexOf(self.amendments(),
@@ -133,8 +144,6 @@
             default:
         }
     });
-
-    testThis = self.bodies();
 };
 
 ko.applyBindings(new ScreenControlModel(initialData), document.getElementById("screenControl"));

@@ -48,6 +48,7 @@ namespace Amendment.Web
                 {
                     new AmendmentBody(){ AmendBody = "Just look at all this text. It boggles the mind.", LanguageId = 1 }
                 }
+                , IsLive = false
             });
 
             amendmentRepository.Add(new Model.DataModel.Amendment()

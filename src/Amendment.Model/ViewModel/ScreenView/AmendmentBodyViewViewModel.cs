@@ -19,5 +19,6 @@ namespace Amendment.Model.ViewModel.ScreenView
         public string AmendBodyHtml { get; set; }
         public string AmendBodyPagedHtml { get; set; }
         public int Page { get; set; }
+        public int Pages { get; set; }
     }
 }
