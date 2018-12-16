@@ -3,19 +3,61 @@
 /*@slideOfflineBackground: url("../images/500ColorCircle.png");*/
 /*H1*/
 .deafSignerPusher {
+  float: right;
+}
+.deafSignerBox {
+  background-color: red;
+  background: url("//via.placeholder.com/320?text=Deaf+Signer");
+  clear: right;
+  float: right;
+}
+.deafSignerPusher {
   height: 660px;
   float: right;
 }
 .deafSignerBox {
   width: 320px;
   height: 320px;
-  background-color: red;
-  clear: right;
-  float: right;
   -ms-transform: translateX(100px);
   -webkit-transform: translateX(100px);
   transform: translateX(100px);
 }
+/*.text-preview .deafSignerPusher {
+    height: 110px;
+    float: right;
+}
+
+.text-preview .deafSignerBox {
+    width: 58px;
+    height: 58px;
+    -ms-transform: none;
+    -webkit-transform: none;
+    transform: none;
+}*/
+/*.fullscreen .deafSignerPusher {
+    height: @deafSignerPusherHeight;
+}
+
+.fullscreen .deafSignerBox {
+    width: @deafSignerWidth;
+    height: @deafSignerHeight;
+    -ms-transform: translateX(@fullScreenPadding);
+    -webkit-transform: translateX(@fullScreenPadding);
+    transform: translateX(@fullScreenPadding);
+}*/
+/*.deafSignerPusher {
+    height: 110px;
+    float: right;
+}
+
+.deafSignerBox {
+    width: 53.33px;
+    height: 53.33px;
+    background-color: red;
+    clear: right;
+    float: right;
+    transform: scale(1);
+}*/
 body {
   padding-top: 50px;
   padding-bottom: 20px;
@@ -72,10 +114,12 @@ body {
 }
 .screen-page {
   margin-bottom: 20px;
-  box-shadow: 0 0 3pt 2pt #767676;
-  border-radius: 3px;
   width: 320px;
   padding: 16.66666667px;
+}
+.screen-border {
+  box-shadow: 0 0 3pt 2pt #767676;
+  border-radius: 3px;
 }
 .activepage {
   box-shadow: 0 0 3pt 2pt red;
@@ -84,16 +128,21 @@ body {
 .screen-page-text {
   transform-origin: top left;
   font-family: 'Open Sans', sans-serif;
+  height: 100%;
+  width: 100%;
 }
 .text-preview .screen-page {
   height: 180px;
   background-size: cover;
 }
+.text-preview .screen-page-height {
+  height: 180px;
+  margin-bottom: 20px;
+}
 .text-preview .screen-page .screen-page-text {
   width: 1720px;
   font-weight: 600;
   font-size: 60px;
-  transform: scale(0.16666667);
 }
 .text-preview .screen-page .screen-page-text h1,
 .text-preview .screen-page .screen-page-text h2,
@@ -113,6 +162,9 @@ body {
 .text-preview .screen-page .screen-page-text .img {
   max-width: 1720px;
   max-height: 880px;
+}
+.text-preview .screen-page-text {
+  transform: scale(0.16666667);
 }
 #fullscreen:-moz-full-screen {
   border: 0px solid #f00;
@@ -309,3 +361,37 @@ body {
   max-width: 1720px;
   max-height: 880px;
 }
+/*div.zoom-factor {
+    position: relative;
+    display: block;
+}
+
+div.z-1,
+div.z-2,
+div.z-3 {
+    display: block;
+    color: white;
+}
+
+div.z-1 {
+    width: 50%;
+    float: left;
+    overflow: hidden;
+    position: relative;
+    margin: 1em 1em .35em;
+}
+
+div.z-2 {
+    position: absolute;
+    width: 100%;
+    background-color: red;
+}
+
+div.z-3 {
+    transform-origin: left top;
+    background-color: blue;
+}
+
+div.z-3 p {
+    text-align: justify;
+}*/

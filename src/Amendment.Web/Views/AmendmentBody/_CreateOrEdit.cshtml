@@ -67,7 +67,7 @@
                         <!-- ko if: amendments().length > 0 -->
                         <p class="form-control-static" data-bind="text: amendments()[0].amendTitle"></p>
                         <!-- ko with: amendments()[0].amendmentBodies()[arrayFirstIndexOf(amendments()[0].amendmentBodies(), function(item){return item.languageId() === amendments()[0].primaryLanguageId();})] -->
-                        <div data-bind="template: {name: 'multi-amend-body-template', data: {amendBodyPages : amendBodyPages, page : $root.page}}"></div>
+                        <div data-bind="template: {name: 'multi-amend-body-template', data: {amendBodyPages : amendBodyPages, page : $root.page }}"></div>
                         <!-- /ko -->
                         <!-- /ko -->
                     </div>
@@ -76,7 +76,7 @@
                             <!-- ko if: amendments().length > 0 -->
                             <p class="form-control-static" data-bind="text: amendments()[0].amendTitle"></p>
                             <!-- /ko -->
-                            <div data-bind="template: {name: 'multi-amend-body-template', data: {amendBodyPages: amendBodyPages().amendBodyPages, page: page}}"></div>
+                            <div data-bind="template: {name: 'multi-amend-body-template', data: {amendBodyPages: amendBodyPages().amendBodyPages, page: page, scale: true}}"></div>
                         </div>
                     </div>
                 </div>

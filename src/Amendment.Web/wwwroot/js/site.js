@@ -177,3 +177,53 @@ function showConnectionError() {
     $("#connection-error").removeClass("hidden");
     jQuery.event.trigger("connection.error");
 }
+
+//"use strict"; var _createClass = function () { function e(e, t) { for (var n = 0; n < t.length; n++) { var i = t[n]; i.enumerable = i.enumerable || !1, i.configurable = !0, "value" in i && (i.writable = !0), Object.defineProperty(e, i.key, i) } } return function (t, n, i) { return n && e(t.prototype, n), i && e(t, i), t } }(); function _classCallCheck(e, t) { if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function") } var zoomFactor = function () { function e(t) { _classCallCheck(this, e), this.el = this.q(t, document), this.b(), this.u() } return _createClass(e, [{ key: "q", value: function (e) { return (arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : this.el).querySelector(e) } }, { key: "b", value: function () { var e = this.el.innerHTML, t = document.createElement("z-1"), n = document.createElement("z-2"), i = document.createElement("z-3"), l = document.createElement("style"); this.el.innerHTML = "", this.el.appendChild(t), t.appendChild(n), n.appendChild(i), i.innerHTML = e, l.appendChild(document.createTextNode("z-1,z-2,z-3,zoom-factor{display:block}z-1,zoom-factor{position:relative}z-1,z-2{width:100%}z-1,z-2,z-3{color:#fff}z-1{float:left;overflow:hidden}z-2{position:absolute}z-3{transform-origin:left top;width:0}")), document.getElementsByTagName("head")[0].appendChild(l) } }, { key: "v", value: function () { return this.q("input") ? this.q("input").value : parseFloat(this.el.dataset.scale) || 1 } }, { key: "u", value: function () { var e = this.v(), t = this.el, n = this.q("z-1"), i = this.q("z-2"), l = this.q("z-3"); n.style = i.style = l.style = t.style = "", i.style.width = n.clientWidth * e + "px", l.style.transform = "scale(" + e + ")", n.style.height = l.clientHeight * e + "px", t.style.height = n.style.height } }]), e }();
+
+function myPostProcessingLogic(elements) {
+
+    
+    //new zoomFactor("zoom-factor");
+
+    //$(elements[1]);
+    //console.log(elements);
+    //testZf = elements[1].querySelector(".zoom-factor");
+    //testZF = new zoomFactor(elements[1].querySelector(".zoom-factor"));
+    //sddsaf = testZF.update();
+}
+
+//class zoomFactor {
+//    constructor(el) {
+//        console.log(el);
+//        this.el = el;
+//        //this.query('input').addEventListener('input', () => this.update());
+//        //window.addEventListener('resize', () => this.update());
+//    }
+
+//    query(s, el = this.el) {
+//        return el.querySelector(s);
+//    }
+
+//    value() {
+//        return .16;
+//    }
+
+//    update() {
+//        var val = this.value();
+//        var z1 = this.query('.z-1');
+//        var z2 = this.query('.z-2');
+//        var z3 = this.query('.z-3');
+
+//        console.log(z1);
+//        console.log(z2);
+//        console.log(z3);
+//        //z1.style = z2.style = z3.style = '';
+//        //z2.style.width = z1.clientWidth * val + 'px';
+//        //z1.style.width = z2.style.width;
+//        z3.style.transform = 'scale(' + val + ')';
+//        //z3.style.width = z2.clientWidth / val + 'px';
+//        //z1.style.height = z3.clientHeight * val + 'px';
+
+//        return { z1, z2, z3 };
+//    }
+//}

@@ -33,6 +33,17 @@
 
 
 .deafSignerPusher {
+    float: right;
+}
+
+.deafSignerBox {
+    background-color: red;
+    background: url("//via.placeholder.com/320?text=Deaf+Signer");
+    clear: right;
+    float: right;
+}
+
+.deafSignerPusher {
     height: @deafSignerPusherHeight;
     float: right;
 }
@@ -40,13 +51,49 @@
 .deafSignerBox {
     width: @deafSignerWidth;
     height: @deafSignerHeight;
-    background-color: red;
-    clear: right;
-    float: right;
     -ms-transform: translateX(@fullScreenPadding);
     -webkit-transform: translateX(@fullScreenPadding);
     transform: translateX(@fullScreenPadding);
 }
+
+/*.text-preview .deafSignerPusher {
+    height: 110px;
+    float: right;
+}
+
+.text-preview .deafSignerBox {
+    width: 58px;
+    height: 58px;
+    -ms-transform: none;
+    -webkit-transform: none;
+    transform: none;
+}*/
+
+/*.fullscreen .deafSignerPusher {
+    height: @deafSignerPusherHeight;
+}
+
+.fullscreen .deafSignerBox {
+    width: @deafSignerWidth;
+    height: @deafSignerHeight;
+    -ms-transform: translateX(@fullScreenPadding);
+    -webkit-transform: translateX(@fullScreenPadding);
+    transform: translateX(@fullScreenPadding);
+}*/
+
+/*.deafSignerPusher {
+    height: 110px;
+    float: right;
+}
+
+.deafSignerBox {
+    width: 53.33px;
+    height: 53.33px;
+    background-color: red;
+    clear: right;
+    float: right;
+    transform: scale(1);
+}*/
 
 body {
     padding-top: 50px;
@@ -115,10 +162,13 @@ body {
 
 .screen-page {
     margin-bottom: 20px;
-    box-shadow: 0 0 3pt 2pt rgb(118, 118, 118);
-    border-radius: 3px;
     width: @smallScreenWidth;
     padding: @smallScreenPadding;
+}
+
+.screen-border {    
+    box-shadow: 0 0 3pt 2pt rgb(118, 118, 118);
+    border-radius: 3px;
 }
 
 .activepage {
@@ -129,6 +179,8 @@ body {
 .screen-page-text {
     transform-origin: top left;
     font-family: @screenFontFamily;
+    height: 100%;
+    width: 100%;
 }
 
 .text-preview .screen-page {
@@ -136,13 +188,21 @@ body {
     background-size: cover;
 }
 
+.text-preview .screen-page-height {
+    height: @smallScreenHeight;
+    margin-bottom: 20px;
+}
+
 .text-preview .screen-page .screen-page-text {
     width: @fullScreenWidth;
     font-weight: @fullScreenFontWeight;
-    font-size: @fullScreenFontSize;
-    transform: scale(@smallScreenRatio);
+    font-size: @fullScreenFontSize;    
     
     .mixin-fullscreen-special-elements()
+}
+
+.text-preview .screen-page-text {
+    transform: scale(@smallScreenRatio);
 }
 
 #fullscreen:-moz-full-screen {
@@ -266,3 +326,39 @@ body {
         max-height: @fullScreenHeight;
     }
 }
+
+
+/*div.zoom-factor {
+    position: relative;
+    display: block;
+}
+
+div.z-1,
+div.z-2,
+div.z-3 {
+    display: block;
+    color: white;
+}
+
+div.z-1 {
+    width: 50%;
+    float: left;
+    overflow: hidden;
+    position: relative;
+    margin: 1em 1em .35em;
+}
+
+div.z-2 {
+    position: absolute;
+    width: 100%;
+    background-color: red;
+}
+
+div.z-3 {
+    transform-origin: left top;
+    background-color: blue;
+}
+
+div.z-3 p {
+    text-align: justify;
+}*/
