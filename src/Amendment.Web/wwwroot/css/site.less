@@ -27,7 +27,6 @@
 
 @smallScreenWidth: 320px;
 @smallScreenTextWidth: @smallScreenWidth - (@smallScreenPadding * 2);
-@smallScreenRatio: 1;
 @smallScreenPadding: @fullScreenPadding * @scaleDownRatio;
 @smallScreenHeight: @fullScreenMaxHeight * @scaleDownRatio;
 
@@ -40,6 +39,12 @@
     -ms-transform: scale(@scaleUpRatio);
     -webkit-transform: scale(@scaleUpRatio);
     transform: scale(@scaleUpRatio);
+}
+
+.scaleDown {
+    -ms-transform: scale(@scaleDownRatio);
+    -webkit-transform: scale(@scaleDownRatio);
+    transform: scale(@scaleDownRatio);
 }
 
 .deafSignerPusher {
@@ -64,45 +69,6 @@
     -webkit-transform: translateX(@smallScreenPadding);
     transform: translateX(@smallScreenPadding);
 }
-
-/*.text-preview .deafSignerPusher {
-    height: 110px;
-    float: right;
-}
-
-.text-preview .deafSignerBox {
-    width: 58px;
-    height: 58px;
-    -ms-transform: none;
-    -webkit-transform: none;
-    transform: none;
-}*/
-
-/*.fullscreen .deafSignerPusher {
-    height: @deafSignerPusherHeight;
-}
-
-.fullscreen .deafSignerBox {
-    width: @deafSignerWidth;
-    height: @deafSignerHeight;
-    -ms-transform: translateX(@fullScreenPadding);
-    -webkit-transform: translateX(@fullScreenPadding);
-    transform: translateX(@fullScreenPadding);
-}*/
-
-/*.deafSignerPusher {
-    height: 110px;
-    float: right;
-}
-
-.deafSignerBox {
-    width: 53.33px;
-    height: 53.33px;
-    background-color: red;
-    clear: right;
-    float: right;
-    transform: scale(1);
-}*/
 
 body {
     padding-top: 50px;
@@ -342,39 +308,3 @@ body {
         max-height: @fullScreenHeight;
     }
 }
-
-
-/*div.zoom-factor {
-    position: relative;
-    display: block;
-}
-
-div.z-1,
-div.z-2,
-div.z-3 {
-    display: block;
-    color: white;
-}
-
-div.z-1 {
-    width: 50%;
-    float: left;
-    overflow: hidden;
-    position: relative;
-    margin: 1em 1em .35em;
-}
-
-div.z-2 {
-    position: absolute;
-    width: 100%;
-    background-color: red;
-}
-
-div.z-3 {
-    transform-origin: left top;
-    background-color: blue;
-}
-
-div.z-3 p {
-    text-align: justify;
-}*/

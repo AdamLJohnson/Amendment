@@ -7,6 +7,11 @@
   -webkit-transform: scale(6);
   transform: scale(6);
 }
+.scaleDown {
+  -ms-transform: scale(0.16666667);
+  -webkit-transform: scale(0.16666667);
+  transform: scale(0.16666667);
+}
 .deafSignerPusher {
   float: right;
 }
@@ -26,42 +31,6 @@
   -webkit-transform: translateX(16.66666667px);
   transform: translateX(16.66666667px);
 }
-/*.text-preview .deafSignerPusher {
-    height: 110px;
-    float: right;
-}
-
-.text-preview .deafSignerBox {
-    width: 58px;
-    height: 58px;
-    -ms-transform: none;
-    -webkit-transform: none;
-    transform: none;
-}*/
-/*.fullscreen .deafSignerPusher {
-    height: @deafSignerPusherHeight;
-}
-
-.fullscreen .deafSignerBox {
-    width: @deafSignerWidth;
-    height: @deafSignerHeight;
-    -ms-transform: translateX(@fullScreenPadding);
-    -webkit-transform: translateX(@fullScreenPadding);
-    transform: translateX(@fullScreenPadding);
-}*/
-/*.deafSignerPusher {
-    height: 110px;
-    float: right;
-}
-
-.deafSignerBox {
-    width: 53.33px;
-    height: 53.33px;
-    background-color: red;
-    clear: right;
-    float: right;
-    transform: scale(1);
-}*/
 body {
   padding-top: 50px;
   padding-bottom: 20px;
@@ -403,37 +372,3 @@ body {
   max-width: 1720px;
   max-height: 880px;
 }
-/*div.zoom-factor {
-    position: relative;
-    display: block;
-}
-
-div.z-1,
-div.z-2,
-div.z-3 {
-    display: block;
-    color: white;
-}
-
-div.z-1 {
-    width: 50%;
-    float: left;
-    overflow: hidden;
-    position: relative;
-    margin: 1em 1em .35em;
-}
-
-div.z-2 {
-    position: absolute;
-    width: 100%;
-    background-color: red;
-}
-
-div.z-3 {
-    transform-origin: left top;
-    background-color: blue;
-}
-
-div.z-3 p {
-    text-align: justify;
-}*/
