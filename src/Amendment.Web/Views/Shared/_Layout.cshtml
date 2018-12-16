@@ -138,16 +138,9 @@
     
 <script type="text/html" id="single-amend-body-template">
     <div style="" class="screen-page-text">
-        <!-- ko if: scale -->
-        <zoom-factor>
-            <div class="deafSignerPusher"></div>
-            <div class="deafSignerBox"></div>
-            <div data-bind="html: amendBodyPagedHtml"></div>
-        </zoom-factor>
-        <!-- /ko -->
-        <!-- ko if: !scale -->
+        <div class="deafSignerPusher"></div>
+        <div class="deafSignerBox"></div>
         <div data-bind="html: amendBodyPagedHtml"></div>
-        <!-- /ko -->
 
     </div>
     </script>

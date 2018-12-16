@@ -2,6 +2,11 @@
 /*@slideBackground: url("//via.placeholder.com/1920X1080/FFFFF0/000000?text=Slide+Background");*/
 /*@slideOfflineBackground: url("../images/500ColorCircle.png");*/
 /*H1*/
+.scaleUp {
+  -ms-transform: scale(6);
+  -webkit-transform: scale(6);
+  transform: scale(6);
+}
 .deafSignerPusher {
   float: right;
 }
@@ -12,15 +17,15 @@
   float: right;
 }
 .deafSignerPusher {
-  height: 660px;
+  height: 110px;
   float: right;
 }
 .deafSignerBox {
-  width: 320px;
-  height: 320px;
-  -ms-transform: translateX(100px);
-  -webkit-transform: translateX(100px);
-  transform: translateX(100px);
+  width: 53.33333333px;
+  height: 53.33333333px;
+  -ms-transform: translateX(16.66666667px);
+  -webkit-transform: translateX(16.66666667px);
+  transform: translateX(16.66666667px);
 }
 /*.text-preview .deafSignerPusher {
     height: 110px;
@@ -140,9 +145,9 @@ body {
   margin-bottom: 20px;
 }
 .text-preview .screen-page .screen-page-text {
-  width: 1720px;
+  width: 286.66666667px;
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
 }
 .text-preview .screen-page .screen-page-text h1,
 .text-preview .screen-page .screen-page-text h2,
@@ -151,27 +156,56 @@ body {
 .text-preview .screen-page .screen-page-text h5,
 .text-preview .screen-page .screen-page-text h6 {
   font-weight: 900;
-  font-size: 70px;
+  font-size: 11.66666667px;
   margin-top: 0px;
-  margin-bottom: 40px;
+  margin-bottom: 6.66666667px;
 }
 .text-preview .screen-page .screen-page-text blockquote {
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
 }
 .text-preview .screen-page .screen-page-text .img {
   max-width: 1720px;
   max-height: 880px;
 }
-.text-preview .screen-page-text {
-  transform: scale(0.16666667);
+.fullscreen .screen-page-text {
+  width: 286.66666667px;
+  height: 180px;
+  background-size: cover;
+}
+.fullscreen .screen-page-text h1,
+.fullscreen .screen-page-text h2,
+.fullscreen .screen-page-text h3,
+.fullscreen .screen-page-text h4,
+.fullscreen .screen-page-text h5,
+.fullscreen .screen-page-text h6 {
+  font-weight: 900;
+  font-size: 11.66666667px;
+  margin-top: 0px;
+  margin-bottom: 6.66666667px;
+}
+.fullscreen .screen-page-text blockquote {
+  font-weight: 600;
+  font-size: 10px;
+}
+.fullscreen .screen-page-text .img {
+  max-width: 1720px;
+  max-height: 880px;
+}
+.fullscreen .screen-page-text {
+  -ms-transform: scale(6);
+  -webkit-transform: scale(6);
+  transform: scale(6);
 }
 #fullscreen:-moz-full-screen {
   border: 0px solid #f00;
   padding: 100px;
   font-family: 'Open Sans', sans-serif;
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
+  -ms-transform: scale(6);
+  -webkit-transform: scale(6);
+  transform: scale(6);
 }
 #fullscreen:-moz-full-screen .screen-page-text h1,
 #fullscreen:-moz-full-screen .screen-page-text h2,
@@ -180,13 +214,13 @@ body {
 #fullscreen:-moz-full-screen .screen-page-text h5,
 #fullscreen:-moz-full-screen .screen-page-text h6 {
   font-weight: 900;
-  font-size: 70px;
+  font-size: 11.66666667px;
   margin-top: 0px;
-  margin-bottom: 40px;
+  margin-bottom: 6.66666667px;
 }
 #fullscreen:-moz-full-screen .screen-page-text blockquote {
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
 }
 #fullscreen:-moz-full-screen .screen-page-text .img {
   max-width: 1720px;
@@ -197,7 +231,10 @@ body {
   padding: 100px;
   font-family: 'Open Sans', sans-serif;
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
+  -ms-transform: scale(6);
+  -webkit-transform: scale(6);
+  transform: scale(6);
 }
 #fullscreen:-webkit-full-screen .screen-page-text h1,
 #fullscreen:-webkit-full-screen .screen-page-text h2,
@@ -206,13 +243,13 @@ body {
 #fullscreen:-webkit-full-screen .screen-page-text h5,
 #fullscreen:-webkit-full-screen .screen-page-text h6 {
   font-weight: 900;
-  font-size: 70px;
+  font-size: 11.66666667px;
   margin-top: 0px;
-  margin-bottom: 40px;
+  margin-bottom: 6.66666667px;
 }
 #fullscreen:-webkit-full-screen .screen-page-text blockquote {
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
 }
 #fullscreen:-webkit-full-screen .screen-page-text .img {
   max-width: 1720px;
@@ -223,7 +260,10 @@ body {
   padding: 100px;
   font-family: 'Open Sans', sans-serif;
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
+  -ms-transform: scale(6);
+  -webkit-transform: scale(6);
+  transform: scale(6);
 }
 #fullscreen:fullscreen .screen-page-text h1,
 #fullscreen:fullscreen .screen-page-text h2,
@@ -232,29 +272,29 @@ body {
 #fullscreen:fullscreen .screen-page-text h5,
 #fullscreen:fullscreen .screen-page-text h6 {
   font-weight: 900;
-  font-size: 70px;
+  font-size: 11.66666667px;
   margin-top: 0px;
-  margin-bottom: 40px;
+  margin-bottom: 6.66666667px;
 }
 #fullscreen:fullscreen .screen-page-text blockquote {
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
 }
 #fullscreen:fullscreen .screen-page-text .img {
   max-width: 1720px;
   max-height: 880px;
 }
 #fullscreen:-moz-full-screen #viewModel {
-  width: 1720px;
-  height: 880px;
+  width: 320px;
+  height: 180px;
 }
 #fullscreen:-webkit-full-screen #viewModel {
-  width: 1720px;
-  height: 880px;
+  width: 320px;
+  height: 180px;
 }
 #fullscreen:fullscreen #viewModel {
-  width: 1720px;
-  height: 880px;
+  width: 320px;
+  height: 180px;
 }
 #fullscreen .deafSignerBox,
 #fullscreen .deafSignerPusher,
@@ -272,7 +312,7 @@ body {
   max-width: 100%;
 }
 .fullscreen .notLiveSlide > img {
-  width: 1920px !important;
+  width: 320px !important;
   max-width: none;
   position: absolute;
   top: 0px;
@@ -313,15 +353,18 @@ body {
   background-repeat: no-repeat;
 }
 .mixin-fullscreen-viewModel {
-  width: 1720px;
-  height: 880px;
+  width: 320px;
+  height: 180px;
 }
 .mixin-fullscreen-for-vendors {
   border: 0px solid #f00;
   padding: 100px;
   font-family: 'Open Sans', sans-serif;
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
+  -ms-transform: scale(6);
+  -webkit-transform: scale(6);
+  transform: scale(6);
 }
 .mixin-fullscreen-for-vendors .screen-page-text h1,
 .mixin-fullscreen-for-vendors .screen-page-text h2,
@@ -330,13 +373,13 @@ body {
 .mixin-fullscreen-for-vendors .screen-page-text h5,
 .mixin-fullscreen-for-vendors .screen-page-text h6 {
   font-weight: 900;
-  font-size: 70px;
+  font-size: 11.66666667px;
   margin-top: 0px;
-  margin-bottom: 40px;
+  margin-bottom: 6.66666667px;
 }
 .mixin-fullscreen-for-vendors .screen-page-text blockquote {
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
 }
 .mixin-fullscreen-for-vendors .screen-page-text .img {
   max-width: 1720px;
@@ -349,13 +392,13 @@ body {
 .mixin-fullscreen-special-elements h5,
 .mixin-fullscreen-special-elements h6 {
   font-weight: 900;
-  font-size: 70px;
+  font-size: 11.66666667px;
   margin-top: 0px;
-  margin-bottom: 40px;
+  margin-bottom: 6.66666667px;
 }
 .mixin-fullscreen-special-elements blockquote {
   font-weight: 600;
-  font-size: 60px;
+  font-size: 10px;
 }
 .mixin-fullscreen-special-elements .img {
   max-width: 1720px;

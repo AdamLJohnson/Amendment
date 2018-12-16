@@ -11,26 +11,36 @@
 
 @fullScreenMaxWidth: 1920px;
 @fullScreenMaxHeight: 1080px;
-@deafSignerWidth: 320px;
-@deafSignerHeight: @deafSignerWidth;
-@deafSignerPusherHeight: @fullScreenHeight - @deafSignerHeight + @fullScreenPadding;
-
 @fullScreenPadding: 100px;
+
+@deafSignerWidth: 320px * @scaleDownRatio;
+@deafSignerHeight: @deafSignerWidth;
+@deafSignerPusherHeight: @smallScreenHeight - @deafSignerHeight - @smallScreenPadding;
+
+@scaleUpRatio: unit(@fullScreenMaxWidth) / unit(@smallScreenWidth);
+@scaleDownRatio: unit(@smallScreenWidth) / unit(@fullScreenMaxWidth);
+
 @fullScreenWidth: @fullScreenMaxWidth - (@fullScreenPadding * 2);
 @fullScreenHeight: @fullScreenMaxHeight - (@fullScreenPadding * 2);
-@fullScreenFontSize: 60px;
+@fullScreenFontSize: 60px * @scaleDownRatio;
 @fullScreenFontWeight: 600;
 
 @smallScreenWidth: 320px;
-@smallScreenRatio: unit(@smallScreenWidth) / unit(@fullScreenMaxWidth);
-@smallScreenPadding: @fullScreenPadding * @smallScreenRatio;
-@smallScreenHeight: @fullScreenHeight * @smallScreenRatio + (@smallScreenPadding * 2);
+@smallScreenTextWidth: @smallScreenWidth - (@smallScreenPadding * 2);
+@smallScreenRatio: 1;
+@smallScreenPadding: @fullScreenPadding * @scaleDownRatio;
+@smallScreenHeight: @fullScreenMaxHeight * @scaleDownRatio;
 
 /*H1*/
-@fullScreenH1Size: @fullScreenFontSize + 10px;
+@fullScreenH1Size: @fullScreenFontSize + 10px * @scaleDownRatio;
 @fullScreenH1Weight: @fullScreenFontWeight + 300;
-@fullScreenH1MarBottom: 40px;
+@fullScreenH1MarBottom: 40px * @scaleDownRatio;
 
+.scaleUp {
+    -ms-transform: scale(@scaleUpRatio);
+    -webkit-transform: scale(@scaleUpRatio);
+    transform: scale(@scaleUpRatio);
+}
 
 .deafSignerPusher {
     float: right;
@@ -51,9 +61,9 @@
 .deafSignerBox {
     width: @deafSignerWidth;
     height: @deafSignerHeight;
-    -ms-transform: translateX(@fullScreenPadding);
-    -webkit-transform: translateX(@fullScreenPadding);
-    transform: translateX(@fullScreenPadding);
+    -ms-transform: translateX(@smallScreenPadding);
+    -webkit-transform: translateX(@smallScreenPadding);
+    transform: translateX(@smallScreenPadding);
 }
 
 /*.text-preview .deafSignerPusher {
@@ -194,15 +204,21 @@ body {
 }
 
 .text-preview .screen-page .screen-page-text {
-    width: @fullScreenWidth;
+    width: @smallScreenTextWidth;
     font-weight: @fullScreenFontWeight;
-    font-size: @fullScreenFontSize;    
-    
+    font-size: @fullScreenFontSize;
     .mixin-fullscreen-special-elements()
 }
 
-.text-preview .screen-page-text {
-    transform: scale(@smallScreenRatio);
+.fullscreen .screen-page-text {
+    width: @smallScreenTextWidth;
+    height: @smallScreenHeight;
+    background-size: cover;
+    .mixin-fullscreen-special-elements()
+}
+
+.fullscreen .screen-page-text {
+    .scaleUp;
 }
 
 #fullscreen:-moz-full-screen {
@@ -244,7 +260,7 @@ body {
 }
 
 .fullscreen .notLiveSlide > img {
-    width: @fullScreenMaxWidth !important;
+    width: @smallScreenWidth !important;
     max-width: none;
     position: absolute;
     top: 0px;
@@ -292,8 +308,8 @@ body {
 }
 
 .mixin-fullscreen-viewModel {
-    width: @fullScreenWidth;
-    height: @fullScreenHeight;
+    width: @smallScreenWidth;
+    height: @smallScreenHeight;
 }
 
 .mixin-fullscreen-for-vendors {
@@ -302,6 +318,7 @@ body {
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
+    .scaleUp;
 
     .screen-page-text {
         .mixin-fullscreen-special-elements
