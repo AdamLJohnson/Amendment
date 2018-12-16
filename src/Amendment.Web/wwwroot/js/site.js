@@ -253,12 +253,15 @@ function userIsInRole() {
 }
 
 function showConnectionError() {
-    $(".connection-error").removeClass("hidden");
+    $("#connection-error").removeClass("hidden");
+    $(".fullscreen .connection-error").removeClass("hidden");
     jQuery.event.trigger("connection.error");
 }
 
 function hideConnectionError(reconnect) {
-    $(".connection-error").addClass("hidden");
+    $("#connection-error").addClass("hidden");
+    $(".fullscreen .connection-error").addClass("hidden");
+
     if (reconnect) {
         jQuery.event.trigger("connection.reconnect");
     }
