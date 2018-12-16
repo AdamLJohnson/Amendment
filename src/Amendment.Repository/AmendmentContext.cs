@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Amendment.Model.DataModel;
+using Amendment.Model.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Amendment.Repository
@@ -100,6 +101,10 @@ namespace Amendment.Repository
                 .HasData(new Language() { Id = 1, LanguageName = "English", LanguageCode = "ENG" }
                 , new Language() { Id = 2, LanguageName = "Spanish", LanguageCode = "SPA" }
                 , new Language() { Id = 3, LanguageName = "French", LanguageCode = "FRA" });
+
+            builder.Entity<SystemSetting>().HasIndex(x => x.Key).IsUnique();
+            builder.Entity<SystemSetting>().HasData(new SystemSetting() { Id = 1, Key = SystemSettingKeys.ShowDeafSigner, Value = "1", EnteredBy = -1, EnteredDate = DateTime.UtcNow, LastUpdatedBy = -1, LastUpdated = DateTime.UtcNow},
+                new SystemSetting() { Id = 2, Key = SystemSettingKeys.ShowDeafSignerBox, Value = "1", EnteredBy = -1, EnteredDate = DateTime.UtcNow, LastUpdatedBy = -1, LastUpdated = DateTime.UtcNow });
         }
     }
 }

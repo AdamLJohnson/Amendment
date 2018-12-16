@@ -57,6 +57,7 @@ namespace Amendment.Web
             //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddSingleton(ConfigureContextOptions);
+            services.AddMemoryCache();
 
             var builder = new ContainerBuilder();
             builder.RegisterModule<RegisterDataServices>();

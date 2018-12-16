@@ -16,9 +16,11 @@
   float: right;
 }
 .deafSignerBox {
-  background-color: #767676;
   clear: right;
   float: right;
+}
+.deafSignerBox.deafSignerBackground {
+  background-color: #767676;
 }
 .deafSignerPusher {
   height: 110px;

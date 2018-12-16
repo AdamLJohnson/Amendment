@@ -2,6 +2,9 @@
 
 var ScreenControlModel = function ScreenControlModel(initialData) {
     self.amendments = ko.observableArray(convertArrayToObservable([initialData]));
+    //self., showDeafSigner: $parent.ShowDeafSigner, showDeafSignerBox: $parent.ShowDeafSignerBox
+    self.ShowDeafSigner = ko.observable("0");
+    self.ShowDeafSignerBox = ko.observable("0");
     self.amendment = ko.computed(function () {
         var upIx = arrayFirstIndexOf(self.amendments(), function (item) {
             return item.isLive();
@@ -72,7 +75,30 @@ var ScreenControlModel = function ScreenControlModel(initialData) {
         return output;
     });
 
+    $(document).on("amendment.reconnect", function (evt) {
+        self.hub.invoke("getLiveAmendment");
+        self.hub.invoke("getSystemSetting", "ShowDeafSigner");
+        self.hub.invoke("getSystemSetting", "ShowDeafSignerBox");
+    });
+
+    $(document).on("amendment.ready", function (evt) {
+        self.hub.invoke("getSystemSetting", "ShowDeafSigner");
+        self.hub.invoke("getSystemSetting", "ShowDeafSignerBox");
+    });
+
+    self.hub.on("RefreshSetting", function (results) {
+        updateSetting(self, results);
+    });
+
+    self.hub.on("amendment.getLiveAmendmentReturn", function (results) {
+        self.amendments(convertArrayToObservable([results]));
+    });
+
     $(document).on("amendment.amendmentChange", function (evt, results) {
+        updateAmendment(results);
+    });
+
+    function updateAmendment(results) {
         var upIx = arrayFirstIndexOf(self.amendments(), function (item) {
             return item.id() === results.id;
         });
@@ -96,10 +122,9 @@ var ScreenControlModel = function ScreenControlModel(initialData) {
                 break;
             default:
         }
-    });
+    }
 
     $(document).on("amendment.amendmentBodyChange", function (evt, results) {
-        console.log(results);
         var amendmentId = results.data.amendId;
 
         var upIx = arrayFirstIndexOf(self.amendments(), function (item) {
@@ -133,8 +158,6 @@ var ScreenControlModel = function ScreenControlModel(initialData) {
             default:
         }
     });
-
-    testThis = self.bodies();
 };
 
 ko.applyBindings(new ScreenControlModel(initialData), document.getElementById("screenControl"));

@@ -10,12 +10,12 @@ using Microsoft.AspNetCore.SignalR;
 namespace Amendment.Web.Hubs
 {
     [Authorize]
-    public class AmendmentHub : Hub
+    public class AmendmentHub : BaseHub
     {
         private readonly IScreenControlService _screenControlService;
         private readonly IAmendmentService _amendmentService;
 
-        public AmendmentHub(IScreenControlService screenControlService, IAmendmentService amendmentService)
+        public AmendmentHub(IScreenControlService screenControlService, IAmendmentService amendmentService, ISystemSettingService systemSettingService) : base(systemSettingService)
         {
             _screenControlService = screenControlService;
             _amendmentService = amendmentService;

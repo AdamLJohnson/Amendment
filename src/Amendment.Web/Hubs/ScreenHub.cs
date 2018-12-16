@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Amendment.Web.Hubs
 {
-    public class ScreenHub : Hub
+    public class ScreenHub : BaseHub
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAmendmentService _amendmentService;
@@ -21,7 +21,7 @@ namespace Amendment.Web.Hubs
         private readonly IReadOnlyDataService<Language> _languageService;
 
         public ScreenHub(IHttpContextAccessor httpContextAccessor, IAmendmentService amendmentService, IMapper mapper
-            , IReadOnlyDataService<Language> languageService)
+            , IReadOnlyDataService<Language> languageService, ISystemSettingService systemSettingService) : base(systemSettingService)
         {
             _httpContextAccessor = httpContextAccessor;
             _amendmentService = amendmentService;

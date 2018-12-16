@@ -1,5 +1,8 @@
 ﻿var ScreenControlModel = function (initialData) {
     self.amendments = ko.observableArray(convertArrayToObservable([initialData]));
+    //self., showDeafSigner: $parent.ShowDeafSigner, showDeafSignerBox: $parent.ShowDeafSignerBox
+    self.ShowDeafSigner = ko.observable("0");
+    self.ShowDeafSignerBox = ko.observable("0");
     self.amendment = ko.computed(function() {
         var upIx = arrayFirstIndexOf(self.amendments(),
             function (item) {
@@ -74,6 +77,17 @@
 
     $(document).on("amendment.reconnect", function (evt) {
         self.hub.invoke("getLiveAmendment");
+        self.hub.invoke("getSystemSetting", "ShowDeafSigner");
+        self.hub.invoke("getSystemSetting", "ShowDeafSignerBox");
+    });
+
+    $(document).on("amendment.ready", function (evt) {
+        self.hub.invoke("getSystemSetting", "ShowDeafSigner");
+        self.hub.invoke("getSystemSetting", "ShowDeafSignerBox");
+    });
+
+    self.hub.on("RefreshSetting", function (results) {
+        updateSetting(self, results);
     });
 
     self.hub.on("amendment.getLiveAmendmentReturn", function (results) {

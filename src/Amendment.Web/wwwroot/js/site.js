@@ -148,6 +148,8 @@ function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, langu
         self.pages = ko.observable(amendmentBody.pages);
         self.language = languageName;
         self.languageId = languageId;
+        self.ShowDeafSigner = ko.observable("0");
+        self.ShowDeafSignerBox = ko.observable("0");
         self.isLive = ko.computed(function () {
             return self.amendmentIsLive() && self.amendmentBodyIsLive();
         });
@@ -184,6 +186,17 @@ function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, langu
         $(document).on("screen.reconnect." + languageId, function (evt) {
             console.log("screen.reconnect." + self.languageId);
             self.hub.invoke("refreshLanguage", languageId);
+            self.hub.invoke("getSystemSetting", "ShowDeafSigner");
+            self.hub.invoke("getSystemSetting", "ShowDeafSignerBox");
+        });
+
+        $(document).on("screen.ready." + languageId, function (evt) {
+            self.hub.invoke("getSystemSetting", "ShowDeafSigner");
+            self.hub.invoke("getSystemSetting", "ShowDeafSignerBox");
+        });
+
+        self.hub.on("RefreshSetting", function (results) {
+            updateSetting(self, results);
         });
     };
     ko.applyBindings(new ScreenViewModel(), document.getElementById(htmlId));
@@ -248,5 +261,13 @@ function hideConnectionError(reconnect) {
     $(".connection-error").addClass("hidden");
     if (reconnect) {
         jQuery.event.trigger("connection.reconnect");
+    }
+}
+
+function updateSetting(self, setting) {
+    if (self[setting.key]) {
+        self[setting.key](setting.value);
+    } else {
+        self[setting.key] = ko.observable(setting.value);
     }
 }

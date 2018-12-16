@@ -1,8 +1,6 @@
 ﻿"use strict";
 
 function ManageAmendmentHub() {
-    var _this = this;
-
     var amendmentUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/amendmentHub").build();
 
     amendmentUpdatesConnection.on(_clientNotifierMethods.amendmentChange, function (results) {
@@ -46,58 +44,28 @@ function ManageAmendmentHub() {
     });
 
     function start(reconnect) {
-        var startcon;
-        return regeneratorRuntime.async(function start$(context$2$0) {
-            while (1) switch (context$2$0.prev = context$2$0.next) {
-                case 0:
-                    context$2$0.prev = 0;
-
-                    if (reconnect) {
-                        console.log("Attempting reconnect");
-                    }
-                    context$2$0.next = 4;
-                    return regeneratorRuntime.awrap(amendmentUpdatesConnection.start());
-
-                case 4:
-                    startcon = context$2$0.sent;
-
-                    startcon.then(function () {
-                        jQuery.event.trigger("amendment.ready");
-                    });
-                    hideConnectionError(reconnect);
-                    console.log("Connected");
-                    context$2$0.next = 14;
-                    break;
-
-                case 10:
-                    context$2$0.prev = 10;
-                    context$2$0.t0 = context$2$0["catch"](0);
-
-                    console.log(context$2$0.t0);
-                    setTimeout(function () {
-                        return start(reconnect);
-                    }, 5000);
-
-                case 14:
-                case "end":
-                    return context$2$0.stop();
+        if (reconnect) {
+            console.log("Attempting reconnect");
+        }
+        amendmentUpdatesConnection.start().then(function () {
+            hideConnectionError(reconnect);
+            console.log("Connected");
+            if (reconnect) {
+                jQuery.event.trigger("amendment.reconnect");
+            } else {
+                jQuery.event.trigger("amendment.ready");
             }
-        }, null, this, [[0, 10]]);
+        }, function (err) {
+            console.log(err);
+            setTimeout(function () {
+                return start(reconnect);
+            }, 5000);
+        });
     }
 
-    amendmentUpdatesConnection.onclose(function callee$1$0(e) {
-        return regeneratorRuntime.async(function callee$1$0$(context$2$0) {
-            while (1) switch (context$2$0.prev = context$2$0.next) {
-                case 0:
-                    showConnectionError();
-                    context$2$0.next = 3;
-                    return regeneratorRuntime.awrap(start(true));
-
-                case 3:
-                case "end":
-                    return context$2$0.stop();
-            }
-        }, null, _this);
+    amendmentUpdatesConnection.onclose(function (e) {
+        showConnectionError();
+        start(true);
     });
     start(false);
     testconn = amendmentUpdatesConnection;
@@ -136,12 +104,35 @@ function ScreenViewHub(languageId) {
         jQuery.event.trigger("screen.amendmentChange." + languageId, results);
     });
 
+    screenUpdatesConnection.on(_clientNotifierMethods.refreshLanguage, function (results) {
+        jQuery.event.trigger("screen.refreshLanguage." + languageId, results);
+    });
+
+    function start(reconnect) {
+        if (reconnect) {
+            console.log("Attempting reconnect");
+        }
+        screenUpdatesConnection.start().then(function () {
+            hideConnectionError(reconnect);
+            console.log("Connected");
+            if (reconnect) {
+                jQuery.event.trigger("screen.reconnect." + languageId);
+            } else {
+                jQuery.event.trigger("screen.ready." + languageId);
+            }
+        }, function (err) {
+            console.log(err);
+            setTimeout(function () {
+                return start(reconnect);
+            }, 5000);
+        });
+    }
+
     screenUpdatesConnection.onclose(function (e) {
         showConnectionError();
+        start(true);
     });
-    screenUpdatesConnection.start()["catch"](function (err) {
-        return console.error(err.toString());
-    });
+    start(false);
     return screenUpdatesConnection;
 }
 
@@ -156,6 +147,8 @@ function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, langu
         self.pages = ko.observable(amendmentBody.pages);
         self.language = languageName;
         self.languageId = languageId;
+        self.ShowDeafSigner = ko.observable("0");
+        self.ShowDeafSignerBox = ko.observable("0");
         self.isLive = ko.computed(function () {
             return self.amendmentIsLive() && self.amendmentBodyIsLive();
         });
@@ -174,6 +167,35 @@ function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, langu
         $(document).on("screen.clearScreens." + self.languageId, function (evt) {
             self.amendmentIsLive(false);
             self.amendmentBodyIsLive(false);
+        });
+
+        $(document).on("screen.refreshLanguage." + self.languageId, function (evt, results) {
+            console.log("screen.refreshLanguage." + self.languageId, results);
+            if (results.amendmentBody) {
+                self.amendBodyPagedHtml(results.amendmentBody.amendBodyPagedHtml);
+                self.amendmentBodyIsLive(results.amendmentBody.isLive);
+                self.page(results.amendmentBody.page);
+                self.pages(results.amendmentBody.pages);
+            } else {
+                self.amendmentBodyIsLive(false);
+            }
+            self.amendmentIsLive(results.amendment.isLive);
+        });
+
+        $(document).on("screen.reconnect." + languageId, function (evt) {
+            console.log("screen.reconnect." + self.languageId);
+            self.hub.invoke("refreshLanguage", languageId);
+            self.hub.invoke("getSystemSetting", "ShowDeafSigner");
+            self.hub.invoke("getSystemSetting", "ShowDeafSignerBox");
+        });
+
+        $(document).on("screen.ready." + languageId, function (evt) {
+            self.hub.invoke("getSystemSetting", "ShowDeafSigner");
+            self.hub.invoke("getSystemSetting", "ShowDeafSignerBox");
+        });
+
+        self.hub.on("RefreshSetting", function (results) {
+            updateSetting(self, results);
         });
     };
     ko.applyBindings(new ScreenViewModel(), document.getElementById(htmlId));
@@ -227,14 +249,22 @@ function userIsInRole() {
 }
 
 function showConnectionError() {
-    $("#connection-error").removeClass("hidden");
+    $(".connection-error").removeClass("hidden");
     jQuery.event.trigger("connection.error");
 }
 
 function hideConnectionError(reconnect) {
-    $("#connection-error").addClass("hidden");
+    $(".connection-error").addClass("hidden");
     if (reconnect) {
         jQuery.event.trigger("connection.reconnect");
+    }
+}
+
+function updateSetting(self, setting) {
+    if (self[setting.key]) {
+        self[setting.key](setting.value);
+    } else {
+        self[setting.key] = ko.observable(setting.value);
     }
 }
 

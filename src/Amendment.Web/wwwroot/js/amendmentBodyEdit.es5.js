@@ -5,6 +5,8 @@ var AmendmentModel = function AmendmentModel(initData) {
     var self = this;
     self.amendments = ko.observableArray();
     self.amendBody = ko.observable(initData.amendBody);
+    self.ShowDeafSigner = ko.observable("0");
+    self.ShowDeafSignerBox = ko.observable("0");
     self.page = ko.observable(-1);
     self.amendBodyPages = ko.computed(function () {
         if (!self.amendBody()) {
@@ -27,6 +29,18 @@ var AmendmentModel = function AmendmentModel(initData) {
 
     $(document).on("amendment.ready", function (evt) {
         amendmentUpdatesConnection.invoke("getAmendment", amendmentId);
+        amendmentUpdatesConnection.invoke("getSystemSetting", "ShowDeafSigner");
+        amendmentUpdatesConnection.invoke("getSystemSetting", "ShowDeafSignerBox");
+    });
+
+    $(document).on("amendment.reconnect", function (evt) {
+        amendmentUpdatesConnection.invoke("getAmendment", amendmentId);
+        amendmentUpdatesConnection.invoke("getSystemSetting", "ShowDeafSigner");
+        amendmentUpdatesConnection.invoke("getSystemSetting", "ShowDeafSignerBox");
+    });
+
+    amendmentUpdatesConnection.on("RefreshSetting", function (results) {
+        updateSetting(self, results);
     });
 
     $(document).on("amendment.amendmentBodyChange", function (evt, results) {
