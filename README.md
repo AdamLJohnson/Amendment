@@ -2,6 +2,10 @@
 
 [![Build Status](https://dev.azure.com/columbus0380/amendment/_apis/build/status/AdamLJohnson.Amendment)](https://dev.azure.com/columbus0380/amendment/_build/latest?definitionId=1)
 
+## Build Prerequisites
+1. [DotNet Core v2.2 SDK](https://dotnet.microsoft.com/download)
+1. [Web Compiler VS Extension](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebCompiler)
+
 ## Some quick commands
 
 ### Compile a release
@@ -25,4 +29,29 @@ sudo systemctl enable aspnetcore-amendment.service
 sudo systemctl start aspnetcore-amendment.service
 
 sudo journalctl -fu aspnetcore-amendment.service
+```
+
+## Setup
+
+### Startup Service Script
+
+Save to `/etc/systemd/system/aspnetcore-amendment.service`
+```
+[Unit]
+Description=Amendment translation web site
+
+[Service]
+WorkingDirectory=/var/aspnetcore/amendments
+ExecStart=/usr/bin/dotnet /var/aspnetcore/amendments/Amendment.Web.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+SyslogIdentifier=amendment-web
+User=adamlj
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=true
+Environment=ConnectionStrings__DefaultConnection=Server=<HOST>;Port=8715;Database=<DATABASENAME>;Uid=<USERNAME>;Pwd=<PASSWORD>;
+
+[Install]
+WantedBy=multi-user.target
 ```
