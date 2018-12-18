@@ -26,5 +26,13 @@
   {
     "outputFile": "wwwroot/js/amendmentBodyEdit.es5.js",
     "inputFile": "wwwroot/js/amendmentBodyEdit.js"
+  },
+  {
+    "outputFile": "wwwroot/js/systemSettingsEdit12.es5.js",
+    "inputFile": "wwwroot/js/systemSettingsEdit12.js"
+  },
+  {
+    "outputFile": "wwwroot/js/systemSettingsEdit.es5.js",
+    "inputFile": "wwwroot/js/systemSettingsEdit.js"
   }
 ]

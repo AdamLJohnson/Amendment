@@ -61,6 +61,7 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li>@Html.ActionLink("Users", "Index", "User", new { Area = "Admin" })</li>
+                                <li>@Html.ActionLink("System Settings", "Index", "SystemSetting", new { Area = "Admin" })</li>
                                 @*<li><a href="#">Another action</a></li>
                     <li><a href="#">Something else here</a></li>
                     <li role="separator" class="divider"></li>
@@ -141,8 +142,8 @@
         <pre data-bind="text: JSON.stringify(ko.toJS($data), null, 2)" class="hidden"></pre>
         <div class="connection-error alert alert-danger hidden">Connection to server lost. Attempting to reconnect.</div>
         <div class="deafSignerPusher"></div>
-        <!-- ko if: showDeafSigner -->
-        <div class="deafSignerBox" data-bind="css: {deafSignerBackground : showDeafSignerBox}"></div>
+        <!-- ko if: showDeafSigner() === '1' -->
+        <div class="deafSignerBox" data-bind="css: {deafSignerBackground : showDeafSignerBox () === '1'}"></div>
         <!-- /ko -->
         <div data-bind="html: amendBodyPagedHtml"></div>
 
