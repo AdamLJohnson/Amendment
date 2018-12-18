@@ -50,8 +50,10 @@ var ScreenControlModel = function ScreenControlModel(initialData) {
         self.hub.invoke("amendmentBodyResetAllPages", amendment().id());
     };
 
+    self.previewEnabled = ko.observable(true);
+
     self.togglePreview = function () {
-        $(".preview").toggleClass("text-preview");
+        self.previewEnabled(!self.previewEnabled());
     };
 
     self.hub = ManageAmendmentHub();
@@ -74,6 +76,20 @@ var ScreenControlModel = function ScreenControlModel(initialData) {
         }
         return output;
     });
+    self.anyBodiesLive = ko.computed(function () {
+        var upIx = arrayFirstIndexOf(self.amendment().amendmentBodies(), function (item) {
+            return item.isLive();
+        });
+        return upIx !== -1;
+    });
+    self.toggleAmendmentBodyAll = function () {
+        for (var i = 0; i < self.amendment().amendmentBodies().length; i++) {
+            var body = self.amendment().amendmentBodies()[i];
+            if (body.isLive() === self.anyBodiesLive()) {
+                self.hub.invoke("amendmentBodyGoLive", body.amendId(), body.id(), !self.anyBodiesLive());
+            }
+        }
+    };
 
     $(document).on("amendment.reconnect", function (evt) {
         self.hub.invoke("getLiveAmendment");

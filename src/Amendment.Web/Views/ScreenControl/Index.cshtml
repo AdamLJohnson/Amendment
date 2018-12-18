@@ -31,13 +31,19 @@
     </div>
     <hr />
     <h3>Amendment Texts</h3>
-    <div class="pull-left">
-        <button type="button" class="btn btn-success" data-bind="click: togglePreview">Change Views</button>
-    </div>
-    <div class="pull-right">
-        <button type="button" class="btn btn-warning" data-bind="click: resetAllPages">Reset All</button>
-        <button type="button" class="btn btn-info" data-bind="click: function(data, event) { changeAllPages('prev') }">All Prev</button>
-        <button type="button" class="btn btn-info" data-bind="click: function(data, event) { changeAllPages('next') }">All Next</button>
+    <div class="row">
+        <div class="col-md-4">
+            <button type="button" class="btn btn-success" data-bind="click: togglePreview">Change Views</button>
+        </div>
+        <div class="col-md-4 text-center">
+            <button type="button" class="btn btn-lg btn-block" data-bind="click: toggleAmendmentBodyAll, css: { 'btn-danger': anyBodiesLive(), 'btn-success': !anyBodiesLive() }, text: (anyBodiesLive() ? 'Take all down' : 'All Go Live')"></button>
+        </div>
+        <div class="col-md-4 text-right">
+            <button type="button" class="btn btn-warning" data-bind="click: resetAllPages">Reset All</button>
+            <button type="button" class="btn btn-info" data-bind="click: function(data, event) { changeAllPages('prev') }">All Prev</button>
+            <button type="button" class="btn btn-info" data-bind="click: function(data, event) { changeAllPages('next') }">All Next</button>
+
+        </div>
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -50,12 +56,11 @@
                                 <span data-bind="text: language().languageName"></span>
                                 <span data-bind="click: function(data, event) { changePage('prev', data) }" class="glyphicon glyphicon-arrow-up"></span>
                                 <span data-bind="click: function(data, event) { changePage('next', data) }" class="glyphicon glyphicon-arrow-down"></span>
-                                <span data-bind="if: languageId() === primaryLanguageId()" class="label label-info pull-right" style="margin-left: 10px;">PRIMARY</span>
-                                <span data-bind="if: isLive()" class="label label-danger pull-right">LIVE</span>
+                                <span data-bind="click: toggleAmendmentBody, css: { 'label-danger': isLive(), 'label-default': !isLive() }" class="label pull-right" style="margin-left: 10px; cursor: pointer">LIVE</span>
+                                <span data-bind="if: languageId() === primaryLanguageId()" class="label label-info pull-right">PRIMARY</span>
                             </h4>
 
-                            <div class="small-screen-container well preview text-preview">
-                                @*<img src="https://via.placeholder.com/1920x1080" class="img-responsive"/>*@
+                            <div data-bind="css: {'text-preview': previewEnabled }" class="small-screen-container well preview">
                                 <div data-bind="template: {name: 'multi-amend-body-template', data: {amendBodyPages: $data.amendBodyPages, page: page, showDeafSigner: ShowDeafSigner, showDeafSignerBox: ShowDeafSignerBox}}"></div>
                             </div>
 

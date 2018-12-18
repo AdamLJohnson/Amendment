@@ -13,80 +13,80 @@
     <button data-bind="click: clearScreens" type="button" class="btn btn-danger">Clear Screens</button>
     <!-- /ko -->
 
-    @Html.ActionLink("Create Amendment", "Create", null, null, new { @class = "btn btn-success pull-right" })
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Motion</th>
-                <th style="min-width: 200px"></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody data-bind="foreach: amendments">
-            <tr>
-                <td>
-                    <span data-bind="text: amendTitle"></span>
-                    <span data-bind="if: isLive()" class="label label-danger pull-right">LIVE</span>
-                </td>
-                <td data-bind="text: author"></td>
-                <td data-bind="text: motion"></td>
-                
-                
-                
-                
-                
-                
-                
-                
-
-                <td data-bind="foreach: {data: languageData, as: 'language'}">
-                    <!-- ko if: arrayFirstIndexOf($parent.amendmentBodies(), function(item){return item.languageId() === language.id;}) === -1 -->
-                    <!-- ko if: userIsInRole('System Administrator', 'Translator', 'Amendment Editor') -->
-                    <a class="label label-default" data-bind="text: languageName, attr: { href: bodyRootUrl + '/' + $parent.id() + '/Body/Create/?languageId=' + id }"></a>
-                    <!-- /ko -->
-                    <!-- ko ifnot: userIsInRole('System Administrator', 'Translator', 'Amendment Editor') -->
-                    <span class="label label-default" data-bind="text: languageName"></span>
-                    <!-- /ko -->
-                    <!-- /ko -->
-                    <!-- ko ifnot: arrayFirstIndexOf($parent.amendmentBodies(), function(item){return item.languageId() === language.id;}) === -1 -->
-                    <!-- ko with: $parent.amendmentBodies()[arrayFirstIndexOf($parent.amendmentBodies(), function(item){return item.languageId() === language.id;})] -->
-                    <!-- ko if: userIsInRole('System Administrator', 'Translator', 'Amendment Editor') -->
-                    <a class="label label-primary" data-bind="text: $parent.languageName, css: { 'label-success': amendStatus() == 3, 'label-danger': isLive },
-                       attr: { href: bodyRootUrl + '/' + amendId() + '/Body/Edit/' + id() }"></a>
-                    <!-- /ko -->
-                    <!-- ko ifnot: userIsInRole('System Administrator', 'Translator', 'Amendment Editor') -->
-                    <span class="label label-primary" data-bind="text: $parent.languageName, css: { 'label-success': amendStatus() == 3, 'label-danger': isLive }"></span>
-                    <!-- /ko -->
-                    <!-- /ko -->
-                    <!-- /ko -->
-                </td>
-                
-                
-                
-                
-                
-                
-
-                
-                
-
-                <td class="text-center">
-                    <!-- ko if: (_usersRoles.indexOf('Screen Controller') > -1 || _usersRoles.indexOf('System Administrator') > -1) -->
-                    <!-- ko if: $root.liveAmendment() == -1 -->
-                    <button type="button" data-bind="click: $parent.amendmentGoLive" class="btn btn-warning">Go Live</button>
-                    <!-- /ko -->
-                    <!-- ko if: $root.liveAmendment() == id() -->
-                    <a data-bind="attr: { href: screenControlUrl }" class="btn btn-success">Control Screens</a>
-                    <!-- /ko -->
-                    <!-- /ko -->
-                    <a data-bind="attr: { href: editUrl + '/' + id() }" class="btn btn-primary">Edit</a>
-                    <a data-bind="attr: { href: deleteUrl + '/' + id() }" class="btn btn-danger">Delete</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    @if (User.IsInRole("System Administrator") || User.IsInRole("Amendment Editor"))
+    {
+        @Html.ActionLink("Create Amendment", "Create", null, null, new { @class = "btn btn-success pull-right" })
+    }
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Motion</th>
+                        <th style="min-width: 200px"></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: amendments">
+                    <tr>
+                        <td>
+                            <span data-bind="text: amendTitle"></span>
+                            <span data-bind="if: isLive()" class="label label-danger pull-right">LIVE</span>
+                        </td>
+                        <td data-bind="text: author"></td>
+                        <td data-bind="text: motion"></td>
+                        <td data-bind="foreach: {data: languageData, as: 'language'}">
+                            <!-- ko if: arrayFirstIndexOf($parent.amendmentBodies(), function(item){return item.languageId() === language.id;}) === -1 -->
+                            <!-- ko if: userIsInRole('System Administrator', 'Translator', 'Amendment Editor') -->
+                            <a class="label label-default" data-bind="text: languageName, attr: { href: bodyRootUrl + '/' + $parent.id() + '/Body/Create/?languageId=' + id }"></a>
+                            <!-- /ko -->
+                            <!-- ko ifnot: userIsInRole('System Administrator', 'Translator', 'Amendment Editor') -->
+                            <span class="label label-default" data-bind="text: languageName"></span>
+                            <!-- /ko -->
+                            <!-- /ko -->
+                            <!-- ko ifnot: arrayFirstIndexOf($parent.amendmentBodies(), function(item){return item.languageId() === language.id;}) === -1 -->
+                            <!-- ko with: $parent.amendmentBodies()[arrayFirstIndexOf($parent.amendmentBodies(), function(item){return item.languageId() === language.id;})] -->
+                            <!-- ko if: userIsInRole('System Administrator', 'Translator', 'Amendment Editor') -->
+                            <a class="label label-primary" data-bind="text: $parent.languageName, css: { 'label-success': amendStatus() == 3, 'label-danger': isLive },
+                            attr: { href: bodyRootUrl + '/' + amendId() + '/Body/Edit/' + id() }"></a>
+                            <!-- /ko -->
+                            <!-- ko ifnot: userIsInRole('System Administrator', 'Translator', 'Amendment Editor') -->
+                            <span class="label label-primary" data-bind="text: $parent.languageName, css: { 'label-success': amendStatus() == 3, 'label-danger': isLive }"></span>
+                            <!-- /ko -->
+                            <!-- /ko -->
+                            <!-- /ko -->
+                        </td>
+                        <td class="text-center">
+                            <!-- ko if: userIsInRole('Screen Controller', 'System Administrator') -->
+                            <!-- ko if: $root.liveAmendment() == -1 -->
+                            <button type="button" data-bind="click: $parent.amendmentGoLive" class="btn btn-warning">Go Live</button>
+                            <!-- /ko -->
+                            <!-- ko if: $root.liveAmendment() == id() -->
+                            <a data-bind="attr: { href: screenControlUrl }" class="btn btn-success">Control Screens</a>
+                            <!-- /ko -->
+                            <!-- /ko -->
+                            @if (User.IsInRole("System Administrator") || User.IsInRole("Amendment Editor"))
+                            {
+                                <a data-bind="attr: { href: editUrl + '/' + id() }" class="btn btn-primary">Edit</a>
+                                <a data-bind="attr: { href: deleteUrl + '/' + id() }" class="btn btn-danger">Delete</a>
+                            }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Key:</h3>
+            <span class="label label-default">Not Created</span>
+            <span class="label label-primary">Not Ready</span>
+            <span class="label label-success">Is Ready</span>
+            <span class="label label-danger">Is Live</span>
+        </div>
+    </div>
 </div>
 
 
