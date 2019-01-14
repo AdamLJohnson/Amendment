@@ -23,16 +23,16 @@
             //https://www.c-sharpcorner.com/article/knockoutjs-filter-search-sort/
             searchVal = searchVal.toLowerCase();
             
-            if (rec.motion().toLowerCase().indexOf(searchVal) > -1) {
+            if (rec.motion() && rec.motion().toLowerCase().indexOf(searchVal) > -1) {
                 return true;
             }
-            if (rec.author().toLowerCase().indexOf(searchVal) > -1) {
+            if (rec.author() && rec.author().toLowerCase().indexOf(searchVal) > -1) {
                 return true;
             }
-            if (rec.amendTitle().toLowerCase().indexOf(searchVal) > -1) {
+            if (rec.amendTitle() && rec.amendTitle().toLowerCase().indexOf(searchVal) > -1) {
                 return true;
             }
-            if (rec.legisId().toLowerCase().indexOf(searchVal) > -1) {
+            if (rec.legisId() && rec.legisId().toLowerCase().indexOf(searchVal) > -1) {
                 return true;
             }
             return false;
