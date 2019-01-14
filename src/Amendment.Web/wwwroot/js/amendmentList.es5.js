@@ -1,9 +1,49 @@
-﻿"use strict";
+﻿'use strict';
 
 var AmendmentModel = function AmendmentModel(amendments) {
     var amendmentUpdatesConnection = ManageAmendmentHub();
     var self = this;
+    self.hub = amendmentUpdatesConnection;
+    self.search_field = ko.observable('');
+    self.clearSearch = function () {
+        self.search_field('');
+    };
+    self.checkForEscapeKey = function (data, event) {
+        if (event.key === "Escape") {
+            self.clearSearch();
+        }
+        return true;
+    };
     self.amendments = ko.observableArray(convertArrayToObservable(amendments));
+    self.filteredAmendmentIds = ko.computed(function () {
+        var searchVal = self.search_field();
+        if (searchVal.length === 0) {
+            return self.amendments().map(function (v) {
+                return v.id();
+            });
+        }
+
+        return ko.utils.arrayFilter(self.amendments(), function (rec) {
+            //https://www.c-sharpcorner.com/article/knockoutjs-filter-search-sort/
+            searchVal = searchVal.toLowerCase();
+
+            if (rec.motion().toLowerCase().indexOf(searchVal) > -1) {
+                return true;
+            }
+            if (rec.author().toLowerCase().indexOf(searchVal) > -1) {
+                return true;
+            }
+            if (rec.amendTitle().toLowerCase().indexOf(searchVal) > -1) {
+                return true;
+            }
+            if (rec.legisId().toLowerCase().indexOf(searchVal) > -1) {
+                return true;
+            }
+            return false;
+        }).map(function (v) {
+            return v.id();
+        });
+    });
     self.userRoles = _usersRoles;
     self.liveAmendment = ko.computed(function () {
         var liveIx = arrayFirstIndexOf(self.amendments(), function (item) {
@@ -81,6 +121,18 @@ var AmendmentModel = function AmendmentModel(amendments) {
                 break;
             default:
         }
+    });
+
+    $(document).keyup(function (e) {
+        self.checkForEscapeKey(null, e);
+    });
+
+    $(document).on("amendment.reconnect", function (evt) {
+        self.hub.invoke("GetAllAmendments");
+    });
+
+    self.hub.on("amendment.getAllAmendmentsReturn", function (results) {
+        self.amendments(convertArrayToObservable(results));
     });
 };
 

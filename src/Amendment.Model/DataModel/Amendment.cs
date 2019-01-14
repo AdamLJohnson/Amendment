@@ -30,5 +30,30 @@ namespace Amendment.Model.DataModel
         public DateTime EnteredDate { get; set; }
         public int LastUpdatedBy { get; set; }
         public DateTime LastUpdated { get; set; }
+
+
+        public static Amendment GenerateNew(int iteration)
+        {
+            return new Model.DataModel.Amendment()
+            {
+                AmendTitle = $"Test Amendment {iteration}",
+                Author = LoremNET.Lorem.Words(2),
+                Motion = $"WC-{iteration}",
+                LegisId = $"Legid {iteration}",
+                PrimaryLanguageId = 1,
+                Source = "Conference Floor",
+                EnteredBy = -1,
+                EnteredDate = DateTime.UtcNow,
+                LastUpdatedBy = -1,
+                LastUpdated = DateTime.UtcNow,
+                AmendmentBodies = new List<AmendmentBody>()
+                {
+                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 1, IsLive = false},
+                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 2, IsLive = false},
+                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 3, IsLive = false}
+                },
+                IsLive = false
+            };
+        }
     }
 }

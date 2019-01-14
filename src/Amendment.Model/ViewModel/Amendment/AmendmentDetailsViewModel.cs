@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Amendment.Model.DataModel;
+using Amendment.Model.Enums;
 
 namespace Amendment.Model.ViewModel.Amendment
 {
@@ -17,6 +18,16 @@ namespace Amendment.Model.ViewModel.Amendment
         public bool IsLive { get; set; }
         public int PrimaryLanguageId { get; set; }
         public Language PrimaryLanguage { get; set; }
-        public List<DataModel.AmendmentBody> AmendmentBodies { get; set; } = new List<DataModel.AmendmentBody>();
+        public List<AmendmentListBody> AmendmentBodies { get; set; } = new List<AmendmentListBody>();
+    }
+
+    public class AmendmentListBody
+    {
+        public int Id { get; set; }
+        public int AmendId { get; set; }
+        public int LanguageId { get; set; }
+        public AmendmentBodyStatus AmendStatus { get; set; }
+        public bool IsLive { get; set; }
+        public Language Language { get; set; }
     }
 }

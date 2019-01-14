@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amendment.Model.ViewModel.Amendment;
 using Amendment.Service;
 using Amendment.Service.Infrastructure;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -14,11 +16,13 @@ namespace Amendment.Web.Hubs
     {
         private readonly IScreenControlService _screenControlService;
         private readonly IAmendmentService _amendmentService;
+        private readonly IMapper _mapper;
 
-        public AmendmentHub(IScreenControlService screenControlService, IAmendmentService amendmentService, ISystemSettingService systemSettingService) : base(systemSettingService)
+        public AmendmentHub(IScreenControlService screenControlService, IAmendmentService amendmentService, ISystemSettingService systemSettingService, IMapper mapper) : base(systemSettingService)
         {
             _screenControlService = screenControlService;
             _amendmentService = amendmentService;
+            _mapper = mapper;
         }
 
         [Authorize(Roles = "Screen Controller, System Administrator")]
@@ -67,6 +71,14 @@ namespace Amendment.Web.Hubs
         {
             var amendment = await _amendmentService.GetLiveAsync();
             await Clients.Caller.SendAsync("amendment.getLiveAmendmentReturn", amendment ?? new Amendment.Model.DataModel.Amendment());
+        }
+
+        [Authorize]
+        public async Task GetAllAmendments()
+        {
+            var amendments = await _amendmentService.GetAllAsync();
+            var model = _mapper.Map<List<AmendmentDetailsViewModel>>(amendments);
+            await Clients.Caller.SendAsync("amendment.getAllAmendmentsReturn", model);
         }
     }
 }

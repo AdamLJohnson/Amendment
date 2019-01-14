@@ -9,14 +9,29 @@
 <h2>@ViewBag.Title</h2>
 
 <div id="amendmentList">
-    <!-- ko if: liveAmendment() > -1 && (_usersRoles.indexOf('Screen Controller') > -1 || _usersRoles.indexOf('System Administrator') > -1) -->
-    <button data-bind="click: clearScreens" type="button" class="btn btn-danger">Clear Screens</button>
-    <!-- /ko -->
-
-    @if (User.IsInRole("System Administrator") || User.IsInRole("Amendment Editor"))
-    {
-        @Html.ActionLink("Create Amendment", "Create", null, null, new { @class = "btn btn-success pull-right" })
-    }
+    <div class="row">
+        <div class="col-md-4">
+            <!-- ko if: liveAmendment() > -1 && (_usersRoles.indexOf('Screen Controller') > -1 || _usersRoles.indexOf('System Administrator') > -1) -->
+            <button data-bind="click: clearScreens" type="button" class="btn btn-danger">Clear Screens</button>
+            <!-- /ko -->
+        </div>
+        <div class="col-md-4">
+            <div class="input-group" data-bind="css: {'input-group': search_field().length > 0}">
+                <input type="text" name="name" value="" class="form-control" placeholder="Search for..." data-bind="textInput: search_field, event: { keyup: checkForEscapeKey }" />
+                <span class="input-group-btn" data-bind="visible: search_field().length > 0">
+                    <button class="btn btn-default" type="button" data-bind="click: clearSearch">
+                        <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            @if (User.IsInRole("System Administrator") || User.IsInRole("Amendment Editor"))
+            {
+                @Html.ActionLink("Create Amendment", "Create", null, null, new { @class = "btn btn-success pull-right" })
+            }
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
             <table class="table table-striped">
@@ -30,7 +45,7 @@
                     </tr>
                 </thead>
                 <tbody data-bind="foreach: amendments">
-                    <tr>
+                    <tr data-bind="visible: $parent.filteredAmendmentIds().indexOf(id()) > -1">
                         <td>
                             <span data-bind="text: amendTitle"></span>
                             <span data-bind="if: isLive()" class="label label-danger pull-right">LIVE</span>
@@ -97,7 +112,6 @@
         var languageData = @Json.Serialize(ViewBag.Languages);
         var editUrl = '@Url.Action("Edit")';
         var deleteUrl = '@Url.Action("Delete")';
-        var detailUrl = '@Url.Action("Detail")';
         var bodyRootUrl = '@Url.Action("Index")';
         var screenControlUrl = '@Url.Action("Index", "ScreenControl")';
     </script>
