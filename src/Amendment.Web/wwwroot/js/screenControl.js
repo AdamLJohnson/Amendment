@@ -159,12 +159,12 @@
                 amendment.amendmentBodies.push(convertToObservable(results.data));
                 break;
             case 2:
-                var upIx = arrayFirstIndexOf(amendment.amendmentBodies(),
+                var upIx2 = arrayFirstIndexOf(amendment.amendmentBodies(),
                     function (item) {
                         return item.id() === results.id;
                     });
-                if (upIx > -1) {
-                    var oldItem = amendment.amendmentBodies()[upIx];
+                if (upIx2 > -1) {
+                    var oldItem = amendment.amendmentBodies()[upIx2];
                     var newItem = convertToObservable(results.data);
                     amendment.amendmentBodies.replace(oldItem, newItem);
                 }

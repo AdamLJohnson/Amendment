@@ -90,7 +90,7 @@ Résolu que, la Première Présidence crée ces directives, options et opportuni
                 IsLive = true
             });
 
-            for (int i = 4; i < 100; i++)
+            for (int i = 4; i < 10; i++)
             {
                 amendmentRepository.Add(Model.DataModel.Amendment.GenerateNew(i));
             }
