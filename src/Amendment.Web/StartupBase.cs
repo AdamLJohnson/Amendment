@@ -24,8 +24,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -105,21 +103,18 @@ namespace Amendment.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IDbFactory dbContext, ILoggerFactory loggerFactory)
         {
-            var database = dbContext.Init();
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
-                await database.Database.EnsureCreatedAsync();
+                await dbContext.Init().Database.EnsureCreatedAsync();
 
                 var seeder = new SeedDatabase(app.ApplicationServices);
                 await seeder.Seed();
             }
             else
             {
-                var migrator = database.GetService<IMigrator>();
-                await migrator.MigrateAsync();
                 app.UseExceptionHandler("/Home/Error");
             }
 
