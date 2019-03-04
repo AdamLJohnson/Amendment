@@ -55,3 +55,10 @@ Environment=ConnectionStrings__DefaultConnection=Server=<HOST>;Port=8715;Databas
 [Install]
 WantedBy=multi-user.target
 ```
+
+### Allow Azure DevOps to restart the service
+
+Add the following to `/etc/sudoers`:
+```
+%sudo   ALL=NOPASSWD: /bin/systemctl restart aspnetcore-amendment.service
+```
