@@ -177,7 +177,7 @@ namespace Amendment.Web
                 await next();
 
                 sw.Stop();
-                logger.LogInformation("{Method} {Path} {Status} {RequestTime}ms {Username}", context.Request.Method, context.Request.Path, context.Response.StatusCode, sw.ElapsedMilliseconds, context.User.Identity.Name);
+                logger.LogInformation("{Method} {Path} {Status} {RequestTime}ms {Username} {RemoteHost}", context.Request.Method, context.Request.Path, context.Response.StatusCode, sw.ElapsedMilliseconds, context.User.Identity.Name, context.Request.HttpContext.Connection.RemoteIpAddress);
             };
         }
     }
