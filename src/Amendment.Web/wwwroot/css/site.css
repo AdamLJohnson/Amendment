@@ -305,7 +305,7 @@ body {
 }
 .small-screen-container.well.slideoffline,
 #fullscreen.fullscreen.slideoffline {
-  background-image: url("../images/Standby.jpg");
+  background-image: url("../images/ConferenceLogo_1.png");
 }
 .small-screen-container.well.slideoffline {
   background-size: cover;
@@ -319,7 +319,7 @@ body {
 }
 /*MIXINS*/
 .mixin-slide-text-background-offline {
-  background-image: url("../images/Standby.jpg");
+  background-image: url("../images/ConferenceLogo_1.png");
 }
 .mixin-slide-text-background {
   background-color: #FFFFF0;
