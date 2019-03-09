@@ -25,8 +25,7 @@
                         <h4>
                             <span data-bind="text: language"></span>
                         </h4>
-
-                        <div class="small-screen-container well" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }">
+                        <div class="small-screen-container well @(language.LanguageName)" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }">
                             <div data-bind="template: {name: 'single-amend-body-template', data: {amendBodyPagedHtml: $data.amendBodyPagedHtml, scale: true, showDeafSigner: ShowDeafSigner, showDeafSignerBox: ShowDeafSignerBox}}, visible: isLive()"></div>
                         </div>
                         <div class="text-center">

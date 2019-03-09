@@ -20,7 +20,7 @@
 <div class="row">
     <div class="col-md-12">
         <div id="viewModel">
-            <div id="fullscreen" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }">
+            <div id="fullscreen" data-bind="css: { slideonline: isLive(), slideoffline: !isLive() }" class="@(Model.Language.LanguageName)">
                 <div data-bind="template: {name: 'single-amend-body-template', data: {amendBodyPagedHtml: $data.amendBodyPagedHtml, scale: true, showDeafSigner: ShowDeafSigner, showDeafSignerBox: ShowDeafSignerBox}}, visible: isLive()"></div>
             </div>
         </div>

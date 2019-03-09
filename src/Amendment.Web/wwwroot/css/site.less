@@ -1,8 +1,12 @@
 ﻿/*SLIDE IMAGES*/
 /*@slideBackground: url("//via.placeholder.com/1920X1080/FFFFF0/000000?text=Slide+Background");*/
 /*@slideOfflineBackground: url("../images/500ColorCircle.png");*/
-@slideBackground: url("//via.placeholder.com/1920X1080/FFFFF0/FFFFF0?text=Slide+Background");
+@slideBackground: url("../images/amend_background_full.png");
+@slideBackgroundColor: #FFFFF0;
 @slideOfflineBackground: url("../images/ConferenceLogo_1.png");
+@slideOfflineBackgroundEng: url("../images/wc_logo_eng.png");
+@slideOfflineBackgroundEsp: url("../images/wc_logo_esp.png");
+@slideOfflineBackgroundFra: url("../images/wc_logo_fra.png");
 @slideBackgroundTest: url("../images/1080test.png");
 @headerLogo: url(../images/wc_app_header.png);
 
@@ -25,6 +29,11 @@
 @fullScreenHeight: @fullScreenMaxHeight - (@fullScreenPadding * 2);
 @fullScreenFontSize: 60px * @scaleDownRatio;
 @fullScreenFontWeight: 600;
+
+@wcColorBarHeight: 15px * @scaleDownRatio;
+@wcColorBarWidth: @smallScreenWidth + 1px;
+@wcColorLeft: 0px - @smallScreenPadding;
+@wcColorTop: -10px * @scaleDownRatio;
 
 @smallScreenWidth: 320px;
 @smallScreenTextWidth: @smallScreenWidth - (@smallScreenPadding * 2);
@@ -153,7 +162,11 @@ body {
     padding: @smallScreenPadding;
 }
 
-.screen-border {    
+.screen-page-height {
+    
+}
+
+.screen-border {
     box-shadow: 0 0 3pt 2pt rgb(118, 118, 118);
     border-radius: 3px;
 }
@@ -173,6 +186,17 @@ body {
         padding: 0;
         padding-left: 11px;
     }
+}
+
+.conference-color-line.onslide {
+    height: @wcColorBarHeight;
+    position: absolute;
+    left: @wcColorLeft;
+    top: @wcColorTop;
+    float: left;
+    /* width: inherit; */
+    /* right: -5px; */
+    width: @wcColorBarWidth;
 }
 
 .text-preview .screen-page {
@@ -335,10 +359,22 @@ nav {
 
 .mixin-slide-text-background-offline {
     background-image: @slideOfflineBackground;
+
+    &.English {
+        background-image: @slideOfflineBackgroundEng
+    }
+
+    &.Spanish {
+        background-image: @slideOfflineBackgroundEsp
+    }
+
+    &.French {
+        background-image: @slideOfflineBackgroundFra
+    }
 }
 
 .mixin-slide-text-background {
-    background-color: #FFFFF0;
+    background-color: @slideBackgroundColor;
     background-image: @slideBackground;
     background-position: center;
     background-repeat: no-repeat;
