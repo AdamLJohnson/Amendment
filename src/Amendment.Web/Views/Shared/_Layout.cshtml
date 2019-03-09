@@ -8,7 +8,7 @@
     <meta http-equiv="Content-Language" content="en" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Amendment.Web</title>
+    <title>@ViewData["Title"] - Amendments</title>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:600,600i,700,700i" rel="stylesheet">
 
@@ -38,7 +38,9 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Amendment.Web</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">
+                    <img src="~/images/wc_app_header_whitetext.png" class="wc-header-logo"/>
+                </a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
@@ -87,7 +89,8 @@
     @RenderBody()
     <hr/>
     <footer>
-        <p>&copy; 2018 - Amendment.Web</p>
+        <p class="pull-left">World Conference Amendment Management</p>
+        <img src="~/images/small_lightbg_CoC_Logo.png" class="pull-right"/>
     </footer>
 </div>
     <script>

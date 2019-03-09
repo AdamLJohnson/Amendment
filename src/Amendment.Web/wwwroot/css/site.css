@@ -320,6 +320,9 @@ body {
 .amendment-body-tabs .tab-pane {
   padding-top: 10px;
 }
+.navbar-brand {
+  padding: 4px;
+}
 .test-background {
   background-image: url("../images/1080test.png") !important;
   background-position: center !important;
