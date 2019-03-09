@@ -80,7 +80,7 @@
 
     let editors = $(".markdown-editor");
     if (editors.length > 0) {
-        self.editor = new SimpleMDE({ element: editors[0], forceSync: true, spellChecker: false, hideIcons: ["guide", "preview", "side-by-side", "fullscreen"] });
+        self.editor = new SimpleMDE({ element: editors[0], forceSync: true, spellChecker: false, hideIcons: ["guide", "preview", "side-by-side", "fullscreen"], showIcons: ["strikethrough"] });
         self.editor.codemirror.on("change",
             function () {
                 self.amendBody($("#AmendBody").val());
