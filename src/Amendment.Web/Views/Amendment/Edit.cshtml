@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Edit Amendment";
     Layout = "_Layout";
+    var dropdownLanguages = Model.Languages.Where(l => Model.AmendmentBodies.Any(b => b.Language.LanguageName == l.LanguageName));
 }
 
 <h2>@ViewBag.Title</h2>
@@ -44,7 +45,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 @Html.LabelFor(f => f.PrimaryLanguageId)
-                @Html.DropDownListFor(f => f.PrimaryLanguageId, Model.Languages.Select(l => new SelectListItem() { Text = l.LanguageName, Value = l.Id.ToString() }).ToList(), new { @class = "form-control" })
+                @Html.DropDownListFor(f => f.PrimaryLanguageId, dropdownLanguages.Select(l => new SelectListItem() { Text = l.LanguageName, Value = l.Id.ToString() }).ToList(), new { @class = "form-control" })
             </div>
             <h2>Amendment Texts</h2>
             @Html.ActionLink("Create New", "Create", "AmendmentBody", new { amendmentId = ViewContext.RouteData.Values["id"] }, new { @class = "btn btn-success" })
