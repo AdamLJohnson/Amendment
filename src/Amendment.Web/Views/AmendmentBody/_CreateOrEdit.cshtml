@@ -6,7 +6,12 @@
     List<SelectListItem> statusList = enumStatuses.Select(s => new SelectListItem() { Text = EnumHelper<AmendmentBodyStatus>.GetDisplayValue(s), Value = ((int)s).ToString() }).ToList();
 }
 
+<!-- ko if: amendments().length > 0 -->
+<h2 data-bind="text: amendments()[0].amendTitle">@ViewBag.Title</h2>
+<!-- /ko -->
+<!-- ko ifnot: amendments().length > 0 -->
 <h2>@ViewBag.Title</h2>
+<!-- /ko -->
 
 @if (ViewData.ModelState != null && ViewData.ModelState.ErrorCount > 0)
 {
@@ -45,7 +50,6 @@
             </div>
         </div>
         <div class="col-md-6">
-            
             <div>
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs" role="tablist">
@@ -62,10 +66,9 @@
                 </ul>
 
                 <!-- Tab panes -->
-                <div class="tab-content">
+                <div class="tab-content amendment-body-tabs">
                     <div role="tabpanel" class="tab-pane active" id="primaryLang">
                         <!-- ko if: amendments().length > 0 -->
-                        <p class="form-control-static" data-bind="text: amendments()[0].amendTitle"></p>
                         <!-- ko with: amendments()[0].amendmentBodies()[arrayFirstIndexOf(amendments()[0].amendmentBodies(), function(item){return item.languageId() === amendments()[0].primaryLanguageId();})] -->
                         <div data-bind="template: {name: 'multi-amend-body-template', data: {amendBodyPages : amendBodyPages, page : $root.page, showDeafSigner: ko.observable('0'), showDeafSignerBox: ko.observable('0') }}"></div>
                         <!-- /ko -->
@@ -73,9 +76,6 @@
                     </div>
                     <div role="tabpanel" class="tab-pane" id="preview">
                         <div class="text-preview">
-                            <!-- ko if: amendments().length > 0 -->
-                            <p class="form-control-static" data-bind="text: amendments()[0].amendTitle"></p>
-                            <!-- /ko -->
                             <div data-bind="template: {name: 'multi-amend-body-template', data: {amendBodyPages: amendBodyPages().amendBodyPages, page: page, showDeafSigner: ShowDeafSigner, showDeafSignerBox: ShowDeafSignerBox}}"></div>
                         </div>
                     </div>
