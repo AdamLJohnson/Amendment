@@ -280,6 +280,46 @@ body {
     }
 }
 
+nav {
+    .conference-color-line {
+        height: 5px;
+        position: absolute;
+    }
+}
+
+@barSectionPercent: 100% / 7;
+@wcColorPurple: #7450A1;
+@wcColorPlum: #404479;
+@barSectionPercentPlum: @barSectionPercent;
+@wcColorMidnight: #0C3B60;
+@barSectionPercentMidnight: @barSectionPercentPlum + @barSectionPercent;
+@wcColorNavy: #0B4F81;
+@barSectionPercentNavy: @barSectionPercentMidnight + @barSectionPercent;
+@wcColorBlue: #005F9C;
+@barSectionPercentBlue: @barSectionPercentNavy + @barSectionPercent;
+@wcColorTeal: #00767C;
+@barSectionPercentTeal: @barSectionPercentBlue + @barSectionPercent;
+@wcColorGreen: #009318;
+@barSectionPercentGreen: @barSectionPercentTeal + @barSectionPercent;
+
+.conference-color-line {
+    background-image: linear-gradient( to right, 
+        @wcColorPurple, 
+        @wcColorPurple @barSectionPercentPlum, 
+        @wcColorPlum @barSectionPercentPlum, 
+        @wcColorPlum @barSectionPercentMidnight, 
+        @wcColorMidnight @barSectionPercentMidnight, 
+        @wcColorMidnight @barSectionPercentNavy, 
+        @wcColorNavy @barSectionPercentNavy, 
+        @wcColorNavy @barSectionPercentBlue, 
+        @wcColorBlue @barSectionPercentBlue, 
+        @wcColorBlue @barSectionPercentTeal, 
+        @wcColorTeal @barSectionPercentTeal, 
+        @wcColorTeal @barSectionPercentGreen, 
+        @wcColorGreen @barSectionPercentGreen );
+    width: 100%;
+}
+
 
 
 

@@ -323,6 +323,14 @@ body {
 .navbar-brand {
   padding: 4px;
 }
+nav .conference-color-line {
+  height: 5px;
+  position: absolute;
+}
+.conference-color-line {
+  background-image: linear-gradient(to right, #7450A1, #7450A1 14.28571429%, #404479 14.28571429%, #404479 28.57142857%, #0C3B60 28.57142857%, #0C3B60 42.85714286%, #0B4F81 42.85714286%, #0B4F81 57.14285714%, #005F9C 57.14285714%, #005F9C 71.42857143%, #00767C 71.42857143%, #00767C 85.71428571%, #009318 85.71428571%);
+  width: 100%;
+}
 .test-background {
   background-image: url("../images/1080test.png") !important;
   background-position: center !important;
