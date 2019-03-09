@@ -111,6 +111,11 @@ body {
   height: 100%;
   width: 100%;
 }
+.screen-page-text ol,
+.screen-page-text ul {
+  padding: 0;
+  padding-left: 11px;
+}
 .text-preview .screen-page {
   height: 180px;
   background-size: cover;
