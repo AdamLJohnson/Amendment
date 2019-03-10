@@ -44,7 +44,6 @@ var AmendmentModel = function AmendmentModel(initData) {
     });
 
     $(document).on("amendment.amendmentBodyChange", function (evt, results) {
-        console.log(results);
         var amendmentId = results.data.amendId;
 
         var upIx = arrayFirstIndexOf(self.amendments(), function (item) {

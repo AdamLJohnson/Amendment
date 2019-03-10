@@ -63,12 +63,13 @@ var AmendmentModel = function AmendmentModel(amendments) {
     };
 
     $(document).on("amendment.amendmentChange", function (evt, results) {
-        console.log(results);
         switch (results.results.operationType) {
             case 1:
                 self.amendments.push(convertToObservable(results.data));
                 break;
             case 2:
+            case 4:
+            case 5:
                 var upIx = arrayFirstIndexOf(self.amendments(), function (item) {
                     return item.id() === results.id;
                 });
@@ -88,7 +89,6 @@ var AmendmentModel = function AmendmentModel(amendments) {
     });
 
     $(document).on("amendment.amendmentBodyChange", function (evt, results) {
-        console.log(results);
         var amendmentId = results.data.amendId;
 
         var upIx = arrayFirstIndexOf(self.amendments(), function (item) {
@@ -105,6 +105,8 @@ var AmendmentModel = function AmendmentModel(amendments) {
                 amendment.amendmentBodies.push(convertToObservable(results.data));
                 break;
             case 2:
+            case 4:
+            case 5:
                 var upIx2 = arrayFirstIndexOf(amendment.amendmentBodies(), function (item) {
                     return item.id() === results.id;
                 });

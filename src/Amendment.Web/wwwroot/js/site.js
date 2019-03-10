@@ -1,23 +1,48 @@
-﻿function ManageAmendmentHub() {
+﻿toastr.options = {
+    "newestOnTop": true,
+    "progressBar": true
+};
+
+function ManageAmendmentHub() {
     const amendmentUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/amendmentHub").build();
 
     amendmentUpdatesConnection.on(_clientNotifierMethods.amendmentChange,
         (results) => {
             toastr.options.escapeHtml = true;
             var message = "Amendment " + results.id;
+            var type = "info";
+
             switch (results.results.operationType) {
             case 1:
-                message += " Created";
+                message += " created";
                 break;
             case 2:
-                message += " Updated";
+                message += " updated";
                 break;
             case 3:
-                message += " Deleted";
+                message += " deleted";
+                break;
+            case 4:
+                if (results.data.isLive) {
+                    type = "error";
+                    message += " changed to live";
+                } else {
+                    type = "warning";
+                    message += " changed to is not live";
+                }
+                break;
+            case 5:
+                type = "success";
+                message += " changed to page";
                 break;
             default:
             }
-            toastr.info(message);
+
+            message += " by " + results.user.name;
+
+            if (_usersRoles.indexOf('Toast Notifications') > -1) {
+                toastr[type](message, results.data.amendTitle);
+            }
 
             jQuery.event.trigger("amendment.amendmentChange", results);
         });
@@ -25,20 +50,40 @@
     amendmentUpdatesConnection.on(_clientNotifierMethods.amendmentBodyChange,
         (results) => {
             toastr.options.escapeHtml = true;
-            var message = "Amendment Body " + results.id;
+            var message = results.data.language.languageName;
+            var type = "info";
+
             switch (results.results.operationType) {
             case 1:
-                message += " Created";
+                message += " created";
                 break;
             case 2:
-                message += " Updated";
+                message += " updated";
                 break;
             case 3:
-                message += " Deleted";
+                message += " deleted";
+                break;
+            case 4:
+                if (results.data.isLive) {
+                    type = "error";
+                    message += " changed to live";
+                } else {
+                    type = "warning";
+                    message += " changed to is not live";
+                }
+                break;
+            case 5:
+                type = "success";
+                message += " changed to page " + (results.page + 1);
                 break;
             default:
             }
-            toastr.info(message);
+
+            message += " by " + results.user.name;
+
+            if (_usersRoles.indexOf('Toast Notifications') > -1) {
+                toastr[type](message, results.amendment.amendTitle);
+            }
 
             jQuery.event.trigger("amendment.amendmentBodyChange", results);
         });
@@ -75,34 +120,16 @@ function ScreenViewHub(languageId)
     const screenUpdatesConnection = new signalR.HubConnectionBuilder().withUrl("/screenHub?languageId=" + languageId).build();
     screenUpdatesConnection.on(_clientNotifierMethods.clearScreens,
         () => {
-            if (_usersRoles.indexOf('System Administrator') > -1) {
-                toastr.options.escapeHtml = true;
-                var message = "";
-                toastr.info(message, _clientNotifierMethods.clearScreens);
-            }
-
             jQuery.event.trigger("screen.clearScreens." + languageId);
         });
 
     screenUpdatesConnection.on(_clientNotifierMethods.amendmentBodyChange,
         (results) => {
-            if (_usersRoles.indexOf('System Administrator') > -1) {
-                toastr.options.escapeHtml = true;
-                var message = "screen " + results.id;
-                toastr.info(message, _clientNotifierMethods.amendmentBodyChange);
-            }
-
             jQuery.event.trigger("screen.amendmentBodyChange." + languageId, results);
         });
 
     screenUpdatesConnection.on(_clientNotifierMethods.amendmentChange,
         (results) => {
-            if (_usersRoles.indexOf('System Administrator') > -1) {
-                toastr.options.escapeHtml = true;
-                var message = "screen " + results.id;
-                toastr.info(message, _clientNotifierMethods.amendmentChange);
-            }
-
             jQuery.event.trigger("screen.amendmentChange." + languageId, results);
         });
 
@@ -171,7 +198,6 @@ function initScreenViewModel(htmlId, languageId, amendment, amendmentBody, langu
         });
 
         $(document).on("screen.refreshLanguage." + self.languageId, function (evt, results) {
-            console.log("screen.refreshLanguage." + self.languageId, results);
             if (results.amendmentBody) {
                 self.amendBodyPagedHtml(results.amendmentBody.amendBodyPagedHtml);
                 self.amendmentBodyIsLive(results.amendmentBody.isLive);

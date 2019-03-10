@@ -20,28 +20,39 @@ namespace Amendment.Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly IClientNotifier _clientNotifier;
         private readonly IScreenControlService _screenControlService;
+        private readonly IAmendmentRepository _amendmentRepository;
+        private readonly IUserService _userService;
 
-        public AmendmentBodyService(IAmendmentBodyRepository repository, IUnitOfWork unitOfWork, IClientNotifier clientNotifier, IScreenControlService screenControlService) : base(repository, unitOfWork)
+        public AmendmentBodyService(IAmendmentBodyRepository repository, IUnitOfWork unitOfWork, IClientNotifier clientNotifier, IScreenControlService screenControlService
+            , IAmendmentRepository amendmentRepository, IUserService userService) : base(repository, unitOfWork)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
             _clientNotifier = clientNotifier;
             _screenControlService = screenControlService;
+            _amendmentRepository = amendmentRepository;
+            _userService = userService;
         }
 
         public override async Task<IOperationResult> CreateAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.CreateAsync(item, userId);
+            var amendment = await _amendmentRepository.GetByIdAsync(item.AmendId);
+            var user = await _userService.GetForToastAsync(userId);
+
             item = await GetAsync(item.Id);
-            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
+            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item, amendment, user });
             return results;
         }
 
         public override async Task<IOperationResult> UpdateAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.UpdateAsync(item, userId);
+            var amendment = await _amendmentRepository.GetByIdAsync(item.AmendId);
+            var user = await _userService.GetForToastAsync(userId);
+
             item = await GetAsync(item.Id);
-            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
+            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item, amendment, user });
             await _screenControlService.UpdateBodyAsync(item, false);
             return results;
         }
@@ -49,7 +60,10 @@ namespace Amendment.Service
         public override async Task<IOperationResult> DeleteAsync(Model.DataModel.AmendmentBody item, int userId)
         {
             var results = await base.DeleteAsync(item, userId);
-            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item });
+            var amendment = await _amendmentRepository.GetByIdAsync(item.AmendId);
+            var user = await _userService.GetForToastAsync(userId);
+
+            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = item.Id, results, data = item, amendment, user });
             return results;
         }
 

@@ -42,7 +42,6 @@
     });
 
     $(document).on("amendment.amendmentBodyChange", function (evt, results) {
-        console.log(results);
         var amendmentId = results.data.amendId;
 
         var upIx = arrayFirstIndexOf(self.amendments(),
@@ -91,8 +90,6 @@
         var pos = self.editor.codemirror.getCursor();
         self.editor.codemirror.setSelection(pos, pos);
         self.editor.codemirror.replaceSelection("**NEWSLIDE**");
-
-        //insertAtCaret('AmendBody', '**NEWSLIDE**');
     });
 };
 

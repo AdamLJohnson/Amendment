@@ -125,6 +125,8 @@
             self.amendments.push(convertToObservable(results.data));
             break;
         case 2:
+        case 4:
+        case 5:
             if (upIx > -1) {
                 var oldItem = self.amendments()[upIx];
                 var newItem = convertToObservable(results.data);
@@ -159,6 +161,8 @@
                 amendment.amendmentBodies.push(convertToObservable(results.data));
                 break;
             case 2:
+            case 4:
+            case 5:
                 var upIx2 = arrayFirstIndexOf(amendment.amendmentBodies(),
                     function (item) {
                         return item.id() === results.id;

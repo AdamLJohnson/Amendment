@@ -75,6 +75,15 @@ namespace Amendment.Repository
                     EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
                     LastUpdated = DateTime.Parse("2018-01-01"),
+                },
+                new Role()
+                {
+                    Id = 5,
+                    Name = "Toast Notifications",
+                    EnteredBy = -1,
+                    EnteredDate = DateTime.Parse("2018-01-01"),
+                    LastUpdatedBy = -1,
+                    LastUpdated = DateTime.Parse("2018-01-01"),
                 });
             builder.Entity<UserXRole>()
                 .HasOne(u => u.User)
@@ -90,6 +99,8 @@ namespace Amendment.Repository
                 .HasKey(x => new {x.UserId, x.RoleId});
             builder.Entity<UserXRole>()
                 .HasData(new UserXRole() {UserId = 1, RoleId = 1});
+            builder.Entity<UserXRole>()
+                .HasData(new UserXRole() { UserId = 1, RoleId = 5 });
 
             builder.Entity<Model.DataModel.Amendment>();
             builder.Entity<AmendmentBody>()

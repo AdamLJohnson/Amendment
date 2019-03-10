@@ -13,6 +13,7 @@ namespace Amendment.Service
     public interface IUserService : IDataService<User>
     {
         Task<User> GetAsync(string userName);
+        Task<User> GetForToastAsync(int userId);
     }
 
     public class UserService : BaseDataService<User>, IUserService
@@ -45,6 +46,20 @@ namespace Amendment.Service
             if (dupeCount > 0)
                 return new OperationResult(OperationType.Update, false, $"A user is already present with the username '{item.Username}'");
             return await base.UpdateAsync(item, userId);
+        }
+
+        public async Task<User> GetForToastAsync(int userId)
+        {
+            var user = await _repository.GetByIdAsync(userId);
+            if (user == null)
+                return null;
+
+            return new User
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Username = user.Username
+            };
         }
     }
 }

@@ -313,7 +313,7 @@ body {
 }
 #fullscreen.fullscreen,
 .text-preview .screen-page {
-  background-color: #FFFFF0;
+  background-color: #fff;
   background-image: url("../images/amend_background_full.png");
   background-position: center;
   background-repeat: no-repeat;
@@ -372,7 +372,7 @@ nav .conference-color-line {
   background-image: url("../images/wc_logo_fra.png");
 }
 .mixin-slide-text-background {
-  background-color: #FFFFF0;
+  background-color: #fff;
   background-image: url("../images/amend_background_full.png");
   background-position: center;
   background-repeat: no-repeat;

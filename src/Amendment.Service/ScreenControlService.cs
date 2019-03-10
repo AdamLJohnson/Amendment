@@ -31,14 +31,16 @@ namespace Amendment.Service
         private readonly IAmendmentBodyRepository _amendmentBodyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public ScreenControlService(IClientNotifier clientNotifier, IAmendmentRepository amendmentRepository, IAmendmentBodyRepository amendmentBodyRepository, IUnitOfWork unitOfWork, IMapper mapper)
+        public ScreenControlService(IClientNotifier clientNotifier, IAmendmentRepository amendmentRepository, IAmendmentBodyRepository amendmentBodyRepository, IUnitOfWork unitOfWork, IMapper mapper, IUserService userService)
         {
             _clientNotifier = clientNotifier;
             _amendmentRepository = amendmentRepository;
             _amendmentBodyRepository = amendmentBodyRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task GoLiveAsync(int userId, int amendmentId, bool isLive)
@@ -46,9 +48,10 @@ namespace Amendment.Service
             var amendment = await _amendmentRepository.GetByIdAsync(amendmentId);
             if (amendment != null)
             {
+                var user = await _userService.GetForToastAsync(userId);
                 _amendmentRepository.SetIsLive(isLive, amendment);
                 await _unitOfWork.SaveChangesAsync(userId);
-                await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentChange, new { id = amendmentId, results = new OperationResult(OperationType.Update), data = amendment });
+                await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentChange, new { id = amendmentId, results = new OperationResult(OperationType.GoLive), data = amendment, isLive, user });
                 await UpdateAmendmentAsync(amendment);
             }
         }
@@ -61,10 +64,11 @@ namespace Amendment.Service
             var amendmentBody = amendment.AmendmentBodies?.Where(b => b.Id == amendmentBodyId).FirstOrDefault();
             if (amendmentBody != null)
             {
+                var user = await _userService.GetForToastAsync(userId);
                 var changed = isLive != amendmentBody.IsLive;
                 _amendmentBodyRepository.SetIsLive(isLive, amendmentBody);
                 await _unitOfWork.SaveChangesAsync(userId);
-                await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentBodyId, results = new OperationResult(OperationType.Update), data = amendmentBody });
+                await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentBodyId, results = new OperationResult(OperationType.GoLive), data = amendmentBody, amendment, isLive, user });
                 if (changed)
                     await UpdateBodyAsync(amendmentBody, changed);
             }
@@ -105,7 +109,9 @@ namespace Amendment.Service
             var amendment = await _amendmentRepository.GetByIdAsync(amendmentId);
             if (amendment == null) return;
 
-            foreach (var body in amendment.AmendmentBodies)
+            var list = new List<AmendmentBody>(amendment.AmendmentBodies);
+
+            foreach (var body in list)
             {
                 var page = body.Page + dir;
                 await ChangeBodyPage(userId, body, page);
@@ -117,7 +123,9 @@ namespace Amendment.Service
             var amendment = await _amendmentRepository.GetByIdAsync(amendmentId);
             if (amendment == null) return;
 
-            foreach (var body in amendment.AmendmentBodies)
+            var list = new List<AmendmentBody>(amendment.AmendmentBodies);
+
+            foreach (var body in list)
             {
                 await ChangeBodyPage(userId, body, 0);
             }
@@ -128,10 +136,12 @@ namespace Amendment.Service
             if (page < 0 || page > amendmentBody.Pages - 1)
                 page = 0;
 
+            var user = await _userService.GetForToastAsync(userId);
             var changed = page != amendmentBody.Page;
             _amendmentBodyRepository.ChangePage(page, amendmentBody);
             await _unitOfWork.SaveChangesAsync(userId);
-            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentBody.Id, results = new OperationResult(OperationType.Update), data = amendmentBody });
+            var amendment = await _amendmentRepository.GetByIdAsync(amendmentBody.AmendId);
+            await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentBody.Id, results = new OperationResult(OperationType.ChangePage), data = amendmentBody, amendment, page, user });
             if (changed)
                 await UpdateBodyAsync(amendmentBody, changed);
         }
@@ -139,19 +149,21 @@ namespace Amendment.Service
         private async Task ClearAll(int userId)
         {
             var activeAmendments = await _amendmentRepository.GetManyAsync(where: a => a.IsLive);
+            var user = await _userService.GetForToastAsync(userId);
             foreach (var amendment in activeAmendments.Results)
             {
                 _amendmentRepository.SetIsLive(false, amendment);
                 await _unitOfWork.SaveChangesAsync(userId);
-                await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentChange, new { id = amendment.Id, results = new OperationResult(OperationType.Update), data = amendment });
+                await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentChange, new { id = amendment.Id, results = new OperationResult(OperationType.GoLive), data = amendment, isLive = false, user });
             }
 
             var activeAmendmentBodies = await _amendmentBodyRepository.GetManyAsync(where: a => a.IsLive);
             foreach (var amendmentBody in activeAmendmentBodies.Results)
             {
                 _amendmentBodyRepository.SetIsLive(false, amendmentBody);
+                var amendment = await _amendmentRepository.GetByIdAsync(amendmentBody.AmendId);
                 await _unitOfWork.SaveChangesAsync(userId);
-                await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentBody.Id, results = new OperationResult(OperationType.Update), data = amendmentBody });
+                await _clientNotifier.SendToAllAsync(DestinationHub.Amendment, ClientNotifierMethods.AmendmentBodyChange, new { id = amendmentBody.Id, results = new OperationResult(OperationType.GoLive), data = amendmentBody, amendment, isLive = false, user });
             }
         }
     }
