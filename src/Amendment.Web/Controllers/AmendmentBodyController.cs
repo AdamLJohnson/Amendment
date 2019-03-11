@@ -52,6 +52,11 @@ namespace Amendment.Web.Controllers
         [Authorize(Roles = "System Administrator, Amendment Editor, Translator")]
         public async Task<ActionResult> Create(AmendmentBodyEditViewModel model, int amendmentId)
         {
+            var body = _mapper.Map<AmendmentBody>(model);
+            var isLanguageIdValid = await _amendmentBodyService.ValidateLanguageId(body);
+            if (!isLanguageIdValid)
+                ModelState.AddModelError("LanguageId", "An Amendment Body has already been created for this language.");
+
             if (!ModelState.IsValid)
             {
                 var bodies = await _amendmentBodyService.GetByAmentmentId(amendmentId);
@@ -61,7 +66,6 @@ namespace Amendment.Web.Controllers
                 return View(model);
             }
 
-            var body = _mapper.Map<AmendmentBody>(model);
             await _amendmentBodyService.CreateAsync(body, User.UserId());
 
             return RedirectToAction(nameof(Index), "Amendment");
@@ -93,6 +97,11 @@ namespace Amendment.Web.Controllers
             if (body == null)
                 return NotFound();
 
+            body = _mapper.Map(model, body);
+            var isLanguageIdValid = await _amendmentBodyService.ValidateLanguageId(body);
+            if(!isLanguageIdValid)
+                ModelState.AddModelError("LanguageId", "An Amendment Body has already been created for this language.");
+
             var alreadyCreatedLanguageIds = bodies.Where(b => b.Id != id).Select(b => b.LanguageId).ToList();
             if (!ModelState.IsValid)
             {
@@ -100,7 +109,6 @@ namespace Amendment.Web.Controllers
                 return View(model);
             }
 
-            body = _mapper.Map(model, body);
             await _amendmentBodyService.UpdateAsync(body, User.UserId());
 
             return RedirectToAction(nameof(Index), "Amendment");

@@ -13,7 +13,7 @@ namespace Amendment.Model.ViewModel.AmendmentBody
         public int AmendId { get; set; }
         [Required]
         [Display(Name = "Language")]
-        public int LanguageId { get; set; }
+        public int? LanguageId { get; set; }
         [Required]
         [Display(Name = "Amendment Body")]
         public string AmendBody { get; set; }

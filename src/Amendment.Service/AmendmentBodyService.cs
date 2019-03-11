@@ -12,6 +12,7 @@ namespace Amendment.Service
     public interface IAmendmentBodyService : IDataService<AmendmentBody>
     {
         Task<List<AmendmentBody>> GetByAmentmentId(int amendmentId);
+        Task<bool> ValidateLanguageId(AmendmentBody body);
     }
 
     public class AmendmentBodyService : BaseDataService<AmendmentBody>, IAmendmentBodyService
@@ -71,6 +72,14 @@ namespace Amendment.Service
         {
             var list = (await _repository.GetManyAsync(where: q => q.AmendId == amendmentId)).Results;
             return list;
+        }
+
+        public async Task<bool> ValidateLanguageId(AmendmentBody body)
+        {
+            var result = (await _repository.GetManyAsync(where: q =>
+                q.AmendId == body.AmendId && q.LanguageId == body.LanguageId && q.Id != body.Id)).FilteredCount == 0;
+
+            return result;
         }
     }
 }
