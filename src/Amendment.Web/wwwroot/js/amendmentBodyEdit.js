@@ -3,9 +3,11 @@
     var self = this;
     self.amendments = ko.observableArray();
     self.amendBody = ko.observable(initData.amendBody);
+    self.amendBodyId = amendBodyId;
     self.ShowDeafSigner = ko.observable("0");
     self.ShowDeafSignerBox = ko.observable("0");
     self.page = ko.observable(-1);
+    var saveClicked = false;
     self.amendBodyPages = ko.computed(function () {
         if (!self.amendBody()) {
             return { amendBodyPages: [""] };
@@ -41,8 +43,17 @@
         updateSetting(self, results);
     });
 
+    self.onSaveClicked = function () {
+        saveClicked = true;
+        return true;
+    };
+
     $(document).on("amendment.amendmentBodyChange", function (evt, results) {
         var amendmentId = results.data.amendId;
+
+        if (results.data.id === self.amendBodyId && !saveClicked) {
+            $("#concurrencyWarning").removeClass("hidden");
+        }
 
         var upIx = arrayFirstIndexOf(self.amendments(),
             function (item) {

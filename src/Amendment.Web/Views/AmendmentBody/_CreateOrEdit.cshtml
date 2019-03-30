@@ -7,10 +7,10 @@
 }
 
 <!-- ko if: amendments().length > 0 -->
-<h2 data-bind="text: amendments()[0].amendTitle">@ViewBag.Title</h2>
+<h2 data-bind="text: amendments()[0].amendTitle"></h2>
 <!-- /ko -->
 <!-- ko ifnot: amendments().length > 0 -->
-<h2>@ViewBag.Title</h2>
+<h2>&nbsp;</h2>
 <!-- /ko -->
 
 @if (ViewData.ModelState != null && ViewData.ModelState.ErrorCount > 0)
@@ -20,6 +20,12 @@
         @Html.ValidationSummary()
     </div>
 }
+
+<div id="concurrencyWarning" class="alert alert-warning hidden">
+    <h4><strong>Warning:</strong></h4>
+    <p>The information on this page has been changed by another user. If you save you will write over any changes they made.</p>
+    <p>@Html.ActionLink("Click here", null, null, null) to refresh the page and get those changes. Refreshing will undo any changes you have made.</p>
+</div>
 
 @using (Html.BeginForm())
 {
@@ -44,7 +50,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary" data-bind="click: onSaveClicked">Save</button>
                     <button type="button" class="btn btn-info pull-right" id="insertPage">Insert Slide</button>
                 </div>
             </div>
