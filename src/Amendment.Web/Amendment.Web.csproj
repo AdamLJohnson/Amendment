@@ -48,6 +48,7 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="wwwroot\lib\marked\" />
+    <Folder Include="wwwroot\lib\diff-match-patch\" />
     <Folder Include="wwwroot\lib\simplemde\" />
   </ItemGroup>
 

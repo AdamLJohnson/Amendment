@@ -102,6 +102,38 @@
         self.editor.codemirror.setSelection(pos, pos);
         self.editor.codemirror.replaceSelection("**NEWSLIDE**");
     });
+
+
+    //var o = self.amendBody() || "";
+    //const diffConnection = new signalR.HubConnectionBuilder().withUrl("/diffHub?pageUrlHash=" + window.PageUrlHash).build();
+    //diffConnection.on("receivePatch",
+    //    (patch) => {
+    //        var dmp = new diff_match_patch();
+    //        var p = dmp.patch_fromText(patch);
+    //        o = dmp.patch_apply(p, o)[0];
+    //        console.log("testre", p);
+    //        console.log("receivePatch", patch);
+
+    //        var c = self.editor.codemirror.getCursor();
+
+    //        self.amendBody(o);
+    //        self.editor.value(o);
+    //        self.editor.codemirror.setCursor(c);
+    //    });
+    //diffConnection.start();
+    
+    //self.amendBody.subscribe(function (newValue) {
+    //    var dmp = new diff_match_patch();
+    //    var diff = dmp.diff_main(o, newValue);
+    //    var p = dmp.patch_make(diff);
+    //    var t = dmp.patch_toText(p);
+    //    if (t) {
+    //        console.log("p", p);
+    //        console.log("xmitPatch", t);
+    //        diffConnection.invoke("xmitPatch", window.PageUrlHash, t);
+    //    }
+    //    o = newValue;
+    //});
 };
 
 

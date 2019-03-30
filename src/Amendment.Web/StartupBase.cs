@@ -136,6 +136,7 @@ namespace Amendment.Web
             {
                 routes.MapHub<AmendmentHub>("/amendmentHub");
                 routes.MapHub<ScreenHub>("/screenHub");
+                routes.MapHub<DiffHub>("/diffHub");
             });
 
             app.UseMvc(routes =>
