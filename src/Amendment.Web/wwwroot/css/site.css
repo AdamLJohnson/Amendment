@@ -23,12 +23,12 @@
   background-color: #767676;
 }
 .deafSignerPusher {
-  height: 110px;
+  height: 88.83333333px;
   float: right;
 }
 .deafSignerBox {
-  width: 53.33333333px;
-  height: 53.33333333px;
+  width: 74.5px;
+  height: 74.5px;
   -ms-transform: translateX(16.66666667px);
   -webkit-transform: translateX(16.66666667px);
   transform: translateX(16.66666667px);
