@@ -324,15 +324,15 @@ body {
 }
 .small-screen-container.well.slideoffline.English,
 #fullscreen.fullscreen.slideoffline.English {
-  background-image: url("../images/wc_logo_eng.png");
+  background-image: url("../images/static_title_eng.png");
 }
 .small-screen-container.well.slideoffline.Spanish,
 #fullscreen.fullscreen.slideoffline.Spanish {
-  background-image: url("../images/wc_logo_esp.png");
+  background-image: url("../images/static_title_esp.png");
 }
 .small-screen-container.well.slideoffline.French,
 #fullscreen.fullscreen.slideoffline.French {
-  background-image: url("../images/wc_logo_fra.png");
+  background-image: url("../images/static_title_fra.png");
 }
 .small-screen-container.well.slideoffline {
   background-size: cover;
@@ -363,13 +363,13 @@ nav .conference-color-line {
   background-image: url("../images/ConferenceLogo_1.png");
 }
 .mixin-slide-text-background-offline.English {
-  background-image: url("../images/wc_logo_eng.png");
+  background-image: url("../images/static_title_eng.png");
 }
 .mixin-slide-text-background-offline.Spanish {
-  background-image: url("../images/wc_logo_esp.png");
+  background-image: url("../images/static_title_esp.png");
 }
 .mixin-slide-text-background-offline.French {
-  background-image: url("../images/wc_logo_fra.png");
+  background-image: url("../images/static_title_fra.png");
 }
 .mixin-slide-text-background {
   background-color: #fff;
