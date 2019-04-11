@@ -23,13 +23,9 @@ namespace Amendment.Repository.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("AmendTitle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(500)")
-                        .HasMaxLength(500);
+                        .IsRequired();
 
-                    b.Property<string>("Author")
-                        .HasColumnType("nvarchar(500)")
-                        .HasMaxLength(500);
+                    b.Property<string>("Author");
 
                     b.Property<int>("EnteredBy");
 
@@ -62,8 +58,7 @@ namespace Amendment.Repository.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("AmendBody")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired();
 
                     b.Property<int>("AmendId");
 
@@ -228,9 +223,9 @@ namespace Amendment.Repository.Migrations
                         {
                             Id = 1,
                             EnteredBy = -1,
-                            EnteredDate = new DateTime(2019, 4, 11, 1, 21, 47, 310, DateTimeKind.Utc).AddTicks(3090),
+                            EnteredDate = new DateTime(2019, 3, 10, 23, 2, 52, 171, DateTimeKind.Utc).AddTicks(5750),
                             Key = "ShowDeafSigner",
-                            LastUpdated = new DateTime(2019, 4, 11, 1, 21, 47, 310, DateTimeKind.Utc).AddTicks(4424),
+                            LastUpdated = new DateTime(2019, 3, 10, 23, 2, 52, 171, DateTimeKind.Utc).AddTicks(6542),
                             LastUpdatedBy = -1,
                             Value = "1"
                         },
@@ -238,9 +233,9 @@ namespace Amendment.Repository.Migrations
                         {
                             Id = 2,
                             EnteredBy = -1,
-                            EnteredDate = new DateTime(2019, 4, 11, 1, 21, 47, 310, DateTimeKind.Utc).AddTicks(5529),
+                            EnteredDate = new DateTime(2019, 3, 10, 23, 2, 52, 171, DateTimeKind.Utc).AddTicks(7270),
                             Key = "ShowDeafSignerBox",
-                            LastUpdated = new DateTime(2019, 4, 11, 1, 21, 47, 310, DateTimeKind.Utc).AddTicks(5536),
+                            LastUpdated = new DateTime(2019, 3, 10, 23, 2, 52, 171, DateTimeKind.Utc).AddTicks(7275),
                             LastUpdatedBy = -1,
                             Value = "1"
                         });
