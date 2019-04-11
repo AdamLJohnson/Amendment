@@ -3,14 +3,16 @@ using System;
 using Amendment.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Amendment.Repository.Migrations
 {
     [DbContext(typeof(AmendmentContext))]
-    partial class AmendmentContextModelSnapshot : ModelSnapshot
+    [Migration("20190411023049_ChangeDataTypeToSupportMoreChars")]
+    partial class ChangeDataTypeToSupportMoreChars
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

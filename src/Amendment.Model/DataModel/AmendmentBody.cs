@@ -19,6 +19,7 @@ namespace Amendment.Model.DataModel
         [Required]
         public int LanguageId { get; set; }
         [Required]
+        [Column(TypeName = "longtext character set utf16")]
         public string AmendBody { get; set; }
         public AmendmentBodyStatus AmendStatus { get; set; }
         public bool IsLive { get; set; }
