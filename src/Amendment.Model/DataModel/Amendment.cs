@@ -12,7 +12,11 @@ namespace Amendment.Model.DataModel
         [Key]
         public int Id { get; set; }
         [Required]
+        [MaxLength(500)]
+        [Column(TypeName = "nvarchar(500)")]
         public string AmendTitle { get; set; }
+        [MaxLength(500)]
+        [Column(TypeName = "nvarchar(500)")]
         public string Author { get; set; }
         public string Motion { get; set; }
         public string Source { get; set; }
