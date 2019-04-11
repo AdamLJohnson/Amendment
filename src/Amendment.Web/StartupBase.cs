@@ -118,7 +118,6 @@ namespace Amendment.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                await dbContext.Init().Database.GetService<IMigrator>().MigrateAsync();
             }
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
