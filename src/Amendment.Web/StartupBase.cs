@@ -27,7 +27,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MySql.Data.MySqlClient;
+//using MySql.Data.MySqlClient;
 
 namespace Amendment.Web
 {
@@ -132,12 +132,12 @@ namespace Amendment.Web
             var logger = loggerFactory.CreateLogger("Amendment.Web");
             app.Use(LogHttpTraffic(logger));
 
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<AmendmentHub>("/amendmentHub");
-                routes.MapHub<ScreenHub>("/screenHub");
-                routes.MapHub<DiffHub>("/diffHub");
-            });
+            //app.UseSignalR(routes =>
+            //{
+            //    routes.MapHub<AmendmentHub>("/amendmentHub");
+            //    routes.MapHub<ScreenHub>("/screenHub");
+            //    routes.MapHub<DiffHub>("/diffHub");
+            //});
 
             app.UseMvc(routes =>
             {
