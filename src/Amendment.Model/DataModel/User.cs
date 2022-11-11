@@ -23,6 +23,6 @@ namespace Amendment.Model.DataModel
         public DateTime LastUpdated { get; set; }
 
 
-        public List<UserXRole> UserXRoles { get; set; }
+        public ICollection<Role> Roles { get; set; }
     }
 }

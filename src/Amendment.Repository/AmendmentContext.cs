@@ -27,7 +27,8 @@ namespace Amendment.Repository
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<User>()
-                .HasData(new User(){
+                .HasData(new User
+                {
                     Id = 1,
                     Username = "admin",
                     Email = "admin@admin.com",
@@ -38,16 +39,18 @@ namespace Amendment.Repository
                     LastUpdatedBy = -1,
                     LastUpdated = DateTime.Parse("2018-01-01"),
                 });
+            
 
             builder.Entity<Role>()
-                .HasData(new Role()
+                .HasData(
+                new Role
                 {
                     Id = 1,
                     Name = "System Administrator",
                     EnteredBy = -1,
                     EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
-                    LastUpdated = DateTime.Parse("2018-01-01"),
+                    LastUpdated = DateTime.Parse("2018-01-01")
                 },
                 new Role()
                 {
@@ -85,22 +88,35 @@ namespace Amendment.Repository
                     LastUpdatedBy = -1,
                     LastUpdated = DateTime.Parse("2018-01-01"),
                 });
-            builder.Entity<UserXRole>()
-                .HasOne(u => u.User)
-                .WithMany(r => r.UserXRoles)
-                .HasForeignKey(ur => ur.UserId);
+            //builder.Entity<UserXRole>()
+            //    .HasOne(u => u.User)
+            //    .WithMany(r => r.UserXRoles)
+            //    .HasForeignKey(ur => ur.UserId);
 
-            builder.Entity<UserXRole>()
-                .HasOne(r => r.Role)
-                .WithMany(r => r.UserXRoles)
-                .HasForeignKey(r => r.RoleId);
+            //builder.Entity<UserXRole>()
+            //    .HasOne(r => r.Role)
+            //    .WithMany(r => r.UserXRoles)
+            //    .HasForeignKey(r => r.RoleId);
 
-            builder.Entity<UserXRole>()
-                .HasKey(x => new {x.UserId, x.RoleId});
-            builder.Entity<UserXRole>()
-                .HasData(new UserXRole() {UserId = 1, RoleId = 1});
-            builder.Entity<UserXRole>()
-                .HasData(new UserXRole() { UserId = 1, RoleId = 5 });
+            //builder.Entity<UserXRole>()
+            //    .HasKey(x => new {x.UserId, x.RoleId});
+            //builder.Entity<UserXRole>()
+            //    .HasData(new UserXRole() {UserId = 1, RoleId = 1});
+            //builder.Entity<UserXRole>()
+            //    .HasData(new UserXRole() { UserId = 1, RoleId = 5 });
+
+            //builder.Entity<User>().HasData()
+
+            builder.Entity<User>()
+                .HasMany(u => u.Roles)
+                .WithMany()
+                .UsingEntity(x =>
+                {
+                    x.ToTable("UserRoles");
+                    x.HasData(new { RolesId = 1, UserId = 1 });
+                });
+
+            //builder.Entity("UserRoles").HasData(new { RolesId = 1, UsersId = 1 });
 
             builder.Entity<Model.DataModel.Amendment>();
             builder.Entity<AmendmentBody>()

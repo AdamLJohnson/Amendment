@@ -11,8 +11,7 @@ namespace Amendment.Repository
     {
         public UserRepository(IDbFactory dbFactory) : base(dbFactory)
         {
-            Query = DbSet.Include(u => u.UserXRoles)
-                .ThenInclude(r => r.Role);
+            Query = DbSet.Include(u => u.Roles);
         }
     }
 }

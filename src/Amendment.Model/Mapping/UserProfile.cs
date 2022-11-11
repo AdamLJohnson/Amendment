@@ -14,8 +14,8 @@ namespace Amendment.Model.Mapping
         {
             CreateMap<User, UserDetailsViewModel>();
             CreateMap<User, UserEditViewModel>()
-                .ForMember(dest => dest.Password, opt => opt.Ignore())
-                .ForMember(dest => dest.Roles, opt => opt.MapFrom((s,d) => s.UserXRoles?.Select(r => new RoleViewModel(){ Id = r.Role.Id, Name = r.Role.Name, IsSelected = true })));
+                .ForMember(dest => dest.Password, opt => opt.Ignore());
+                //.ForMember(dest => dest.Roles, opt => opt.MapFrom((s,d) => s.UserXRoles?.Select(r => new RoleViewModel(){ Id = r.Role.Id, Name = r.Role.Name, IsSelected = true })));
             CreateMap<UserCreateViewModel, User>()
                 .ForMember(dest => dest.Password, opt => opt.Ignore());
             CreateMap<UserEditViewModel, User>()

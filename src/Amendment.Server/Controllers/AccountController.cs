@@ -1,5 +1,8 @@
-using Amendment.Model.DataModel;
-using Amendment.Repository;
+using Amendment.Shared.Requests;
+using Amendment.Shared.Responses;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amendment.Server.Controllers
@@ -8,19 +11,19 @@ namespace Amendment.Server.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly ILogger<AccountController> _logger;
-        private readonly AmendmentContext _context;
+        private readonly IMediator _mediator;
 
-        public AccountController(ILogger<AccountController> logger, AmendmentContext context)
+        public AccountController(IMediator mediator)
         {
-            _logger = logger;
-            _context = context;
+            _mediator = mediator;
         }
 
-        [HttpGet]
-        public IEnumerable<User> Get()
+        [HttpPost("Login")]
+        [AllowAnonymous]
+        public async Task<Results<Ok<AccountLoginResponse>, UnauthorizedHttpResult>> Login([FromBody] AccountLoginRequest userForAuthentication)
         {
-            return _context.Set<User>().ToList();
+            var result = await _mediator.Send(userForAuthentication);
+            return !result.IsAuthSuccessful ? TypedResults.Unauthorized() : TypedResults.Ok(result);
         }
     }
 }

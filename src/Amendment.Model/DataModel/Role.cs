@@ -16,7 +16,5 @@ namespace Amendment.Model.DataModel
         public DateTime EnteredDate { get; set; }
         public int LastUpdatedBy { get; set; }
         public DateTime LastUpdated { get; set; }
-
-        public List<UserXRole> UserXRoles { get; set; }
     }
 }
