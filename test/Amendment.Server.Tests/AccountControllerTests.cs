@@ -43,7 +43,6 @@ namespace Amendment.Server.Tests
             
             // Assert
             Assert.NotNull(response);
-            //response.EnsureSuccessStatusCode();
             Assert.Equal("application/json; charset=utf-8",
                 response.Content.Headers.ContentType.ToString());
             var jsonResponse = await response.Content.ReadFromJsonAsync<IEnumerable<Amendment.Shared.Responses.AccountLoginResponse>>();
@@ -51,7 +50,7 @@ namespace Amendment.Server.Tests
         }
 
         [Fact]
-        public async Task LoginAction_Returns_JWT_WhenBadUserInfo()
+        public async Task LoginAction_Returns_Unauthorized_WhenBadUserInfo()
         {
             // Arrange
             var client = _factory.CreateClient();
@@ -65,7 +64,7 @@ namespace Amendment.Server.Tests
         }
 
         [Fact]
-        public async Task LoginAction_Returns_Error_WhenBadUserInfo()
+        public async Task LoginAction_Returns_Error_ErrorPageIsAskedFor()
         {
             // Arrange
             var client = _factory.CreateClient();
