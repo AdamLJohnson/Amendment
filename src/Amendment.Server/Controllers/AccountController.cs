@@ -1,5 +1,8 @@
+using Amendment.Server.Extensions;
+using Amendment.Server.Mediator.Commands;
 using Amendment.Shared.Requests;
 using Amendment.Shared.Responses;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -20,10 +23,12 @@ namespace Amendment.Server.Controllers
 
         [HttpPost("Login")]
         [AllowAnonymous]
-        public async Task<Results<Ok<AccountLoginResponse>, UnauthorizedHttpResult>> Login([FromBody] AccountLoginRequest userForAuthentication)
+        public async Task<IResult> Login([FromBody] AccountLoginRequest userForAuthentication)
         {
-            var result = await _mediator.Send(userForAuthentication);
-            return !result.IsAuthSuccessful ? TypedResults.Unauthorized() : TypedResults.Ok(result);
+            var command = new AccountLoginCommand
+                { Username = userForAuthentication.Username, Password = userForAuthentication.Password };
+            var result = await _mediator.Send(command);
+            return result.ToResult();
         }
     }
 }

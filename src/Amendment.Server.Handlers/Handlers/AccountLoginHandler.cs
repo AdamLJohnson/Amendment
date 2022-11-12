@@ -9,10 +9,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Amendment.Model.DataModel;
+using Amendment.Shared;
+using System.Net;
+using Amendment.Server.Mediator.Commands;
 
-namespace Amendment.Server.Handlers
+namespace Amendment.Server.Mediator.Handlers
 {
-    public sealed class AccountLoginHandler : IRequestHandler<AccountLoginRequest, AccountLoginResponse>
+    public sealed class AccountLoginHandler : IRequestHandler<AccountLoginCommand, IApiResult>
     {
         private readonly ILogger<AccountLoginHandler> _logger;
         private readonly IConfiguration _configuration;
@@ -29,16 +32,17 @@ namespace Amendment.Server.Handlers
             _jwtSettings = _configuration.GetSection("JWTSettings");
         }
 
-        public async Task<AccountLoginResponse> Handle(AccountLoginRequest request, CancellationToken cancellationToken)
+        public async Task<IApiResult> Handle(AccountLoginCommand request, CancellationToken cancellationToken)
         {
             var user = await _userService.GetAsync(request.Username);
             if (user == null || !_passwordHashService.VerifyHashedPassword(user.Password, request.Password))
-                return new AccountLoginResponse { IsAuthSuccessful = false };
+                return new ApiFailedResult(HttpStatusCode.Unauthorized);
             var signingCredentials = GetSigningCredentials();
             var claims = GetClaims(user);
             var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
             var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-            return new AccountLoginResponse { IsAuthSuccessful = true, Token = token };
+
+            return new ApiSuccessResult<AccountLoginResponse>(new AccountLoginResponse { Token = token });
         }
 
         private SigningCredentials GetSigningCredentials()

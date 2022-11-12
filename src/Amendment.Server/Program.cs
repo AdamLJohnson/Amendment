@@ -1,16 +1,15 @@
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
 using Autofac.Extensions.DependencyInjection;
 using Autofac;
 using Amendment.Server.IoC;
 using Amendment.Server.PipelineBehaviors;
-using Amendment.Server.Extensions;
+using Amendment.Server.Mediator.Handlers;
+using Amendment.Server.Mediator.Commands;
 
 namespace Amendment
 {
@@ -21,7 +20,8 @@ namespace Amendment
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
             builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule(new RegisterDataServices()));
-
+            //builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule<RegisterMapperProfile>());
+            
             builder.Services.AddDbContext<Repository.AmendmentContext>(options =>
             {
                 options.UseInMemoryDatabase("Amendment");
@@ -55,9 +55,9 @@ namespace Amendment
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddMediatR(typeof(Program));
-            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-            builder.Services.AddValidatorsFromAssembly(typeof(Shared.AssemblyAnchor).Assembly);
+            builder.Services.AddMediatR(typeof(AccountLoginHandler));
+            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<>));
+            builder.Services.AddValidatorsFromAssembly(typeof(AccountLoginCommand).Assembly);
             
             var app = builder.Build();
             
@@ -95,7 +95,6 @@ namespace Amendment
 
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseFluentValidationExceptionHandler();
 
             app.MapRazorPages();
             app.MapControllers();

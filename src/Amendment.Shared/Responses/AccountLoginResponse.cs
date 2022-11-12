@@ -8,8 +8,6 @@ namespace Amendment.Shared.Responses
 {
     public sealed class AccountLoginResponse
     {
-        public bool IsAuthSuccessful { get; set; }
         public string? Token { get; set; }
-        public string? ErrorMessage { get; set; }
     }
 }

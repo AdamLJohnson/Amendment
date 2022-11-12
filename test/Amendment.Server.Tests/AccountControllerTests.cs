@@ -1,7 +1,9 @@
+using Amendment.Shared.Responses;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System;
 using System.Net;
 using System.Net.Http.Json;
+using Newtonsoft.Json;
 
 namespace Amendment.Server.Tests
 {
@@ -28,8 +30,8 @@ namespace Amendment.Server.Tests
             response.EnsureSuccessStatusCode();
             Assert.Equal("application/json; charset=utf-8",
                 response.Content.Headers.ContentType.ToString());
-            var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.Responses.AccountLoginResponse>();
-            Assert.True(jsonResponse.IsAuthSuccessful);
+            var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AccountLoginResponse>>();
+            Assert.True(jsonResponse.IsSuccess);
         }
 
         [Fact]
@@ -45,8 +47,11 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             Assert.Equal("application/json; charset=utf-8",
                 response.Content.Headers.ContentType.ToString());
-            var jsonResponse = await response.Content.ReadFromJsonAsync<IEnumerable<Amendment.Shared.Responses.AccountLoginResponse>>();
-            Assert.True(jsonResponse.Count() == 1);
+            var str = await response.Content.ReadAsStringAsync();
+            var j = Newtonsoft.Json.JsonConvert.DeserializeObject<Amendment.Shared.ApiFailedResult>(str, new JsonSerializerSettings{ CheckAdditionalContent = true});
+            var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiFailedResult>();
+            Assert.False(jsonResponse.IsSuccess);
+            Assert.True(jsonResponse.Errors.Count() == 1);
         }
 
         [Fact]

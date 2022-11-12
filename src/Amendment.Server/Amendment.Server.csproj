@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Amendment.Server.Handlers\Amendment.Server.Mediator.csproj" />
     <ProjectReference Include="..\Amendment.Service\Amendment.Service.csproj" />
     <ProjectReference Include="..\Amendment.Shared\Amendment.Shared.csproj" />
     <ProjectReference Include="..\Amendment.Repository\Amendment.Repository.csproj" />
