@@ -10,6 +10,7 @@ using Amendment.Server.IoC;
 using Amendment.Server.PipelineBehaviors;
 using Amendment.Server.Mediator.Handlers;
 using Amendment.Server.Mediator.Commands;
+using Amendment.Server;
 
 namespace Amendment
 {
@@ -55,9 +56,10 @@ namespace Amendment
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddMediatR(typeof(AccountLoginHandler));
+            builder.Services.AddMediatR(typeof(AccountLoginHandler).Assembly);
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<>));
             builder.Services.AddValidatorsFromAssembly(typeof(AccountLoginCommand).Assembly);
+            builder.Services.RegisterMapsterConfiguration();
             
             var app = builder.Build();
             

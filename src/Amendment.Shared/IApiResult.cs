@@ -15,8 +15,7 @@ namespace Amendment.Shared
 
     public interface IApiResult<T> : IApiResult
     {
-        HttpStatusCode StatusCode { get; set; }
-        bool IsSuccess { get; set; }
+        T Result { get; set; }
     }
 
     public sealed class ApiCommandSuccessResult : IApiResult
@@ -43,11 +42,36 @@ namespace Amendment.Shared
         }
     }
 
-    public sealed class ApiFailedResult : IApiResult
+    public class ApiFailedResult : IApiResult
     {
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.BadRequest;
         public bool IsSuccess { get; set; } = false;
-        public List<ValidationError> Errors { get; set; }// = Enumerable.Empty<ValidationError>();
+        public List<ValidationError> Errors { get; set; } = Enumerable.Empty<ValidationError>().ToList();
+
+        public ApiFailedResult()
+        {
+        }
+
+        public ApiFailedResult(IEnumerable<ValidationError> errors)
+        {
+            Errors = errors.ToList();
+        }
+
+        public ApiFailedResult(HttpStatusCode statusCode)
+        {
+            StatusCode = statusCode;
+        }
+
+        public ApiFailedResult(IEnumerable<ValidationError> errors, HttpStatusCode statusCode)
+        {
+            Errors = errors.ToList();
+            StatusCode = statusCode;
+        }
+    }
+
+    public sealed class ApiFailedResult<T> : ApiFailedResult, IApiResult<T> where T : new()
+    {
+        public T Result { get; set; } = new T();
 
         public ApiFailedResult()
         {
