@@ -13,7 +13,7 @@ namespace Amendment.Model.DataModel
         public int Id { get; set; }
         [Required]
         [Column(TypeName = "longtext character set utf16")]
-        public string AmendTitle { get; set; }
+        public string Title { get; set; }
         [Column(TypeName = "longtext character set utf16")]
         public string Author { get; set; }
         public string Motion { get; set; }
@@ -38,7 +38,7 @@ namespace Amendment.Model.DataModel
         {
             return new Model.DataModel.Amendment()
             {
-                AmendTitle = $"Test Amendment {iteration}",
+                Title = $"Test Amendment {iteration}",
                 Author = LoremNET.Lorem.Words(2),
                 Motion = $"WC-{iteration}",
                 LegisId = $"Legid {iteration}",

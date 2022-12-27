@@ -15,6 +15,8 @@ namespace Amendment.Server.Extensions
                     return Results.BadRequest(result);
                 case HttpStatusCode.Unauthorized:
                     return Results.Unauthorized();
+                case HttpStatusCode.NotFound:
+                    return Results.NotFound(result);
                 default:
                     throw new NotImplementedException("That status code is not supported by 'ToResults' yet.");
             }

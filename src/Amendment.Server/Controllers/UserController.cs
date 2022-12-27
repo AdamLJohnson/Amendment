@@ -30,7 +30,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IResult> GetUser(int id)
+    public async Task<IResult> Get(int id)
     {
         var results = await _mediator.Send(new GetSingleUserQuery(id));
         return results.ToResult();
@@ -48,7 +48,7 @@ public class UserController : ControllerBase
         if (results is ApiSuccessResult<UserResponse>)
         {
             var typedResults = (ApiSuccessResult<UserResponse>)results;
-            return results.ToResult(Url.Action(nameof(GetUser), new { id = typedResults.Result.Id }));
+            return results.ToResult(Url.Action(nameof(Get), new { id = typedResults.Result.Id }));
         }   
         return results.ToResult();
     }

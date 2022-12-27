@@ -24,7 +24,7 @@ namespace Amendment.Repository.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("AmendTitle")
+                    b.Property<string>("Title")
                         .IsRequired();
 
                     b.Property<string>("Author");

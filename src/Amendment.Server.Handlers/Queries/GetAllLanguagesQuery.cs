@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Amendment.Shared;
+using Amendment.Shared.Responses;
+using MediatR;
+
+namespace Amendment.Server.Mediator.Queries
+{
+    public sealed record GetAllLanguagesQuery : IRequest<IApiResult<List<LanguageResponse>>>;
+}

@@ -7,7 +7,7 @@ using Amendment.Repository.Infrastructure;
 using Amendment.Service;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Amendment.Web
+namespace Amendment.Server
 {
     public class SeedDatabase
     {

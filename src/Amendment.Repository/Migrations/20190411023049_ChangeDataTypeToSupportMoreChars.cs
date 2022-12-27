@@ -23,7 +23,7 @@ namespace Amendment.Repository.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
-                name: "AmendTitle",
+                name: "Title",
                 table: "Amendment",
                 type: "longtext character set utf16",
                 nullable: false,
@@ -48,7 +48,7 @@ namespace Amendment.Repository.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
-                name: "AmendTitle",
+                name: "Title",
                 table: "Amendment",
                 nullable: false,
                 oldClrType: typeof(string),

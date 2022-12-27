@@ -30,16 +30,14 @@ namespace Amendment.Service
         private readonly IAmendmentRepository _amendmentRepository;
         private readonly IAmendmentBodyRepository _amendmentBodyRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
 
-        public ScreenControlService(IClientNotifier clientNotifier, IAmendmentRepository amendmentRepository, IAmendmentBodyRepository amendmentBodyRepository, IUnitOfWork unitOfWork, IMapper mapper, IUserService userService)
+        public ScreenControlService(IClientNotifier clientNotifier, IAmendmentRepository amendmentRepository, IAmendmentBodyRepository amendmentBodyRepository, IUnitOfWork unitOfWork, IUserService userService)
         {
             _clientNotifier = clientNotifier;
             _amendmentRepository = amendmentRepository;
             _amendmentBodyRepository = amendmentBodyRepository;
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _userService = userService;
         }
 
@@ -83,14 +81,14 @@ namespace Amendment.Service
         public Task UpdateBodyAsync(AmendmentBody item, bool forceSend)
         {
             if (item.IsLive || forceSend)
-                return _clientNotifier.SendToLanguageScreenAsync(item.LanguageId, ClientNotifierMethods.AmendmentBodyChange, _mapper.Map<AmendmentBodyViewViewModel>(item));
+                return _clientNotifier.SendToLanguageScreenAsync(item.LanguageId, ClientNotifierMethods.AmendmentBodyChange, item);
             return Task.FromResult(0);
         }
 
         public Task UpdateAmendmentAsync(Model.DataModel.Amendment item)
         {
             if (item.IsLive)
-                return _clientNotifier.SendToAllAsync(DestinationHub.Screen, ClientNotifierMethods.AmendmentChange, _mapper.Map<AmendmentViewViewModel>(item));
+                return _clientNotifier.SendToAllAsync(DestinationHub.Screen, ClientNotifierMethods.AmendmentChange, item);
             return Task.FromResult(0);
         }
 

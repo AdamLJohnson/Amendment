@@ -11,12 +11,14 @@ using Amendment.Server.PipelineBehaviors;
 using Amendment.Server.Mediator.Handlers;
 using Amendment.Server.Mediator.Commands;
 using Amendment.Server;
+using Amendment.Service.Infrastructure;
+using Autofac.Core;
 
 namespace Amendment
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -60,7 +62,8 @@ namespace Amendment
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<>));
             builder.Services.AddValidatorsFromAssembly(typeof(AccountLoginCommand).Assembly);
             builder.Services.RegisterMapsterConfiguration();
-            
+            builder.Services.AddSingleton<IClientNotifier, MockClientNotifier>();
+
             var app = builder.Build();
             
             // Configure the HTTP request pipeline.
@@ -86,6 +89,10 @@ namespace Amendment
                 var context = services.GetRequiredService<Repository.AmendmentContext>();
                 context.Database.EnsureCreated();
                 //DbInitializer.Initialize(context);
+#if DEBUG
+                var seeder = new SeedDatabase(app.Services);
+                await seeder.Seed();
+#endif
             }
 
             app.UseHttpsRedirection();
