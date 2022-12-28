@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Shared", "src\Ame
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Server.Tests", "test\Amendment.Server.Tests\Amendment.Server.Tests.csproj", "{893201C5-258C-4B74-9AD8-98357E42C066}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amendment.Server.Mediator", "src\Amendment.Server.Handlers\Amendment.Server.Mediator.csproj", "{15C1124C-DC5B-4109-97B3-55FE1682C7CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Server.Mediator", "src\Amendment.Server.Handlers\Amendment.Server.Mediator.csproj", "{15C1124C-DC5B-4109-97B3-55FE1682C7CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

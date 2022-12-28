@@ -42,6 +42,20 @@ namespace Amendment.Shared
         }
     }
 
+    /// <summary>
+    /// Used for the Blazor client only
+    /// </summary>
+    public class ApiResult : IApiResult
+    {
+        public HttpStatusCode StatusCode { get; set; }
+        public bool IsSuccess { get; set; }
+    }
+
+    public sealed class ApiResult<T> : ApiResult, IApiResult<T>
+    {
+        public T Result { get; set; }
+    }
+
     public class ApiFailedResult : IApiResult
     {
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.BadRequest;
