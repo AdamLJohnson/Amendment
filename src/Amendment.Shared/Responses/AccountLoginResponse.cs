@@ -9,5 +9,6 @@ namespace Amendment.Shared.Responses
     public sealed class AccountLoginResponse
     {
         public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

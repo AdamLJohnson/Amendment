@@ -1,5 +1,11 @@
 ﻿@page "/counter"
 @using System.Security.Claims
+@using Amendment.Client.Repository
+@using Amendment.Shared
+@using Amendment.Shared.Responses
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "System Administrator")]
+@inject IAmendmentRepository AmendmentRepository
 
 <PageTitle>Counter</PageTitle>
 
@@ -8,11 +14,18 @@
         The user: @context.User.FindFirst(ClaimTypes.Name).Value is authorized
     </Authorized>
     <NotAuthorized>
-        The User is not authorized
+        The User is not authorized Test
     </NotAuthorized>
 </AuthorizeView>
 
-<h1>Counter</h1>
+<h1>Counter @amendments.Count()</h1>
+
+<Row>
+    <Column ColumnSize="ColumnSize.Is5">
+        <Slider TValue="decimal" Value="25m" Max="100m" />
+    </Column>
+</Row>
+
 
 <p role="status">Current count: @currentCount</p>
 
@@ -36,6 +49,14 @@
     protected override bool ShouldRender()
     {
         return true;
+    }
+
+    private IEnumerable<AmendmentResponse> amendments = Enumerable.Empty<AmendmentResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var get = await AmendmentRepository.GetAsync();
+        amendments = get;
     }
 
 }

@@ -21,6 +21,8 @@ namespace Amendment.Model.DataModel
         public DateTime EnteredDate { get; set; }
         public int LastUpdatedBy { get; set; }
         public DateTime LastUpdated { get; set; }
+        public string RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
 
 
         public ICollection<Role> Roles { get; set; }

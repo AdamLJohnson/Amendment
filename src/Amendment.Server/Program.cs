@@ -11,6 +11,7 @@ using Amendment.Server.PipelineBehaviors;
 using Amendment.Server.Mediator.Handlers;
 using Amendment.Server.Mediator.Commands;
 using Amendment.Server;
+using Amendment.Service;
 using Amendment.Service.Infrastructure;
 using Autofac.Core;
 
@@ -63,6 +64,7 @@ namespace Amendment
             builder.Services.AddValidatorsFromAssembly(typeof(AccountLoginCommand).Assembly);
             builder.Services.RegisterMapsterConfiguration();
             builder.Services.AddSingleton<IClientNotifier, MockClientNotifier>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
             var app = builder.Build();
             

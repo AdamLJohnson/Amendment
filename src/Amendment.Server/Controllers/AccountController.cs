@@ -30,5 +30,15 @@ namespace Amendment.Server.Controllers
             var result = await _mediator.Send(command);
             return result.ToResult();
         }
+
+        [HttpPost("RefreshToken")]
+        [AllowAnonymous]
+        public async Task<IResult> RefreshToken([FromBody] RefreshTokenRequest model)
+        {
+            var command = model.Adapt<RefreshTokenCommand>();
+            var result = await _mediator.Send(command);
+            return result.ToResult();
+        }
+
     }
 }
