@@ -1,17 +1,60 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<Layout>
+    <LayoutHeader Fixed>
+        <Bar Breakpoint="Breakpoint.Desktop"
+             Background="Background.Dark"
+             ThemeContrast="ThemeContrast.Dark">
+            <div class="container">
+                <BarBrand>
+                    Amendments
+                </BarBrand>
+                <BarToggler />
+                <BarMenu>
+                    <BarStart>
+                        <BarItem>
+                            <BarLink To="/">Home</BarLink>
+                        </BarItem>
 
-    <main>
-        <div class="top-row px-4">
-            <AuthLinks />
+                        <AuthorizeView>
+                            <Authorized>
+                                <BarItem>
+                                    <BarLink To="Counter">Counter</BarLink>
+                                </BarItem>
+                            </Authorized>
+                        </AuthorizeView>
+
+                        @*<BarItem>
+                        <BarDropdown>
+                        <BarDropdownToggle>Dropdown</BarDropdownToggle>
+                        <BarDropdownMenu>
+                        <BarDropdownItem>Action</BarDropdownItem>
+                        <BarDropdownDivider />
+                        <BarDropdownItem>Another action</BarDropdownItem>
+                        </BarDropdownMenu>
+                        </BarDropdown>
+                        </BarItem>*@
+                    </BarStart>
+                    <BarEnd>
+                        <BarItem TextColor="TextColor.Light">
+                            <AuthLinks />
+                        </BarItem>
+                    </BarEnd>
+                </BarMenu>
+            </div>
+
+        </Bar>
+    </LayoutHeader>
+    <LayoutContent style="margin-top: 70px">
+        <main>
+            <div class="container">
+                @Body
+            </div>
+        </main>
+    </LayoutContent>
+    <LayoutFooter>
+        <div class="container">
+            Footer
         </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    </LayoutFooter>
+</Layout>
