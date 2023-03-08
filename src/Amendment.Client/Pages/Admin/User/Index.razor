@@ -1,0 +1,49 @@
+﻿@page "/Admin/User"
+@using Microsoft.AspNetCore.Authorization
+@using Amendment.Client.Repository
+@using Amendment.Shared.Responses
+@attribute [Authorize(Roles = "System Administrator")]
+@inject IUserRepository UserRepository
+
+<PageTitle>Users</PageTitle>
+
+<h1>Users (@users.Count())</h1>
+
+<Table Striped>
+    <TableHeader>
+        <TableRow>
+            <TableHeaderCell>Username</TableHeaderCell>
+            <TableHeaderCell>Email</TableHeaderCell>
+            <TableHeaderCell>Name</TableHeaderCell>
+            <TableHeaderCell></TableHeaderCell>
+        </TableRow>
+    </TableHeader>
+    <TableBody>
+        <Repeater Items="@users">
+            <TableRow>
+                <TableRowCell>@context.Username</TableRowCell>
+                <TableRowCell>@context.Email</TableRowCell>
+                <TableRowCell>@context.Name</TableRowCell>
+                <TableRowCell></TableRowCell>
+            </TableRow>
+        </Repeater>
+        @if (users.Count() == 0)
+        {
+            <TableRow>
+                <TableRowCell ColumnSpan="4">No Users Found</TableRowCell>
+            </TableRow>
+        }
+    </TableBody>
+</Table>
+
+
+@code
+{
+    private IEnumerable<UserResponse> users = Enumerable.Empty<UserResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var get = await UserRepository.GetAsync();
+        users = get;
+    }
+}

@@ -4,7 +4,8 @@
     <LayoutHeader Fixed>
         <Bar Breakpoint="Breakpoint.Desktop"
              Background="Background.Dark"
-             ThemeContrast="ThemeContrast.Dark">
+             ThemeContrast="ThemeContrast.Dark"
+             >
             <div class="container">
                 <BarBrand>
                     Amendments
@@ -19,24 +20,46 @@
                         <AuthorizeView>
                             <Authorized>
                                 <BarItem>
-                                    <BarLink To="Counter">Counter</BarLink>
+                                    <BarDropdown>
+                                        <BarDropdownToggle>View Amendments</BarDropdownToggle>
+                                        <BarDropdownMenu>
+                                            <BarDropdownItem>
+                                                <BarLink To="/" TextColor="TextColor.Dark">English</BarLink>
+                                            </BarDropdownItem>
+                                            <BarDropdownItem>
+                                                <BarLink To="/" TextColor="TextColor.Dark">Spanish</BarLink>
+                                            </BarDropdownItem>
+                                            <BarDropdownItem>
+                                                <BarLink To="/" TextColor="TextColor.Dark">French</BarLink>
+                                            </BarDropdownItem>
+                                        </BarDropdownMenu>
+                                    </BarDropdown>
+                                </BarItem>
+                                <BarItem>
+                                    <BarLink To="/Amendment">
+                                        Amendments
+                                    </BarLink>
+                                </BarItem>
+                                <BarItem>
+                                    <BarDropdown Background="Background.Light">
+                                        <BarDropdownToggle>Admin</BarDropdownToggle>
+                                        <BarDropdownMenu>
+                                            <BarDropdownItem>
+                                                <BarLink To="/Admin/User" TextColor="TextColor.Dark">
+                                                    Users
+                                                </BarLink>
+                                            </BarDropdownItem>
+                                            <BarDropdownItem>
+                                                <BarLink To="/Admin/SystemSetting" TextColor="TextColor.Dark">System Settings</BarLink>
+                                            </BarDropdownItem>
+                                        </BarDropdownMenu>
+                                    </BarDropdown>
                                 </BarItem>
                             </Authorized>
                         </AuthorizeView>
-
-                        @*<BarItem>
-                        <BarDropdown>
-                        <BarDropdownToggle>Dropdown</BarDropdownToggle>
-                        <BarDropdownMenu>
-                        <BarDropdownItem>Action</BarDropdownItem>
-                        <BarDropdownDivider />
-                        <BarDropdownItem>Another action</BarDropdownItem>
-                        </BarDropdownMenu>
-                        </BarDropdown>
-                        </BarItem>*@
                     </BarStart>
                     <BarEnd>
-                        <BarItem TextColor="TextColor.Light">
+                        <BarItem>
                             <AuthLinks />
                         </BarItem>
                     </BarEnd>

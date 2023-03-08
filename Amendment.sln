@@ -7,8 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D93ED188-980
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{80D57FF3-F691-46C8-A6A7-461AE5D10DB9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Web", "src\Amendment.Web\Amendment.Web.csproj", "{ECA93622-0AD0-43E5-8BCB-3B83B16649DD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Model", "src\Amendment.Model\Amendment.Model.csproj", "{826530C2-F830-480C-8D38-23E30AE21E1E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Service", "src\Amendment.Service\Amendment.Service.csproj", "{73D9177C-8B5C-4415-AE71-0028A0E05656}"
@@ -31,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Server.Tests", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Server.Mediator", "src\Amendment.Server.Handlers\Amendment.Server.Mediator.csproj", "{15C1124C-DC5B-4109-97B3-55FE1682C7CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amendment.Client.Repository", "src\Amendment.Client.Repository\Amendment.Client.Repository.csproj", "{F5BC33B0-B6E1-49F1-8362-E26D0FF72E09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Client.Repository", "src\Amendment.Client.Repository\Amendment.Client.Repository.csproj", "{F5BC33B0-B6E1-49F1-8362-E26D0FF72E09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,10 +37,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ECA93622-0AD0-43E5-8BCB-3B83B16649DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECA93622-0AD0-43E5-8BCB-3B83B16649DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ECA93622-0AD0-43E5-8BCB-3B83B16649DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ECA93622-0AD0-43E5-8BCB-3B83B16649DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{826530C2-F830-480C-8D38-23E30AE21E1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{826530C2-F830-480C-8D38-23E30AE21E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{826530C2-F830-480C-8D38-23E30AE21E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -84,7 +78,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{ECA93622-0AD0-43E5-8BCB-3B83B16649DD} = {D93ED188-9808-4EE7-A989-897DA66874C0}
 		{826530C2-F830-480C-8D38-23E30AE21E1E} = {D93ED188-9808-4EE7-A989-897DA66874C0}
 		{73D9177C-8B5C-4415-AE71-0028A0E05656} = {D93ED188-9808-4EE7-A989-897DA66874C0}
 		{DA028E93-31C4-4363-994E-73C25AFAC7A0} = {D93ED188-9808-4EE7-A989-897DA66874C0}
