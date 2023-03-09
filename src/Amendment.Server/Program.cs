@@ -54,12 +54,16 @@ namespace Amendment
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
+            builder.Services.AddSignalR();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddMediatR(typeof(AccountLoginHandler).Assembly);
+            builder.Services.AddMediatR(configuration =>
+            {
+                configuration.RegisterServicesFromAssembly(typeof(AccountLoginHandler).Assembly);
+            });
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<>));
             builder.Services.AddValidatorsFromAssembly(typeof(AccountLoginCommand).Assembly);
             builder.Services.RegisterMapsterConfiguration();
@@ -109,6 +113,11 @@ namespace Amendment
 
             app.MapRazorPages();
             app.MapControllers();
+
+            //app.MapHub<AmendmentHub>("/amendmentHub");
+            //app.MapHub<ScreenHub>("/screenHub");
+            //app.MapHub<DiffHub>("/diffHub");
+
             app.MapFallbackToFile("index.html");
 
             app.Run();

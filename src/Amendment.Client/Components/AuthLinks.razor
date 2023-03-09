@@ -1,9 +1,11 @@
-﻿<AuthorizeView>
-    <Authorized>
-        Hello, @context.User.Identity.Name!
-        <a class="btn btn-secondary" href="Logout">Log out</a>
-    </Authorized>
-    <NotAuthorized>
-        <a class="btn btn-primary" href="Login">Log in</a>
-    </NotAuthorized>
-</AuthorizeView>
+﻿<BarItem TextColor="TextColor.Light">
+    <AuthorizeView>
+        <Authorized>
+            Hello, @context.User.Identity.Name!
+            <a class="btn btn-secondary" href="Logout">Log out</a>
+        </Authorized>
+        <NotAuthorized>
+            <a class="btn btn-primary" href="Login">Log in</a>
+        </NotAuthorized>
+    </AuthorizeView>
+</BarItem>

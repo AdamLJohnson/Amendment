@@ -1,0 +1,110 @@
+﻿@page "/Admin/User/Create"
+@page "/Admin/User/Edit/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+@using Amendment.Client.Repository
+@using Amendment.Shared.Requests
+@using Amendment.Shared.Responses
+@attribute [Authorize(Roles = "System Administrator")]
+@inject IUserRepository UserRepository
+@inject NavigationManager NavigationManager
+
+<PageTitle>@title</PageTitle>
+
+<h3>@title</h3>
+<Row>
+    <Column ColumnSize="ColumnSize.Is6">
+        <Validations @ref="@fluentValidations" Mode="ValidationMode.Manual" Model="@model" HandlerType="typeof(FluentValidationHandler)">
+            <Validation>
+                <Field>
+                    <FieldLabel For="username">Username</FieldLabel>
+                    <TextEdit id="username" @bind-Text="model.Username" Placeholder="Enter Username">
+                        <Feedback>
+                            <ValidationError/>
+                            <FieldHelp>Username for the user</FieldHelp>
+                        </Feedback>
+                    </TextEdit>
+                </Field>
+            </Validation>
+            <Validation>
+                <Field>
+                    <FieldLabel For="email">Email</FieldLabel>
+                    <TextEdit id="email" @bind-Text="model.Email" Placeholder="Enter Email">
+                        <Feedback>
+                            <ValidationError/>
+                            <FieldHelp>Email address for the user</FieldHelp>
+                        </Feedback>
+                    </TextEdit>
+                </Field>
+            </Validation>
+            <Validation>
+                <Field>
+                    <FieldLabel For="name">Name</FieldLabel>
+                    <TextEdit id="name" @bind-Text="model.Name" Placeholder="Enter Name">
+                        <Feedback>
+                            <ValidationError/>
+                            <FieldHelp>Name for the user</FieldHelp>
+                        </Feedback>
+                    </TextEdit>
+                </Field>
+            </Validation>
+            <Validation>
+                <Field>
+                    <FieldLabel For="password">Password</FieldLabel>
+                    <TextEdit id="password" @bind-Text="model.Password" Role="TextRole.Password" Placeholder="Enter Password">
+                        <Feedback>
+                            <ValidationError/>
+                            <FieldHelp>Password for the user</FieldHelp>
+                        </Feedback>
+                    </TextEdit>
+                </Field>
+            </Validation>
+            <Validation>
+                <Field>
+                    <FieldLabel For="confirmPassword">Confirm Password</FieldLabel>
+                    <TextEdit id="confirmPassword" @bind-Text="model.ConfirmPassword" Role="TextRole.Password" Placeholder="Enter Password">
+                        <Feedback>
+                            <ValidationError/>
+                        </Feedback>
+                    </TextEdit>
+                </Field>
+            </Validation>
+        </Validations>
+    </Column>
+    <Column ColumnSize="ColumnSize.Is6">
+        <h3>Roles</h3>
+    </Column>
+</Row>
+
+<Button Color="Color.Primary" Clicked="@OnSavePerson">Save</Button>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    Validations fluentValidations;
+    string title = "";
+    UserRequest model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        title = Id == null ? "Create User" : "Edit User";
+        var userResponse = Id == null ? new UserResponse() : await UserRepository.GetAsync(Id.Value);
+        model = userResponse.ToUserRequest();
+        model.IsCreate = Id == null;
+        StateHasChanged();
+    }
+
+    protected async Task OnSavePerson()
+    {
+        if ( await fluentValidations.ValidateAll() )
+        {
+            if (Id == null)
+                await UserRepository.PostAsync( model);
+            else
+                await UserRepository.PutAsync(Id ?? 0, model);
+            NavigationManager.NavigateTo("/Admin/User");
+        }
+        StateHasChanged();
+    }
+
+}

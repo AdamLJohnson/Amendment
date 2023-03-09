@@ -1,6 +1,7 @@
 using Amendment.Client;
 using Amendment.Client.AuthProviders;
 using Amendment.Client.Repository;
+using Amendment.Shared.Responses;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -9,6 +10,9 @@ using Toolbelt.Blazor.Extensions.DependencyInjection;
 using Blazorise;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
+using Blazorise.FluentValidation;
+using FluentValidation;
+using Amendment.Client.Repository.Infrastructure;
 
 namespace Amendment.Client
 {
@@ -37,7 +41,10 @@ namespace Amendment.Client
                     options.Immediate = true;
                 })
                 .AddBootstrap5Providers()
-                .AddFontAwesomeIcons();
+                .AddFontAwesomeIcons()
+                .AddBlazoriseFluentValidation();
+
+            builder.Services.AddValidatorsFromAssembly(typeof(UserResponse).Assembly);
 
             var app = builder.Build();
 

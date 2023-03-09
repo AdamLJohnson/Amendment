@@ -9,10 +9,9 @@
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.4.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="FluentValidation" Version="11.3.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.3.0" />
+    <PackageReference Include="FluentValidation" Version="11.5.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.1" />
     <PackageReference Include="Mapster" Version="7.3.0" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.0" />
@@ -28,6 +27,10 @@
     <ProjectReference Include="..\Amendment.Shared\Amendment.Shared.csproj" />
     <ProjectReference Include="..\Amendment.Repository\Amendment.Repository.csproj" />
     <ProjectReference Include="..\Amendment.Client\Amendment.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Hubs\" />
   </ItemGroup>
 
 
