@@ -34,6 +34,7 @@ namespace Amendment.Client
             builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             builder.Services.AddScoped<IAmendmentRepository, AmendmentRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
             builder.Services
                 .AddBlazorise(options =>

@@ -18,7 +18,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         _client = client;
     }
 
-    public async Task<IEnumerable<TResponse>> GetAsync()
+    public virtual async Task<IEnumerable<TResponse>> GetAsync()
     {
         var response = await _client.GetAsync(_baseUrl);
         var content = await response.Content.ReadAsStringAsync();
@@ -29,7 +29,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         return result == null ? Enumerable.Empty<TResponse>() : result.Result;
     }
 
-    public async Task<TResponse> GetAsync(int id)
+    public virtual async Task<TResponse> GetAsync(int id)
     {
         var response = await _client.GetAsync($"{_baseUrl}/{id}");
         var content = await response.Content.ReadAsStringAsync();
@@ -40,7 +40,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         return result == null ? new TResponse() : result.Result;
     }
 
-    public async Task<TResponse> PostAsync(TRequest request)
+    public virtual async Task<TResponse> PostAsync(TRequest request)
     {
         var json = JsonSerializer.Serialize(request);
         var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
@@ -53,7 +53,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         return result == null ? new TResponse() : result.Result;
     }
 
-    public async Task<TResponse> PutAsync(int id, TRequest request)
+    public virtual async Task<TResponse> PutAsync(int id, TRequest request)
     {
         var json = JsonSerializer.Serialize(request);
         var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
@@ -66,7 +66,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         return result == null ? new TResponse() : result.Result;
     }
 
-    public async Task DeleteAsync(int id)
+    public virtual async Task DeleteAsync(int id)
     {
         var response = await _client.DeleteAsync($"{_baseUrl}/{id}");
         var content = await response.Content.ReadAsStringAsync();

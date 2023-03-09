@@ -6,6 +6,7 @@ using Amendment.Shared.Requests;
 using Amendment.Shared.Responses;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ namespace Amendment.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = "System Administrator")]
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;

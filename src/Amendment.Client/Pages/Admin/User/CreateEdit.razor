@@ -6,6 +6,7 @@
 @using Amendment.Shared.Responses
 @attribute [Authorize(Roles = "System Administrator")]
 @inject IUserRepository UserRepository
+@inject IRoleRepository RoleRepository
 @inject NavigationManager NavigationManager
 
 <PageTitle>@title</PageTitle>
@@ -72,6 +73,9 @@
     </Column>
     <Column ColumnSize="ColumnSize.Is6">
         <h3>Roles</h3>
+        <Repeater Items="@roleList">
+            <Check TValue="bool" Checked="model.Roles.Contains(context.Id)" CheckedChanged="(value) => OnChanged(value, context.Id)">@context.Name</Check>
+        </Repeater>
     </Column>
 </Row>
 
@@ -84,10 +88,12 @@
     Validations fluentValidations;
     string title = "";
     UserRequest model = new();
+    IEnumerable<RoleResponse> roleList;
 
     protected override async Task OnInitializedAsync()
     {
         title = Id == null ? "Create User" : "Edit User";
+        roleList = await RoleRepository.GetAsync();
         var userResponse = Id == null ? new UserResponse() : await UserRepository.GetAsync(Id.Value);
         model = userResponse.ToUserRequest();
         model.IsCreate = Id == null;
@@ -105,6 +111,26 @@
             NavigationManager.NavigateTo("/Admin/User");
         }
         StateHasChanged();
+    }
+
+    private void OnChanged(bool value, int roleId)
+    {
+        if (model.Roles.Contains(roleId) && value)
+            return;
+
+        if (model.Roles.Contains(roleId) && !value)
+        {
+            var tempList = model.Roles.ToList();
+            tempList.Remove(roleId);
+            model.Roles = tempList.ToArray();
+        }
+
+        if (!model.Roles.Contains(roleId) && value)
+        {
+            var tempList = model.Roles.ToList();
+            tempList.Add(roleId);
+            model.Roles = tempList.ToArray();
+        }
     }
 
 }
