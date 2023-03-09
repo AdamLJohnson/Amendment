@@ -1,0 +1,24 @@
+﻿@using Amendment.Shared.Responses
+@using Amendment.Client.Repository
+@using Amendment.Shared.Requests
+@inject ISystemSettingRepository SystemSettingRepository
+
+<TableRow>
+    <TableRowCell>@context.Key</TableRowCell>
+    <TableRowCell>
+        <TextEdit id="username" @bind-Text="context.Value" />
+    </TableRowCell>
+    <TableRowCell TextAlignment="TextAlignment.End">
+        <Button Color="Color.Primary" Clicked="OnSaveClick">Save</Button>
+    </TableRowCell>
+</TableRow>
+@code {
+    [Parameter]
+    public SystemSettingResponse context { get; set; }
+
+    private Task OnSaveClick()
+    {
+        return SystemSettingRepository.PutAsync(context.Id, new SystemSettingRequest { Key = context.Key, Value = context.Value });
+    }
+
+}

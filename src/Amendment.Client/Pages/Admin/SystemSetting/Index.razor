@@ -1,0 +1,41 @@
+﻿@page "/Admin/SystemSetting"
+@using Microsoft.AspNetCore.Authorization
+@using Amendment.Client.Repository
+@using Amendment.Shared.Responses
+@attribute [Authorize(Roles = "System Administrator")]
+@inject ISystemSettingRepository SystemSettingRepository
+
+<PageTitle>System Settings</PageTitle>
+
+<h1>System Settings</h1>
+
+<Table>
+    <TableHeader>
+        <TableRow>
+            <TableHeaderCell>Name</TableHeaderCell>
+            <TableHeaderCell>Value</TableHeaderCell>
+            <TableHeaderCell></TableHeaderCell>
+        </TableRow>
+    </TableHeader>
+    <TableBody>
+        <Repeater Items="@settings">
+            <SystemSettingRow context="context"/>
+        </Repeater>
+        @if (settings.Count() == 0)
+        {
+            <TableRow>
+                <TableRowCell ColumnSpan="4">No Users Found</TableRowCell>
+            </TableRow>
+        }
+    </TableBody>
+</Table>
+
+@code {
+    IEnumerable<SystemSettingResponse> settings = Enumerable.Empty<SystemSettingResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        settings = await SystemSettingRepository.GetAsync();
+    }
+
+}
