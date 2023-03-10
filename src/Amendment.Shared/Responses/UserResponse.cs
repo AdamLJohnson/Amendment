@@ -15,7 +15,7 @@ namespace Amendment.Shared.Responses
         public string? Name { get; set; }
         public int[] Roles { get; set; } = Array.Empty<int>();
 
-        public UserRequest ToUserRequest()
+        public UserRequest ToRequest()
         {
             return new UserRequest
             {

@@ -14,6 +14,7 @@ using Amendment.Server;
 using Amendment.Service;
 using Amendment.Service.Infrastructure;
 using Autofac.Core;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Amendment
 {
@@ -28,7 +29,9 @@ namespace Amendment
             
             builder.Services.AddDbContext<Repository.AmendmentContext>(options =>
             {
+                //options.UseSqlite("Filename=:memory:");
                 options.UseInMemoryDatabase("Amendment");
+                options.ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             });
 
             var jwtSettings = builder.Configuration.GetSection("JWTSettings");

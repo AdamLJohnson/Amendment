@@ -22,8 +22,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
     {
         var response = await _client.GetAsync(_baseUrl);
         var content = await response.Content.ReadAsStringAsync();
-        if (!response.IsSuccessStatusCode)
-            return Enumerable.Empty<TResponse>();
+        response.EnsureSuccessStatusCode();
 
         var result = JsonSerializer.Deserialize<ApiResult<IEnumerable<TResponse>>>(content, _options);
         return result == null ? Enumerable.Empty<TResponse>() : result.Result;
@@ -33,8 +32,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
     {
         var response = await _client.GetAsync($"{_baseUrl}/{id}");
         var content = await response.Content.ReadAsStringAsync();
-        if (!response.IsSuccessStatusCode)
-            return new TResponse();
+        response.EnsureSuccessStatusCode();
 
         var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, _options);
         return result == null ? new TResponse() : result.Result;
@@ -46,8 +44,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await _client.PostAsync(_baseUrl, bodyContent);
         var content = await response.Content.ReadAsStringAsync();
-        if (!response.IsSuccessStatusCode)
-            return new TResponse();
+        response.EnsureSuccessStatusCode();
 
         var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, _options);
         return result == null ? new TResponse() : result.Result;
@@ -59,8 +56,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await _client.PutAsync($"{_baseUrl}/{id}", bodyContent);
         var content = await response.Content.ReadAsStringAsync();
-        if (!response.IsSuccessStatusCode)
-            return new TResponse();
+        response.EnsureSuccessStatusCode();
 
         var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, _options);
         return result == null ? new TResponse() : result.Result;

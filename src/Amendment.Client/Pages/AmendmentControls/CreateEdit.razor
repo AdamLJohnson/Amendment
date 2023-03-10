@@ -1,0 +1,137 @@
+﻿@page "/Amendment/Create"
+@page "/Amendment/Edit/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+@using Amendment.Shared.Requests
+@using Amendment.Client.Repository
+@using Amendment.Shared.Responses
+@attribute [Authorize]
+@inject ILanguageRepository LanguageRepository
+@inject IAmendmentRepository AmendmentRepository
+@inject IAmendmentBodyRepository AmendmentBodyRepository
+@inject NavigationManager NavigationManager
+
+<PageTitle>@title</PageTitle>
+
+<h3>@title</h3>
+
+<EditForm Model="model" OnValidSubmit="OnSave">
+    <Validations @ref="@fluentValidations" Mode="ValidationMode.Manual" Model="@model" HandlerType="typeof(FluentValidationHandler)">
+        <Row>
+            <Column ColumnSize="ColumnSize.Is6">
+                <Validation>
+                    <Field>
+                        <FieldLabel For="amendmentTitle">Amendment Title</FieldLabel>
+                        <TextEdit id="amendmentTitle" @bind-Text="model.Title" Placeholder="Amendment Title">
+                            <Feedback>
+                                <ValidationError/>
+                            </Feedback>
+                        </TextEdit>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field>
+                        <FieldLabel For="author">Author</FieldLabel>
+                        <TextEdit id="author" @bind-Text="model.Author" Placeholder="Author">
+                            <Feedback>
+                                <ValidationError/>
+                            </Feedback>
+                        </TextEdit>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field>
+                        <FieldLabel For="motion">Motion</FieldLabel>
+                        <TextEdit id="motion" @bind-Text="model.Motion" Placeholder="Motion">
+                            <Feedback>
+                                <ValidationError/>
+                            </Feedback>
+                        </TextEdit>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field>
+                        <FieldLabel For="source">Source</FieldLabel>
+                        <TextEdit id="source" @bind-Text="model.Source" Placeholder="Source">
+                            <Feedback>
+                                <ValidationError/>
+                            </Feedback>
+                        </TextEdit>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field>
+                        <FieldLabel For="legisId">Legislative ID</FieldLabel>
+                        <TextEdit id="legisId" @bind-Text="model.LegisId" Placeholder="Legislative ID">
+                            <Feedback>
+                                <ValidationError/>
+                            </Feedback>
+                        </TextEdit>
+                    </Field>
+                </Validation>
+            </Column>
+            <Column ColumnSize="ColumnSize.Is6">
+                <Field>
+                    <FieldLabel For="primaryLanguage">Primary Language</FieldLabel>
+                    <Select id="primaryLanguage" @bind-SelectedValue="@model.PrimaryLanguageId" TValue="int">
+                        <ChildContent>
+                            <Repeater Items="language">
+                                <ChildContent Context="languageItem">
+                                    <SelectItem Value="@languageItem.Id">@languageItem.LanguageName</SelectItem>
+                                </ChildContent>
+                            </Repeater>
+                        </ChildContent>
+                    </Select>
+                </Field>
+                @if (Id == null)
+                {
+                    <Field>
+                        <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
+                        <Markdown @bind-Value="@bodyModel.AmendBody" id="amendmentBody" UploadImage="false"></Markdown>
+                    </Field>
+                }
+            </Column>
+        </Row>
+    </Validations>
+
+    <Button Color="Color.Primary" Type="ButtonType.Submit">Save</Button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    string title = "";
+    Validations fluentValidations;
+    IEnumerable<LanguageResponse> language = Enumerable.Empty<LanguageResponse>();
+
+    AmendmentRequest model = new () { PrimaryLanguageId = 1 };
+    AmendmentBodyRequest bodyModel = new (){ AmendBody = "" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        title = Id == null ? "Create Amendment" : "Edit Amendment";
+        language = await LanguageRepository.GetAsync();
+        if (Id != null)
+        {
+            var response = await AmendmentRepository.GetAsync(Id.Value);
+            model = response.ToRequest();
+        }
+    }
+
+    protected async Task OnSave()
+    {
+        if ( await fluentValidations.ValidateAll() )
+        {
+            if (Id == null)
+            {
+                var amendModel = await AmendmentRepository.PostAsync(model);
+                bodyModel.LanguageId = amendModel.PrimaryLanguageId;
+                await AmendmentBodyRepository.PostAsync(amendModel.Id, bodyModel);
+            }
+            else
+                await AmendmentRepository.PutAsync(Id ?? 0, model);
+            NavigationManager.NavigateTo("/Amendment");
+        }
+        StateHasChanged();
+    }
+
+}

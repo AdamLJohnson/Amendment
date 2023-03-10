@@ -19,7 +19,7 @@ namespace Amendment.Client.Repository
     public class RoleRepository : HttpRepository<RoleRequest, RoleResponse>, IRoleRepository
     {
         protected override string _baseUrl { get; set; } = "api/Role";
-        private IEnumerable<RoleResponse> _roles = null;
+        private IEnumerable<RoleResponse>? _roles;
         public RoleRepository(HttpClient client) : base(client)
         {
         }

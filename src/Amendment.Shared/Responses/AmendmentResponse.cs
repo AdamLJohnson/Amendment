@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Amendment.Shared.Requests;
 
 namespace Amendment.Shared.Responses
 {
@@ -17,5 +18,18 @@ namespace Amendment.Shared.Responses
         public bool IsLive { get; set; }
         
         public int PrimaryLanguageId { get; set; }
+
+        public AmendmentRequest ToRequest()
+        {
+            return new AmendmentRequest
+            {
+                Title = Title,
+                Author = Author,
+                Motion = Motion,
+                Source = Source,
+                LegisId = LegisId,
+                PrimaryLanguageId = PrimaryLanguageId
+            };
+        }
     }
 }

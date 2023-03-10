@@ -1,0 +1,64 @@
+﻿@page "/Amendment"
+@using Microsoft.AspNetCore.Authorization
+@using Amendment.Shared.Responses
+@using Amendment.Client.Repository
+@attribute [Authorize]
+@inject IAmendmentRepository AmendmentRepository
+
+<PageTitle>Amendments</PageTitle>
+
+<h3>Amendments</h3>
+
+<Row>
+    <Column>
+        @if (_amendments.Any(a => a.IsLive))
+        {
+            <Button Color="Color.Danger">Clear Screens</Button>
+        }
+    </Column>
+    <Column>
+
+    </Column>
+    <Column TextAlignment="TextAlignment.End">
+        <Button Color="Color.Success" Type="ButtonType.Link" To="/Amendment/Create">Create Amendment</Button>
+    </Column>
+</Row>
+
+<Table>
+    <TableHeader>
+        <TableRow>
+            <TableHeaderCell>Title</TableHeaderCell>
+            <TableHeaderCell>Author</TableHeaderCell>
+            <TableHeaderCell>Motion</TableHeaderCell>
+            <TableHeaderCell Style="min-width: 200px"></TableHeaderCell>
+            <TableHeaderCell Style="min-width: 300px"></TableHeaderCell>
+        </TableRow>
+    </TableHeader>
+    <TableBody>
+        <Repeater Items="@_amendments">
+            <AmendmentTableRow Model="context" OnDelete="RefreshAmendments" />
+        </Repeater>
+        @if (_amendments.Count() == 0)
+        {
+            <TableRow>
+                <TableRowCell ColumnSpan="5">No Amendments Found</TableRowCell>
+            </TableRow>
+        }
+    </TableBody>
+</Table>
+
+
+@code {
+    IEnumerable<AmendmentResponse> _amendments = Enumerable.Empty<AmendmentResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _amendments = await AmendmentRepository.GetAsync();
+    }
+
+    private Task RefreshAmendments()
+    {
+        return OnInitializedAsync();
+    }
+
+}

@@ -33,9 +33,11 @@ namespace Amendment.Client
             builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
             builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             builder.Services.AddScoped<IAmendmentRepository, AmendmentRepository>();
+            builder.Services.AddScoped<IAmendmentBodyRepository, AmendmentBodyRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
+            builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 
             builder.Services
                 .AddBlazorise(options =>

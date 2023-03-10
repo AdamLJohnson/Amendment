@@ -25,7 +25,7 @@ public sealed class GetSingleAmendmentHandler : IRequestHandler<GetSingleAmendme
         var result = await _amendmentService.GetAsync(request.Id);
         if (result == null)
             return new ApiFailedResult<AmendmentResponse>(HttpStatusCode.NotFound);
-
+        
         return new ApiSuccessResult<AmendmentResponse>(result.Adapt<AmendmentResponse>());
     }
 }

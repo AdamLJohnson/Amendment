@@ -95,7 +95,7 @@
         title = Id == null ? "Create User" : "Edit User";
         roleList = await RoleRepository.GetAsync();
         var userResponse = Id == null ? new UserResponse() : await UserRepository.GetAsync(Id.Value);
-        model = userResponse.ToUserRequest();
+        model = userResponse.ToRequest();
         model.IsCreate = Id == null;
         StateHasChanged();
     }
