@@ -1,0 +1,91 @@
+﻿@using Amendment.Shared.Responses
+@using Amendment.Client.Repository
+@inject ILanguageRepository LanguageRepository
+@inject IAmendmentBodyRepository AmendmentBodyRepository
+
+<h3>Amendment Texts</h3>
+
+<Table Striped>
+    <TableHeader>
+        <TableRow>
+            <TableHeaderCell>Language</TableHeaderCell>
+            <TableHeaderCell></TableHeaderCell>
+        </TableRow>
+    </TableHeader>
+    <TableBody>
+        <Repeater Items="@languages">
+            <TableRow>
+                <TableRowCell>@context.LanguageName</TableRowCell>
+                <TableRowCell TextAlignment="TextAlignment.Center">
+                    @if (AmendmentBodies.Any(x => x.LanguageId == context.Id))
+                    {
+                        var amendmentBody = AmendmentBodies.First(x => x.LanguageId == context.Id);
+                        <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/{AmendmentId}/Body/Edit/{amendmentBody.Id}")>Edit</Button>
+                        <span></span>
+                        if (PrimaryLanguageId != amendmentBody.LanguageId)
+                        {
+                            <Button Color="Color.Danger" Clicked="() => ShowConfirmDelete(amendmentBody.Id)">Delete</Button>
+                        }
+                    }
+                    else
+                    {
+                        <Button Color="Color.Success" Type="ButtonType.Link" To=@($"/Amendment/{AmendmentId}/Body/Create")>Create</Button>
+                    }
+                </TableRowCell>
+            </TableRow>
+        </Repeater>
+    </TableBody>
+</Table>
+
+<Modal @ref="@modalRef" Closed="ModalClosed">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Delete Text</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            Are you sure you want to delete this amendment text?
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => modalRef.Hide()">Close</Button>
+            <Button Color="Color.Primary" Clicked="() => DeleteBody()">Delete Text</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code
+{
+    private Modal? modalRef;
+    [Parameter, EditorRequired]
+    public int AmendmentId { get; set; }
+    [Parameter, EditorRequired]
+    public int PrimaryLanguageId { get; set; }
+    [Parameter, EditorRequired]
+    public List<AmendmentBodySummary> AmendmentBodies { get; set; } = new();
+
+    IEnumerable<LanguageResponse> languages = Enumerable.Empty<LanguageResponse>();
+    int deleteBody = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        languages = await LanguageRepository.GetAsync();
+    }
+
+    private async Task DeleteBody()
+    {
+        await AmendmentBodyRepository.DeleteAsync(AmendmentId, deleteBody);
+        AmendmentBodies.RemoveAll(x => x.Id == deleteBody);
+        modalRef.Hide();
+    }
+
+    private void ShowConfirmDelete(int amendmentBodyId)
+    {
+        deleteBody = amendmentBodyId;
+        modalRef.Show();
+    }
+
+    private void ModalClosed()
+    {
+        deleteBody = 0;
+    }
+}

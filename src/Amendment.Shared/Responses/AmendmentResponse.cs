@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Amendment.Shared.Enums;
 using Amendment.Shared.Requests;
 
 namespace Amendment.Shared.Responses
@@ -16,7 +17,9 @@ namespace Amendment.Shared.Responses
         public string Source { get; set; }
         public string LegisId { get; set; }
         public bool IsLive { get; set; }
-        
+        public IEnumerable<AmendmentBodySummary> AmendmentBodies { get; set; } = Enumerable.Empty<AmendmentBodySummary>();
+
+
         public int PrimaryLanguageId { get; set; }
 
         public AmendmentRequest ToRequest()
@@ -31,5 +34,14 @@ namespace Amendment.Shared.Responses
                 PrimaryLanguageId = PrimaryLanguageId
             };
         }
+    }
+
+    public class AmendmentBodySummary
+    {
+        public int Id { get; set; }
+        public int AmendId { get; set; }
+        public int LanguageId { get; set; }
+        public AmendmentBodyStatus AmendStatus { get; set; }
+        public bool IsLive { get; set; }
     }
 }

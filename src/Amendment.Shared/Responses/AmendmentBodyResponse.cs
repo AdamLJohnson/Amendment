@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Amendment.Shared.Enums;
+using Amendment.Shared.Requests;
 
 namespace Amendment.Shared.Responses
 {
@@ -15,5 +16,15 @@ namespace Amendment.Shared.Responses
         public string AmendBody { get; set; }
         public AmendmentBodyStatus AmendStatus { get; set; }
         public bool IsLive { get; set; }
+
+        public AmendmentBodyRequest ToRequest()
+        {
+            return new AmendmentBodyRequest
+            {
+                LanguageId = LanguageId,
+                AmendBody = AmendBody,
+                AmendStatus = AmendStatus
+            };
+        }
     }
 }

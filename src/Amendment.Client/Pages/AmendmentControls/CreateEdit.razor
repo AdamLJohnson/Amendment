@@ -89,6 +89,10 @@
                         <Markdown @bind-Value="@bodyModel.AmendBody" id="amendmentBody" UploadImage="false"></Markdown>
                     </Field>
                 }
+                else
+                {
+                    <AmendmentEditBodies AmendmentId="Id.Value" PrimaryLanguageId="model.PrimaryLanguageId" AmendmentBodies="amendmentBodySummaries.ToList()"></AmendmentEditBodies>
+                }
             </Column>
         </Row>
     </Validations>
@@ -102,6 +106,7 @@
     string title = "";
     Validations fluentValidations;
     IEnumerable<LanguageResponse> language = Enumerable.Empty<LanguageResponse>();
+    IEnumerable<AmendmentBodySummary> amendmentBodySummaries = Enumerable.Empty<AmendmentBodySummary>();
 
     AmendmentRequest model = new () { PrimaryLanguageId = 1 };
     AmendmentBodyRequest bodyModel = new (){ AmendBody = "" };
@@ -114,6 +119,7 @@
         {
             var response = await AmendmentRepository.GetAsync(Id.Value);
             model = response.ToRequest();
+            amendmentBodySummaries = response.AmendmentBodies;
         }
     }
 

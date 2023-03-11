@@ -24,7 +24,7 @@
     </Column>
 </Row>
 
-<Table>
+<Table Striped>
     <TableHeader>
         <TableRow>
             <TableHeaderCell>Title</TableHeaderCell>
@@ -36,9 +36,9 @@
     </TableHeader>
     <TableBody>
         <Repeater Items="@_amendments">
-            <AmendmentTableRow Model="context" OnDelete="RefreshAmendments" />
+            <AmendmentTableRow Model="context" OnDelete="RefreshAmendments" LiveAmendmentId="_amendments.SingleOrDefault(x => x.IsLive)?.Id"/>
         </Repeater>
-        @if (_amendments.Count() == 0)
+        @if (_amendments.Any())
         {
             <TableRow>
                 <TableRowCell ColumnSpan="5">No Amendments Found</TableRowCell>

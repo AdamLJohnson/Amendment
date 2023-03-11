@@ -8,6 +8,10 @@ public sealed class AmendmentBodyRequestValidator : AbstractValidator<AmendmentB
     public AmendmentBodyRequestValidator()
     {
         RuleFor(x => x.LanguageId)
+            .NotEqual(0).WithMessage("Language is required")
+            //.NotEmpty().WithMessage("Language is required")
+            ;
+        RuleFor(x => x.AmendBody)
             .NotEmpty();
     }
 }

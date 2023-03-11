@@ -37,7 +37,7 @@
                         </TableRowCell>
                     </TableRow>
                 </Repeater>
-                @if (users.Count() == 0)
+                @if (users.Any())
                 {
                     <TableRow>
                         <TableRowCell ColumnSpan="4">No Users Found</TableRowCell>

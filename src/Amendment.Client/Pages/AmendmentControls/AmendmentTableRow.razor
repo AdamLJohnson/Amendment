@@ -24,7 +24,7 @@
         {
             <Button Color="Color.Success">Control Screens</Button> 
         }
-        else
+        @if ((LiveAmendmentId ?? 0) == 0)
         {
             <Button Color="Color.Warning">Go Live</Button> 
         }
@@ -60,6 +60,9 @@
 
     [Parameter]
     public EventCallback OnDelete { get; set; }
+
+    [Parameter]
+    public int? LiveAmendmentId { get; set; }
 
     private Modal? modalRef;
 
