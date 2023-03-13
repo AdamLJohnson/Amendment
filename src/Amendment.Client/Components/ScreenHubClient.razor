@@ -1,10 +1,8 @@
 ﻿@using Microsoft.AspNetCore.SignalR.Client
 @using Amendment.Shared.Responses
 @using Amendment.Client.Repository
-@using Amendment.Client.AuthProviders
 @inject NavigationManager NavigationManager
 @inject IHubEventService HubEventService
-@inject IRefreshTokenService RefreshTokenService
 @implements IAsyncDisposable
 @implements IDisposable
 
@@ -13,14 +11,10 @@
     private HubConnection? hubConnection;
     protected override async Task OnInitializedAsync()
     {
-        var token = await RefreshTokenService.TryRefreshToken();
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/amendmentHub"), options =>
-            {
-                options.AccessTokenProvider = () => Task.FromResult(token)!;
-            })
+            .WithUrl(NavigationManager.ToAbsoluteUri("/screenHub"))
             .Build();
-
+            
         hubConnection.On<SignalRResponse<AmendmentResponse>>("AmendmentUpdate", response =>
         {
             HubEventService.OnAmendmentUpdated(response);

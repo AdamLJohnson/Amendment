@@ -1,0 +1,86 @@
+﻿@page "/ScreenControl"
+@using Microsoft.AspNetCore.Authorization
+@using Amendment.Client.Repository
+@using Amendment.Shared.Enums
+@using Amendment.Shared.Responses
+@attribute [Authorize]
+@implements IDisposable
+@inject IAmendmentRepository AmendmentRepository
+@inject IHubEventService HubEventService
+
+<PageTitle>Screen Control</PageTitle>
+<h3>Screen Control</h3>
+
+@if (_amendment != null)
+{
+
+}
+else
+{
+    <h4>No amendments are currently live</h4>
+    <Button Color="Color.Primary" Type="ButtonType.Link" To=@("/Amendment")>Go to Amendments</Button>
+}
+
+@code {
+    AmendmentFullBodyResponse? _amendment = null;
+    protected override async Task OnInitializedAsync()
+    {
+        _amendment = await AmendmentRepository.GetLiveAsync();
+        HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
+        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+        HubEventService.ClearScreens += ClearScreensEvent;
+    }
+    
+    private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
+    {
+        if (_amendment == null)
+            return;
+        if (_amendment.Id != e.Value.AmendId)
+            return;
+            
+        switch (e.OperationType)
+        {
+            case OperationType.Create:
+                _amendment.AmendmentBodies.Add(e.Value);
+                break;
+            case OperationType.Update:
+                var i = _amendment.AmendmentBodies.FindIndex(x => x.Id == e.Value.Id);
+                if (i > -1)
+                    _amendment.AmendmentBodies[i] = e.Value;
+                break;
+            case OperationType.Delete:
+                _amendment?.AmendmentBodies.RemoveAll(x => x.Id == e.Value.Id);
+                break;
+        }
+
+        StateHasChanged();
+    }
+
+    private async void AmendmentUpdatedEvent(object? sender, SignalRResponse<AmendmentResponse> e)
+    {
+        if (e.Value.IsLive)
+        {
+            _amendment = await AmendmentRepository.GetLiveAsync();
+            StateHasChanged();
+            return;
+        }
+
+
+        if (_amendment != null && _amendment.Id == e.Value.Id && !e.Value.IsLive)
+        {
+            _amendment = null;
+            StateHasChanged();
+            return;
+        }
+    }
+
+    private void ClearScreensEvent(object? sender, EventArgs e) => _amendment = null;
+
+    public void Dispose()
+    {
+        HubEventService.AmendmentUpdated -= AmendmentUpdatedEvent;
+        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+        HubEventService.ClearScreens -= ClearScreensEvent;
+    }
+
+}

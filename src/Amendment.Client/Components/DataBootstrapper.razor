@@ -1,0 +1,8 @@
+﻿@using Amendment.Client.Repository
+@inject ILanguageRepository LanguageRepository
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        return LanguageRepository.GetAsync();
+    }
+}

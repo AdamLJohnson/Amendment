@@ -16,10 +16,12 @@ namespace Amendment.Server.PipelineBehaviors;
 public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
 {
     private readonly IHubContext<AmendmentHub> _amendmentHub;
+    private readonly IHubContext<ScreenHub> _screenHub;
 
-    public ClientNotificationBehavior(IHubContext<AmendmentHub> amendmentHub)
+    public ClientNotificationBehavior(IHubContext<AmendmentHub> amendmentHub, IHubContext<ScreenHub> screenHub)
     {
         _amendmentHub = amendmentHub;
+        _screenHub = screenHub;
     }
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -48,22 +50,35 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
                 await NotifySystemSettingUpdate(OperationType.Update, (IApiResult<SystemSettingResponse>)result!);
                 break;
             case ClearScreensCommand csc:
+                await NotifyClearScreens();
                 break;
         }
         return result;
     }
-    
-    private Task NotifyAmendmentChange(OperationType operationType, IApiResult<AmendmentResponse>? result)
+
+
+    private async Task NotifyAmendmentChange(OperationType operationType, IApiResult<AmendmentResponse>? result)
     {
-        return _amendmentHub.Clients.All.SendAsync("AmendmentUpdate", new SignalRResponse<AmendmentResponse>(operationType, result.Result));
+        var tasks = new List<Task>();
+        tasks.Add(_amendmentHub.Clients.All.SendAsync("AmendmentUpdate", new SignalRResponse<AmendmentResponse>(operationType, result.Result)));
+
+        if(result.Result.IsLive)
+            tasks.Add(_screenHub.Clients.All.SendAsync("AmendmentUpdate", new SignalRResponse<AmendmentResponse>(operationType, result.Result)));
+
+        await Task.WhenAll(tasks);
     }
     private Task NotifyAmendmentDelete(int id)
     {
         return _amendmentHub.Clients.All.SendAsync("AmendmentUpdate", new SignalRResponse<AmendmentResponse>(OperationType.Delete, new AmendmentResponse() { Id = id }));
     }
-    private Task NotifyAmendmentBodyChange(OperationType operationType, IApiResult<AmendmentBodyResponse>? result)
+    private async Task NotifyAmendmentBodyChange(OperationType operationType, IApiResult<AmendmentBodyResponse>? result)
     {
-        return _amendmentHub.Clients.All.SendAsync("AmendmentBodyUpdate", new SignalRResponse<AmendmentBodyResponse>(operationType, result.Result));
+        var tasks = new List<Task>();
+        tasks.Add(_amendmentHub.Clients.All.SendAsync("AmendmentBodyUpdate", new SignalRResponse<AmendmentBodyResponse>(operationType, result.Result)));
+
+        if (result.Result.IsLive)
+            tasks.Add(_screenHub.Clients.All.SendAsync("AmendmentBodyUpdate", new SignalRResponse<AmendmentBodyResponse>(operationType, result.Result)));
+        await Task.WhenAll(tasks);
     }
     private Task NotifyAmendmentBodyDelete(int id, int amendmentId)
     {
@@ -72,5 +87,14 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
     private Task NotifySystemSettingUpdate(OperationType update, IApiResult<SystemSettingResponse> result)
     {
         return _amendmentHub.Clients.All.SendAsync("SystemSettingUpdate", new SignalRResponse<SystemSettingResponse>(OperationType.Update, result.Result));
+    }
+    private async Task NotifyClearScreens()
+    {
+        var tasks = new List<Task>
+        {
+            _amendmentHub.Clients.All.SendAsync("ClearScreens"),
+            _screenHub.Clients.All.SendAsync("ClearScreens")
+        };
+        await Task.WhenAll(tasks);
     }
 }

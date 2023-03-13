@@ -29,7 +29,7 @@ namespace Amendment.Client.Repository
 
         Task<IEnumerable<AmendmentBodyResponse>> IAmendmentBodyRepository.GetAsync(int amendmentId)
         {
-            _baseUrl = $"api/Amendment/{amendmentId}";
+            _baseUrl = $"api/Amendment/{amendmentId}/Body";
             return base.GetAsync();
         }
 
@@ -55,35 +55,6 @@ namespace Amendment.Client.Repository
         {
             _baseUrl = $"api/Amendment/{amendmentId}/Body";
             return base.DeleteAsync(id);
-        }
-
-
-
-
-
-        public override Task<IEnumerable<AmendmentBodyResponse>> GetAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<AmendmentBodyResponse> GetAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<AmendmentBodyResponse> PostAsync(AmendmentBodyRequest request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<AmendmentBodyResponse> PutAsync(int id, AmendmentBodyRequest request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task DeleteAsync(int id)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -2,20 +2,23 @@
 
 namespace Amendment.Client.Repository
 {
-    public interface IAmendmentHubService
+    public interface IHubEventService
     {
         event EventHandler<SignalRResponse<AmendmentResponse>> AmendmentUpdated;
         event EventHandler<SignalRResponse<AmendmentBodyResponse>> AmendmentBodyUpdated;
         event EventHandler<SignalRResponse<SystemSettingResponse>> SystemSettingUpdated;
+        event EventHandler ClearScreens;
         void OnAmendmentUpdated(SignalRResponse<AmendmentResponse> e);
         void OnAmendmentBodyUpdated(SignalRResponse<AmendmentBodyResponse> e);
         void OnSystemSettingUpdated(SignalRResponse<SystemSettingResponse> e);
+        void OnClearScreens();
     }
-    public sealed class AmendmentHubService : IAmendmentHubService
+    public sealed class HubEventService : IHubEventService
     {
         public event EventHandler<SignalRResponse<AmendmentResponse>> AmendmentUpdated;
         public event EventHandler<SignalRResponse<AmendmentBodyResponse>> AmendmentBodyUpdated;
         public event EventHandler<SignalRResponse<SystemSettingResponse>> SystemSettingUpdated;
+        public event EventHandler ClearScreens;
 
         public void OnAmendmentUpdated(SignalRResponse<AmendmentResponse> e)
         {
@@ -30,6 +33,11 @@ namespace Amendment.Client.Repository
         public void OnSystemSettingUpdated(SignalRResponse<SystemSettingResponse> e)
         {
             SystemSettingUpdated?.Invoke(this, e);
+        }
+
+        public void OnClearScreens()
+        {
+            ClearScreens?.Invoke(this, EventArgs.Empty);
         }
     }
 }

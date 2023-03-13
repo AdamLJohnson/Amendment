@@ -59,6 +59,23 @@ namespace Amendment
                     ValidAudience = jwtSettings["validAudience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["securityKey"] ?? throw new NullReferenceException("Security key can not be null")))
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // If the request is for our hub...
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            (path.StartsWithSegments("/amendmentHub")))
+                        {
+                            // Read the token out of the query string
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             // Add services to the container.
@@ -82,7 +99,7 @@ namespace Amendment
             builder.Services.AddScoped<ITokenService, TokenService>();
 
             var app = builder.Build();
-            app.UseResponseCompression();
+            //app.UseResponseCompression();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -95,6 +112,7 @@ namespace Amendment
             }
             else
             {
+                app.UseResponseCompression();
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
@@ -127,7 +145,7 @@ namespace Amendment
             app.MapControllers();
 
             app.MapHub<AmendmentHub>("/amendmentHub");
-            //app.MapHub<ScreenHub>("/screenHub");
+            app.MapHub<ScreenHub>("/screenHub");
             //app.MapHub<DiffHub>("/diffHub");
 
             app.MapFallbackToFile("index.html");

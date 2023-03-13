@@ -7,6 +7,12 @@ namespace Amendment.Client.AuthProviders
     {
         private readonly HttpClientInterceptor _interceptor;
         private readonly IRefreshTokenService _refreshTokenService;
+        private readonly List<string> _anonymousUrls = new ()
+        {
+            "api/account/login",
+            "api/account/refreshtoken",
+            "api/language"
+        };
 
         public HttpInterceptorService(HttpClientInterceptor interceptor, IRefreshTokenService refreshTokenService)
         {
@@ -18,8 +24,7 @@ namespace Amendment.Client.AuthProviders
         public async Task InterceptBeforeHttpAsync(object sender, HttpClientInterceptorEventArgs e)
         {
             var absPath = e.Request.RequestUri.AbsolutePath;
-            if (absPath.Contains("api/account/login", StringComparison.CurrentCultureIgnoreCase) ||
-                absPath.Contains("api/account/refreshtoken", StringComparison.CurrentCultureIgnoreCase))
+            if (_anonymousUrls.Any(z => absPath.Contains(z, StringComparison.CurrentCultureIgnoreCase)))
             {
                 return;
             }

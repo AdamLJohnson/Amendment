@@ -28,6 +28,13 @@ namespace Amendment.Server.Controllers
             return results.ToResult();
         }
 
+        [HttpGet("Live")]
+        public async Task<IResult> GetLive()
+        {
+            var results = await _mediator.Send(new GetLiveAmendmentQuery());
+            return results.ToResult();
+        }
+
         [HttpGet("{id}")]
         public async Task<IResult> Get(int id)
         {

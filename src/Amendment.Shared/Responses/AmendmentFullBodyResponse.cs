@@ -8,7 +8,7 @@ using Amendment.Shared.Requests;
 
 namespace Amendment.Shared.Responses
 {
-    public sealed class AmendmentResponse
+    public sealed class AmendmentFullBodyResponse
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -17,7 +17,7 @@ namespace Amendment.Shared.Responses
         public string Source { get; set; }
         public string LegisId { get; set; }
         public bool IsLive { get; set; }
-        public List<AmendmentBodySummary> AmendmentBodies { get; set; } = new ();
+        public List<AmendmentBodyResponse> AmendmentBodies { get; set; } = new ();
 
 
         public int PrimaryLanguageId { get; set; }
@@ -35,14 +35,5 @@ namespace Amendment.Shared.Responses
                 IsLive = IsLive
             };
         }
-    }
-
-    public class AmendmentBodySummary
-    {
-        public int Id { get; set; }
-        public int AmendId { get; set; }
-        public int LanguageId { get; set; }
-        public AmendmentBodyStatus AmendStatus { get; set; }
-        public bool IsLive { get; set; }
     }
 }

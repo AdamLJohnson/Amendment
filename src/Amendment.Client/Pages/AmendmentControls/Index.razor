@@ -6,7 +6,8 @@
 @implements IDisposable
 @attribute [Authorize]
 @inject IAmendmentRepository AmendmentRepository
-@inject IAmendmentHubService AmendmentHubService
+@inject IAmendmentBodyRepository AmendmentBodyRepository
+@inject IHubEventService HubEventService
 
 <PageTitle>Amendments</PageTitle>
 
@@ -16,7 +17,7 @@
     <Column>
         @if (_amendments.Any(a => a.IsLive))
         {
-            <Button Color="Color.Danger">Clear Screens</Button>
+            <Button Color="Color.Danger" Clicked="ClearScreens">Clear Screens</Button>
         }
     </Column>
     <Column>
@@ -62,8 +63,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        AmendmentHubService.AmendmentUpdated += AmendmentUpdatedEvent;
-        AmendmentHubService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
+        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
         _amendments = (await AmendmentRepository.GetAsync()).ToList();
     }
 
@@ -117,8 +118,31 @@
 
     public void Dispose()
     {
-        AmendmentHubService.AmendmentUpdated -= AmendmentUpdatedEvent;
-        AmendmentHubService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentUpdated -= AmendmentUpdatedEvent;
+        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+    }
+
+    private async Task ClearScreens()
+    {
+        var liveAmendment = _amendments.FirstOrDefault(a => a.IsLive);
+        if (liveAmendment == null)
+            return;
+
+        var amendmentId = liveAmendment.Id;
+        var amendmentBodies = await AmendmentBodyRepository.GetAsync(amendmentId);
+
+        var amendmentRequest = liveAmendment.ToRequest();
+        amendmentRequest.IsLive = false;
+
+        await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
+
+        foreach (var body in amendmentBodies.Where(x => x.IsLive))
+        {
+            var bodyRequest = body.ToRequest();
+            bodyRequest.IsLive = false;
+            bodyRequest.Page = 0;
+            await AmendmentBodyRepository.PutAsync(amendmentId, body.Id, bodyRequest);
+        }
     }
 
 }

@@ -23,11 +23,11 @@
 
         @if (_model.IsLive)
         {
-            <Button Color="Color.Success">Control Screens</Button> 
+            <Button Color="Color.Success" Type="ButtonType.Link" To=@("/ScreenControl")>Control Screens</Button>
         }
         @if ((LiveAmendmentId ?? 0) == 0)
         {
-            <Button Color="Color.Warning">Go Live</Button> 
+            <Button Color="Color.Warning" Clicked="GoLive">Go Live</Button> 
         }
         <span></span>
         <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{_model.Id}")>Edit</Button>
@@ -79,6 +79,13 @@
         await AmendmentRepository.DeleteAsync(_model.Id);
         await modalRef.Hide();
         OnDelete.InvokeAsync();
+    }
+
+    private async Task GoLive()
+    {
+        var amendmentRequest = _model.ToRequest();
+        amendmentRequest.IsLive = true;
+        await AmendmentRepository.PutAsync(_model.Id, amendmentRequest);
     }
 
 }
