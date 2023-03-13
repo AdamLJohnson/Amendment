@@ -1,34 +1,55 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Amendment</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+﻿<BarBrand>
+    Amendments
+</BarBrand>
+<BarToggler />
+<BarMenu>
+    <BarStart>
+        <BarItem>
+            <BarLink To="/">Home</BarLink>
+        </BarItem>
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
-@code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-}
+        <AuthorizeView>
+            <Authorized>
+                <BarItem>
+                    <BarDropdown>
+                        <BarDropdownToggle>View Amendments</BarDropdownToggle>
+                        <BarDropdownMenu>
+                            <BarDropdownItem>
+                                <BarLink To="/" TextColor="TextColor.Dark">English</BarLink>
+                            </BarDropdownItem>
+                            <BarDropdownItem>
+                                <BarLink To="/" TextColor="TextColor.Dark">Spanish</BarLink>
+                            </BarDropdownItem>
+                            <BarDropdownItem>
+                                <BarLink To="/" TextColor="TextColor.Dark">French</BarLink>
+                            </BarDropdownItem>
+                        </BarDropdownMenu>
+                    </BarDropdown>
+                </BarItem>
+                <BarItem>
+                    <BarLink To="/Amendment">
+                        Amendments
+                    </BarLink>
+                </BarItem>
+                <BarItem>
+                    <BarDropdown Background="Background.Light">
+                        <BarDropdownToggle>Admin</BarDropdownToggle>
+                        <BarDropdownMenu>
+                            <BarDropdownItem>
+                                <BarLink To="/Admin/User" TextColor="TextColor.Dark">
+                                    Users
+                                </BarLink>
+                            </BarDropdownItem>
+                            <BarDropdownItem>
+                                <BarLink To="/Admin/SystemSetting" TextColor="TextColor.Dark">System Settings</BarLink>
+                            </BarDropdownItem>
+                        </BarDropdownMenu>
+                    </BarDropdown>
+                </BarItem>
+            </Authorized>
+        </AuthorizeView>
+    </BarStart>
+    <BarEnd>
+        <AuthLinks />
+    </BarEnd>
+</BarMenu>

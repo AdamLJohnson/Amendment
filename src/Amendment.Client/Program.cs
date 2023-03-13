@@ -38,6 +38,7 @@ namespace Amendment.Client
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+            builder.Services.AddScoped<IAmendmentHubService, AmendmentHubService>();
 
             builder.Services
                 .AddBlazorise(options =>

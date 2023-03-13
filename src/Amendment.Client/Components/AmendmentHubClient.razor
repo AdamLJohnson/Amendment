@@ -1,0 +1,34 @@
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@using Amendment.Shared.Responses
+@using Amendment.Client.Repository
+@inject NavigationManager NavigationManager
+@inject IAmendmentHubService AmendmentHubService
+
+@code {
+
+    private HubConnection? amendmentHubConnection;
+    protected override async Task OnInitializedAsync()
+    {
+        amendmentHubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/amendmentHub"))
+            .Build();
+            
+        amendmentHubConnection.On<SignalRResponse<AmendmentResponse>>("AmendmentUpdate", response =>
+        {
+            AmendmentHubService.OnAmendmentUpdated(response);
+        });
+
+        amendmentHubConnection.On<SignalRResponse<AmendmentBodyResponse>>("AmendmentBodyUpdate", response =>
+        {
+            AmendmentHubService.OnAmendmentBodyUpdated(response);
+        });
+
+        amendmentHubConnection.On<SignalRResponse<SystemSettingResponse>>("SystemSettingUpdate", response =>
+        {
+            AmendmentHubService.OnSystemSettingUpdated(response);
+        });
+
+        await amendmentHubConnection.StartAsync(); 
+    }
+
+}

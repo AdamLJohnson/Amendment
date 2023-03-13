@@ -17,7 +17,7 @@ namespace Amendment.Shared.Responses
         public string Source { get; set; }
         public string LegisId { get; set; }
         public bool IsLive { get; set; }
-        public IEnumerable<AmendmentBodySummary> AmendmentBodies { get; set; } = Enumerable.Empty<AmendmentBodySummary>();
+        public List<AmendmentBodySummary> AmendmentBodies { get; set; } = new ();
 
 
         public int PrimaryLanguageId { get; set; }

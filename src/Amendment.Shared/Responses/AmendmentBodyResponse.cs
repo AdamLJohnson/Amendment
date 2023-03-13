@@ -16,6 +16,7 @@ namespace Amendment.Shared.Responses
         public string AmendBody { get; set; }
         public AmendmentBodyStatus AmendStatus { get; set; }
         public bool IsLive { get; set; }
+        public int Page { get; set; } = 0;
 
         public AmendmentBodyRequest ToRequest()
         {
@@ -23,7 +24,9 @@ namespace Amendment.Shared.Responses
             {
                 LanguageId = LanguageId,
                 AmendBody = AmendBody,
-                AmendStatus = AmendStatus
+                AmendStatus = AmendStatus,
+                IsLive = IsLive,
+                Page = Page
             };
         }
     }

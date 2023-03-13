@@ -1,0 +1,29 @@
+﻿@using Amendment.Client.Repository
+@inject ISystemSettingRepository SystemSettingRepository
+
+<div class="screen-page-text">
+    <div class="deafSignerPusher"></div>
+    @if (_showDeafSigner == "1")
+    {
+        <div class="deafSignerBox@(_showDeafSignerBox == "1" ? " deafSignerBackground" : "")"></div>
+    }
+    <div>@((MarkupString)Markdig.Markdown.ToHtml(BodyText))</div>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public string BodyText { get; set; } = "";
+
+    string _showDeafSigner = "0";
+    string _showDeafSignerBox = "0";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var settings = (await SystemSettingRepository.GetAsync()).ToList();
+        _showDeafSigner = settings.First(x => x.Key == "ShowDeafSigner").Value;
+        _showDeafSignerBox = settings.First(x => x.Key == "ShowDeafSignerBox").Value;
+    }
+
+}

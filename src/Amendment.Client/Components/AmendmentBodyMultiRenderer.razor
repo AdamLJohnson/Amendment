@@ -1,0 +1,19 @@
+﻿<Repeater Items="_renderedBodyText">
+    <div class="screen-page-height">
+        <div class="screen-page screen-border">
+            <AmendmentBodySingleRenderer BodyText="@context"></AmendmentBodySingleRenderer>
+        </div>
+    </div>
+</Repeater>
+
+@code {
+    [Parameter]
+    public string BodyText { get; set; } = "";
+
+    string[] _renderedBodyText = Array.Empty<string>();
+
+    protected override void OnParametersSet()
+    {
+        _renderedBodyText = BodyText.Split("**NEWSLIDE**");
+    }
+}

@@ -11,8 +11,10 @@ using Amendment.Server.PipelineBehaviors;
 using Amendment.Server.Mediator.Handlers;
 using Amendment.Server.Mediator.Commands;
 using Amendment.Server;
+using Amendment.Server.Hubs;
 using Amendment.Service;
 using Amendment.Service.Infrastructure;
+using Microsoft.AspNetCore.ResponseCompression;
 using Autofac.Core;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -26,7 +28,12 @@ namespace Amendment
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
             builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule(new RegisterDataServices()));
             //builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule<RegisterMapperProfile>());
-            
+            builder.Services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
+            });
+
             builder.Services.AddDbContext<Repository.AmendmentContext>(options =>
             {
                 //options.UseSqlite("Filename=:memory:");
@@ -68,13 +75,15 @@ namespace Amendment
                 configuration.RegisterServicesFromAssembly(typeof(AccountLoginHandler).Assembly);
             });
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<>));
+            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ClientNotificationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(AccountLoginCommand).Assembly);
             builder.Services.RegisterMapsterConfiguration();
             builder.Services.AddSingleton<IClientNotifier, MockClientNotifier>();
             builder.Services.AddScoped<ITokenService, TokenService>();
 
             var app = builder.Build();
-            
+            app.UseResponseCompression();
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -117,7 +126,7 @@ namespace Amendment
             app.MapRazorPages();
             app.MapControllers();
 
-            //app.MapHub<AmendmentHub>("/amendmentHub");
+            app.MapHub<AmendmentHub>("/amendmentHub");
             //app.MapHub<ScreenHub>("/screenHub");
             //app.MapHub<DiffHub>("/diffHub");
 

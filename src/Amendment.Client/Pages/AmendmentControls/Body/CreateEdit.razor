@@ -1,4 +1,4 @@
-﻿@page "/Amendment/{AmendmentId:int}/Body/Create"
+﻿@page "/Amendment/{AmendmentId:int}/Body/Create/{LanguageId:int?}"
 @page "/Amendment/{AmendmentId:int}/Body/Edit/{id:int}"
 @using Microsoft.AspNetCore.Authorization
 @using Amendment.Client.Repository
@@ -10,6 +10,8 @@
 @inject IAmendmentRepository AmendmentRepository
 @inject IAmendmentBodyRepository AmendmentBodyRepository
 @inject ILanguageRepository LanguageRepository
+@inject ISystemSettingRepository SystemSettingRepository
+@inject NavigationManager NavigationManager
 <PageTitle>@_title</PageTitle>
 <h3>@_amendment.Title</h3>
 
@@ -53,7 +55,7 @@
                 </Validation>
                 <Field>
                     <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
-                    <Markdown @bind-Value="@_model.AmendBody" id="amendmentBody" UploadImage="false" SpellChecker="false" @ref="_markdown" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}})>
+                    <Markdown Value="@_model.AmendBody" id="amendmentBody" ValueChanged="MarkdownValueChanged" UploadImage="false" SpellChecker="false" @ref="_markdown" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}})>
                         <Toolbar>
                             <MarkdownToolbarButton Action="MarkdownAction.Bold"/>
                             <MarkdownToolbarButton Action="MarkdownAction.Italic" />
@@ -64,7 +66,7 @@
                             <MarkdownToolbarButton Action="MarkdownAction.OrderedList" />
                             <MarkdownToolbarButton Action="MarkdownAction.Link" Separator />
                             <MarkdownToolbarButton Action="MarkdownAction.Image" />
-                            <MarkdownToolbarButton Action="MarkdownAction.HorizontalRule" Icon="fa fa-plus" />
+                            <MarkdownToolbarButton Action="MarkdownAction.HorizontalRule" Icon="fa fa-plus" Separator />
                         </Toolbar>
                     </Markdown>
                 </Field>
@@ -73,18 +75,20 @@
             <Button Color="Color.Primary" Type="ButtonType.Submit">Save</Button>
         </EditForm>
     </Column>
-    <Column>
-        <Tabs SelectedTab="@_selectedTab">
+    <Column Class="amendment-body-tabs">
+        <Tabs SelectedTab="@_selectedTab" SelectedTabChanged="SelectedTabChanged">
             <Items>
-                <Tab Name="english">English</Tab>
+                <Tab Name="primaryLanguageTab">@_primaryLanguageName</Tab>
                 <Tab Name="preview">Preview</Tab>
             </Items>
             <Content>
-                <TabPanel Name="english">
-                    @_englishBody.AmendBody
+                <TabPanel Name="primaryLanguageTab" Class="tab-pane">
+                    <AmendmentBodyMultiRenderer BodyText="@_primaryLanguageBody.AmendBody"></AmendmentBodyMultiRenderer>
                 </TabPanel>
-                <TabPanel Name="preview">
-                    Content for preview.
+                <TabPanel Name="preview" Class="tab-pane">
+                    <Div class="text-preview">
+                        <AmendmentBodyMultiRenderer BodyText="@_model.AmendBody"></AmendmentBodyMultiRenderer>
+                    </Div>
                 </TabPanel>
             </Content>
         </Tabs>
@@ -97,12 +101,15 @@
     public int? Id { get; set; }
     [Parameter]
     public int AmendmentId { get; set; }
+    [Parameter]
+    public int? LanguageId { get; set; }
     string _title = "";
-    AmendmentBodyRequest _model = new();
-    string _selectedTab = "english";
+    AmendmentBodyRequest _model = new() { AmendBody = "" };
+    string _selectedTab = "primaryLanguageTab";
 
     AmendmentResponse _amendment = new();
-    AmendmentBodyResponse _englishBody = new() { AmendBody = "" } ;
+    AmendmentBodyResponse _primaryLanguageBody = new() { AmendBody = "" } ;
+    string _primaryLanguageName = "English";
 
     Validations fluentValidations;
     Markdown _markdown;
@@ -114,49 +121,58 @@
         _title = Id == null ? "Create Amendment Body" : "Edit Amendment Body";
         var languages = await LanguageRepository.GetAsync();
         _amendment = await AmendmentRepository.GetAsync(AmendmentId);
-        
         _languages = languages.ToList();
 
-        var englishBodyId = _amendment.AmendmentBodies.FirstOrDefault(x => x.LanguageId == _languages.First(x => x.LanguageName == "English").Id);
-        if (englishBodyId != null)
-            _englishBody = await AmendmentBodyRepository.GetAsync(AmendmentId, englishBodyId.Id);
+        _primaryLanguageName = _languages.Single(x => x.Id == _amendment.PrimaryLanguageId).LanguageName;
+
+        var primaryBodyId = _amendment.AmendmentBodies.FirstOrDefault(x => x.LanguageId == _amendment.PrimaryLanguageId)?.Id;
+        if (primaryBodyId != null)
+            _primaryLanguageBody = await AmendmentBodyRepository.GetAsync(AmendmentId, primaryBodyId.Value);
             
         if (Id != null)
         {
             var response = await AmendmentBodyRepository.GetAsync(AmendmentId, Id.Value);
             _model = response.ToRequest();
+            if (string.IsNullOrEmpty(_model.AmendBody))
+                await _markdown.SetValueAsync(" ");
         }
         else
-        {
             await _markdown.SetValueAsync("");
-        }
 
         _languages.RemoveAll(x => _amendment.AmendmentBodies.Any(y => y.LanguageId == x.Id && y.LanguageId != _model.LanguageId));
+        if (Id == null)
+        {
+            if (LanguageId != null)
+                _model.LanguageId = LanguageId.Value;
+            else
+                _model.LanguageId = !_languages.Any() ? 0 : _languages.First().Id;
+        }
         if (!_languages.Any())
             _model.LanguageId = 0;
     }
 
     protected async Task OnSave()
     {
-        if ( await fluentValidations.ValidateAll() )
+        if (await fluentValidations.ValidateAll())
         {
-            //if (Id == null)
-            //{
-            //    var amendModel = await AmendmentRepository.PostAsync(model);
-            //    bodyModel.LanguageId = amendModel.PrimaryLanguageId;
-            //    await AmendmentBodyRepository.PostAsync(amendModel.Id, bodyModel);
-            //}
-            //else
-            //    await AmendmentRepository.PutAsync(Id ?? 0, model);
-            //NavigationManager.NavigateTo("/Amendment");
+            if (Id == null)
+                await AmendmentBodyRepository.PostAsync(AmendmentId, _model);
+            else
+                await AmendmentBodyRepository.PutAsync(AmendmentId, Id ?? 0, _model);
+            NavigationManager.NavigateTo("/Amendment");
         }
         StateHasChanged();
     }
 
-    private async Task InsertSlide()
+    private Task MarkdownValueChanged(string value)
     {
-        var val = await _markdown.GetValueAsync();
-        await _markdown.SetValueAsync($"{val} **NEWSLIDE**");
+        _model.AmendBody = value;
+        return Task.CompletedTask;
     }
 
+    private void SelectedTabChanged(string tabName)
+    {
+        _selectedTab = tabName;
+    }
 }
+

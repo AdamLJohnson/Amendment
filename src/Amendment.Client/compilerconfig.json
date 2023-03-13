@@ -1,0 +1,7 @@
+﻿[
+  {
+    "options": {"math": "always"},
+    "outputFile": "wwwroot/css/screen.css",
+    "inputFile": "wwwroot/css/screen.less"
+  }
+]

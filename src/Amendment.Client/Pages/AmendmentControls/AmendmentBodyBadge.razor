@@ -1,0 +1,35 @@
+﻿@using Amendment.Shared.Responses
+@using Amendment.Shared.Enums
+
+@if (Amendment.AmendmentBodies.Any(x => x.LanguageId == Language.Id))
+{
+    Background bg = Background.Primary;
+    var body = Amendment.AmendmentBodies.First(x => x.LanguageId == Language.Id);
+    if (body.AmendStatus == AmendmentBodyStatus.Ready)
+    {
+        bg = Background.Success;
+    }
+    if (body.IsLive)
+    {
+        bg = Background.Danger;
+    }
+
+    <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Edit/{body.Id}")>
+        <Badge Background="bg">@Language.LanguageName</Badge>
+    </Anchor>
+    <span></span>
+}
+else
+{
+    <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Create/{Language.Id}")>
+        <Badge Background="Background.Light" TextColor="TextColor.Black50">@Language.LanguageName</Badge>
+    </Anchor>
+    <span></span>
+}
+@code {
+    [Parameter]
+    public AmendmentResponse Amendment { get; set; }
+
+    [Parameter]
+    public LanguageResponse Language { get; set; }
+}

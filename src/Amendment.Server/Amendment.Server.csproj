@@ -30,9 +30,5 @@
     <ProjectReference Include="..\Amendment.Client\Amendment.Client.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Hubs\" />
-  </ItemGroup>
-
 
 </Project>
