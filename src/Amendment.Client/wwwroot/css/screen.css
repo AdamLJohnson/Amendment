@@ -40,7 +40,7 @@
 }
 .small-screen-container {
   position: relative;
-  max-width: 360px;
+  /*max-width: 360px;*/
 }
 .centered-small-screen-text {
   position: absolute;
@@ -281,6 +281,8 @@
 }
 .small-screen-container.well {
   min-height: 202.5px;
+  display: flex;
+  justify-content: center;
 }
 #fullscreen.fullscreen,
 .text-preview .screen-page {

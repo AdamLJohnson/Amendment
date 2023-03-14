@@ -6,6 +6,7 @@ using Amendment.Shared.Responses;
 using Amendment.Shared;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amendment.Server.Controllers
@@ -29,6 +30,7 @@ namespace Amendment.Server.Controllers
         }
 
         [HttpGet("Live")]
+        [AllowAnonymous]
         public async Task<IResult> GetLive()
         {
             var results = await _mediator.Send(new GetLiveAmendmentQuery());

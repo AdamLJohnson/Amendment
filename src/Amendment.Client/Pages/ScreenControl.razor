@@ -6,6 +6,7 @@
 @attribute [Authorize]
 @implements IDisposable
 @inject IAmendmentRepository AmendmentRepository
+@inject ILanguageRepository LanguageRepository
 @inject IHubEventService HubEventService
 
 <PageTitle>Screen Control</PageTitle>
@@ -13,7 +14,87 @@
 
 @if (_amendment != null)
 {
+    <Row>
+        <Column ColumnSize="ColumnSize.Is3">
+            <Field>
+                <FieldLabel>Title</FieldLabel>
+                <p>@_amendment.Title</p>
+            </Field>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is3">
+            <Field>
+                <FieldLabel>Author</FieldLabel>
+                <p>@_amendment.Author</p>
+            </Field>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is3">
+            <Field>
+                <FieldLabel>Motion</FieldLabel>
+                <p>@_amendment.Motion</p>
+            </Field>
+        </Column>
+    </Row>
+    <hr />
+    <h4>Amendment Texts</h4>
+    <Row>
+        <Column ColumnSize="ColumnSize.Is4.OnDesktop">
+            <Button Color="Color.Success">Change Views</Button>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is4.OnDesktop">
+            @if (_amendment.AmendmentBodies.Any(x => x.IsLive))
+            {
+                <Button Color="Color.Danger" Block Size="Size.Large">Take all down</Button>
+            }
+            else
+            {
+                <Button Color="Color.Success" Block Size="Size.Large">All Go Live</Button>
+            }
+        </Column>
+        <Column ColumnSize="ColumnSize.Is4.OnDesktop" TextAlignment="TextAlignment.End">
+            <Button Color="Color.Warning">Reset All</Button>
+            <Button Color="Color.Info">All Prev</Button>
+            <Button Color="Color.Info">All Next</Button>
+        </Column>
+    </Row>
+    <Row Style="margin-top:10px;">
+        <Repeater Items="_amendment.AmendmentBodies.OrderBy(x => x.Id)">
+            <Column ColumnSize="ColumnSize.Is4.OnDesktop">
+                <h5>
+                    <Row>
+                        <Column>
+                            @_languages.First(x => x.Id == context.LanguageId).LanguageName
+                            <Icon Name="IconName.ArrowUp"></Icon>
+                            <Icon Name="IconName.ArrowDown"></Icon>
+                        </Column>
+                        <Column TextAlignment="TextAlignment.End">
+                            @if (_amendment.PrimaryLanguageId == context.LanguageId)
+                            {
+                                <Badge Color="Color.Primary">PRIMARY</Badge>
+                                <span></span>
+                            }
+                            <Badge Background=@(context.IsLive ? Background.Danger : Background.Info)>LIVE</Badge>
+                        </Column>
+                    </Row>
+                </h5>
+                <Div Class="small-screen-container well text-preview fill-well">
+                    <div>
+                        <AmendmentBodyMultiRenderer BodyText="@context.AmendBody"></AmendmentBodyMultiRenderer>
+                    </div>
+                </Div>
+                <Div TextAlignment="TextAlignment.Center">
+                    @if (!context.IsLive)
+                    {
+                        <Button Color="Color.Success">GO LIVE</Button>
+                    }
+                    else
+                    {
+                        <Button Color="Color.Danger">TAKE DOWN</Button>
+                    }
+                </Div>
+            </Column>
 
+        </Repeater>
+    </Row>
 }
 else
 {
@@ -23,8 +104,10 @@ else
 
 @code {
     AmendmentFullBodyResponse? _amendment = null;
+    List<LanguageResponse> _languages = new();
     protected override async Task OnInitializedAsync()
     {
+        _languages = (await LanguageRepository.GetAsync()).ToList();
         _amendment = await AmendmentRepository.GetLiveAsync();
         HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
         HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;

@@ -11,7 +11,8 @@ namespace Amendment.Client.AuthProviders
         {
             "api/account/login",
             "api/account/refreshtoken",
-            "api/language"
+            "api/language",
+            "api/Amendment/Live"
         };
 
         public HttpInterceptorService(HttpClientInterceptor interceptor, IRefreshTokenService refreshTokenService)
@@ -26,6 +27,7 @@ namespace Amendment.Client.AuthProviders
             var absPath = e.Request.RequestUri.AbsolutePath;
             if (_anonymousUrls.Any(z => absPath.Contains(z, StringComparison.CurrentCultureIgnoreCase)))
             {
+                e.Request.Headers.Authorization = null;
                 return;
             }
 
