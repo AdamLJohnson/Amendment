@@ -13,7 +13,7 @@ using MediatR;
 
 namespace Amendment.Server.Mediator.Handlers
 {
-    public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, IApiResult<AccountLoginResponse>>
+    public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, IApiResult>
     {
         private readonly ITokenService _tokenService;
         private readonly IUserService _userService;
@@ -24,7 +24,7 @@ namespace Amendment.Server.Mediator.Handlers
             _userService = userService;
         }
 
-        public async Task<IApiResult<AccountLoginResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+        public async Task<IApiResult> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(request.Token) || string.IsNullOrEmpty(request.RefreshToken))
                 return new ApiFailedResult<AccountLoginResponse>(HttpStatusCode.BadRequest);

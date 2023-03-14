@@ -8,7 +8,7 @@ public sealed class AmendmentRequestValidator : AbstractValidator<AmendmentReque
     public AmendmentRequestValidator()
     {
         RuleFor(x => x.Title)
-            .NotEqual("adam")
+            .NotEqual("not allowed")
             .NotEmpty();
         RuleFor(x => x.Author)
             .NotEmpty();

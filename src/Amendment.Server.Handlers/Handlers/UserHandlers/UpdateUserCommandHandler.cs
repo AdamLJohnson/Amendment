@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Amendment.Server.Mediator.Handlers.UserHandlers;
 
-public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, IApiResult<UserResponse>>
+public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, IApiResult>
 {
     private readonly ILogger<CreateUserCommandHandler> _logger;
     private readonly IUserService _userService;
@@ -25,7 +25,7 @@ public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand
         _passwordHashService = passwordHashService;
     }
 
-    public async Task<IApiResult<UserResponse>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    public async Task<IApiResult> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userService.GetAsync(request.Id);
         if (user == null)

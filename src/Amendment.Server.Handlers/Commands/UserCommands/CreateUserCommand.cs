@@ -10,7 +10,7 @@ using Amendment.Shared.Responses;
 
 namespace Amendment.Server.Mediator.Commands.UserCommands
 {
-    public sealed class CreateUserCommand : IRequest<IApiResult<UserResponse>>
+    public sealed class CreateUserCommand : IRequest<IApiResult>
     {
         public int SavingUserId { get; set; }
         public string? Username { get; set; }

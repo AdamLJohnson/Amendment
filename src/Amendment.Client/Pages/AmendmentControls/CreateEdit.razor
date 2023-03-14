@@ -9,6 +9,7 @@
 @inject IAmendmentRepository AmendmentRepository
 @inject IAmendmentBodyRepository AmendmentBodyRepository
 @inject NavigationManager NavigationManager
+@inject INotificationService NotificationService
 
 <PageTitle>@title</PageTitle>
 
@@ -125,7 +126,13 @@
 
     protected async Task OnSave()
     {
-        if ( await fluentValidations.ValidateAll() )
+        var isValid = await fluentValidations.ValidateAll();
+        if (string.IsNullOrEmpty(bodyModel.AmendBody))
+        {
+            await NotificationService.Error("Amendment Body can not be empty", "Error");
+            isValid = false;
+        }
+        if (isValid)
         {
             if (Id == null)
             {

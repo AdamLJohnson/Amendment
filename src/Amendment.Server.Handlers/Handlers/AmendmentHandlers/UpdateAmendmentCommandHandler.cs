@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Amendment.Server.Mediator.Handlers.AmendmentHandlers;
 
-public sealed class UpdateAmendmentCommandHandler : IRequestHandler<UpdateAmendmentCommand, IApiResult<AmendmentResponse>>
+public sealed class UpdateAmendmentCommandHandler : IRequestHandler<UpdateAmendmentCommand, IApiResult>
 {
     private readonly ILogger<UpdateAmendmentCommandHandler> _logger;
     private readonly IAmendmentService _amendmentService;
@@ -20,7 +20,7 @@ public sealed class UpdateAmendmentCommandHandler : IRequestHandler<UpdateAmendm
         _amendmentService = amendmentService;
     }
 
-    public async Task<IApiResult<AmendmentResponse>> Handle(UpdateAmendmentCommand request, CancellationToken cancellationToken)
+    public async Task<IApiResult> Handle(UpdateAmendmentCommand request, CancellationToken cancellationToken)
     {
         var amendment = await _amendmentService.GetAsync(request.Id);
         if (amendment == null)

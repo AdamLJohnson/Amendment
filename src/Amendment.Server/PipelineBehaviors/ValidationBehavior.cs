@@ -1,4 +1,5 @@
-﻿using Amendment.Shared;
+﻿using Amendment.Server.Mediator;
+using Amendment.Shared;
 using FluentValidation;
 using MediatR;
 using ValidationException = FluentValidation.ValidationException;

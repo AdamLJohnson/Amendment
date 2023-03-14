@@ -24,7 +24,7 @@ namespace Amendment.Server.Mediator.Commands
                 .NotEmpty();
 
             RuleFor(x => x.Password)
-                .NotEmpty().NotEqual("adam");
+                .NotEmpty().NotEqual("not allowed");
         }
     }
 }

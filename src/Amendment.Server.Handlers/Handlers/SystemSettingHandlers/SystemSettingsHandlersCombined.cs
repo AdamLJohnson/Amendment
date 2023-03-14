@@ -33,7 +33,7 @@ public sealed class GetAllSystemSettingsHandler : IRequestHandler<GetAllSystemSe
     }
 }
 
-public sealed class GetSingleSystemSettingHandler : IRequestHandler<GetSingleSystemSettingQuery, IApiResult<SystemSettingResponse>>
+public sealed class GetSingleSystemSettingHandler : IRequestHandler<GetSingleSystemSettingQuery, IApiResult>
 {
     private readonly ILogger<GetSingleSystemSettingHandler> _logger;
     private readonly ISystemSettingService _systemSettingService;
@@ -44,7 +44,7 @@ public sealed class GetSingleSystemSettingHandler : IRequestHandler<GetSingleSys
         _systemSettingService = systemSettingService;
     }
 
-    public async Task<IApiResult<SystemSettingResponse>> Handle(GetSingleSystemSettingQuery request, CancellationToken cancellationToken)
+    public async Task<IApiResult> Handle(GetSingleSystemSettingQuery request, CancellationToken cancellationToken)
     {
         var result = await _systemSettingService.GetAsync(request.Id);
         if (result == null)
@@ -54,7 +54,7 @@ public sealed class GetSingleSystemSettingHandler : IRequestHandler<GetSingleSys
     }
 }
 
-public sealed class CreateSystemSettingCommandHandler : IRequestHandler<CreateSystemSettingCommand, IApiResult<SystemSettingResponse>>
+public sealed class CreateSystemSettingCommandHandler : IRequestHandler<CreateSystemSettingCommand, IApiResult>
 {
     private readonly ILogger<CreateSystemSettingCommandHandler> _logger;
     private readonly ISystemSettingService _systemSettingService;
@@ -65,7 +65,7 @@ public sealed class CreateSystemSettingCommandHandler : IRequestHandler<CreateSy
         _systemSettingService = systemSettingService;
     }
 
-    public async Task<IApiResult<SystemSettingResponse>> Handle(CreateSystemSettingCommand request, CancellationToken cancellationToken)
+    public async Task<IApiResult> Handle(CreateSystemSettingCommand request, CancellationToken cancellationToken)
     {
         var systemSetting = request.Adapt<Model.DataModel.SystemSetting>();
         systemSetting.EnteredBy = request.SavingUserId;
@@ -84,7 +84,7 @@ public sealed class CreateSystemSettingCommandHandler : IRequestHandler<CreateSy
     }
 }
 
-public sealed class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSettingCommand, IApiResult<SystemSettingResponse>>
+public sealed class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSystemSettingCommand, IApiResult>
 {
     private readonly ILogger<UpdateSystemSettingCommandHandler> _logger;
     private readonly ISystemSettingService _systemSettingService;
@@ -95,7 +95,7 @@ public sealed class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSy
         _systemSettingService = systemSettingService;
     }
 
-    public async Task<IApiResult<SystemSettingResponse>> Handle(UpdateSystemSettingCommand request, CancellationToken cancellationToken)
+    public async Task<IApiResult> Handle(UpdateSystemSettingCommand request, CancellationToken cancellationToken)
     {
         var systemSetting = await _systemSettingService.GetAsync(request.Id);
         if (systemSetting == null)

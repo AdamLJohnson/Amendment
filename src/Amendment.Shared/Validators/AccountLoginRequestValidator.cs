@@ -11,7 +11,7 @@ namespace Amendment.Shared.Validators
                 .NotEmpty();
 
             RuleFor(x => x.Password)
-                .NotEmpty().NotEqual("adam");
+                .NotEmpty().NotEqual("not allowed");
         }
     }
 }

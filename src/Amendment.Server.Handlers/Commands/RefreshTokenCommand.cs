@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Amendment.Server.Mediator.Commands
 {
-    public class RefreshTokenCommand : IRequest<IApiResult<AccountLoginResponse>>
+    public class RefreshTokenCommand : IRequest<IApiResult>
     {
         public string Token { get; set; }
         public string RefreshToken { get; set; }

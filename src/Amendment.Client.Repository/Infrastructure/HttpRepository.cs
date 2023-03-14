@@ -45,6 +45,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         var response = await _client.PostAsync(_baseUrl, bodyContent);
         var content = await response.Content.ReadAsStringAsync();
         response.EnsureSuccessStatusCode();
+        
 
         var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, _options);
         return result == null ? new TResponse() : result.Result;

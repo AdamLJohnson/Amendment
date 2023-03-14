@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Amendment.Server.Mediator.Handlers.UserHandlers;
 
-public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, IApiResult<UserResponse>>
+public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, IApiResult>
 {
     private readonly ILogger<CreateUserCommandHandler> _logger;
     private readonly IUserService _userService;
@@ -25,7 +25,7 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
         _passwordHashService = passwordHashService;
     }
 
-    public async Task<IApiResult<UserResponse>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<IApiResult> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         var user = new User()
         {

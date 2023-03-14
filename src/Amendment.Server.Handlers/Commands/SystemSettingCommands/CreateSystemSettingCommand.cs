@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace Amendment.Server.Mediator.Commands.SystemSettingCommands;
 
-public sealed class CreateSystemSettingCommand : IRequest<IApiResult<SystemSettingResponse>>
+public sealed class CreateSystemSettingCommand : IRequest<IApiResult>
 {
     public int SavingUserId { get; set; }
     public string Key { get; set; }
     public string Value { get; set; }
 }
 
-public sealed class UpdateSystemSettingCommand : IRequest<IApiResult<SystemSettingResponse>>
+public sealed class UpdateSystemSettingCommand : IRequest<IApiResult>
 {
     public int SavingUserId { get; set; }
     public int Id { get; set; }

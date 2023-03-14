@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Amendment.Server.Mediator.Commands.UserCommands;
 
-public sealed class UpdateUserCommand : IRequest<IApiResult<UserResponse>>
+public sealed class UpdateUserCommand : IRequest<IApiResult>
 {
     public int SavingUserId { get; set; }
     public string? Username { get; set; }

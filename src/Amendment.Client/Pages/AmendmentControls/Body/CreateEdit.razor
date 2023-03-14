@@ -12,6 +12,7 @@
 @inject ILanguageRepository LanguageRepository
 @inject ISystemSettingRepository SystemSettingRepository
 @inject NavigationManager NavigationManager
+@inject INotificationService NotificationService
 <PageTitle>@_title</PageTitle>
 <h3>@_amendment.Title</h3>
 
@@ -153,7 +154,13 @@
 
     protected async Task OnSave()
     {
-        if (await fluentValidations.ValidateAll())
+        var isValid = await fluentValidations.ValidateAll();
+        if (string.IsNullOrEmpty(_model.AmendBody))
+        {
+            await NotificationService.Error("Amendment Body can not be empty", "Error");
+            isValid = false;
+        }
+        if (isValid)
         {
             if (Id == null)
                 await AmendmentBodyRepository.PostAsync(AmendmentId, _model);
