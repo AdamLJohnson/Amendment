@@ -1,19 +1,31 @@
-﻿<Repeater Items="_renderedBodyText">
+﻿<Repeater Items="@_renderedBodyText">
     <div class="screen-page-height">
-        <div class="screen-page screen-border">
-            <AmendmentBodySingleRenderer BodyText="@context"></AmendmentBodySingleRenderer>
+        <div class="screen-page screen-border@(ActivePage == context.Index ? " activepage" : "")">
+            <AmendmentBodySingleRenderer BodyText="@context.Body"></AmendmentBodySingleRenderer>
         </div>
     </div>
 </Repeater>
 
 @code {
-    [Parameter]
+    [Parameter, EditorRequired]
     public string BodyText { get; set; } = "";
 
-    string[] _renderedBodyText = Array.Empty<string>();
+    [Parameter]
+    public int ActivePage { get; set; } = -1;
+
+    List<AmendmentId> _renderedBodyText = new();
 
     protected override void OnParametersSet()
     {
-        _renderedBodyText = BodyText.Split("**NEWSLIDE**");
+        var text = BodyText.Split("**NEWSLIDE**");
+        _renderedBodyText.Clear();
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            _renderedBodyText.Add(new AmendmentId(i, text[i]));
+        }
     }
+
+    private record AmendmentId(int Index, string Body);
+
 }

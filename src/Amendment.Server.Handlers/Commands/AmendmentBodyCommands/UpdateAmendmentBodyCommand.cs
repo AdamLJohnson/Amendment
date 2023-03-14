@@ -15,6 +15,7 @@ public sealed class UpdateAmendmentBodyCommand : IRequest<IApiResult<AmendmentBo
     public string AmendBody { get; set; }
     public AmendmentBodyStatus AmendStatus { get; set; }
     public bool IsLive { get; set; }
+    public int Page { get; set; }
 }
 
 public sealed class UpdateAmendmentBodyCommandValidator : AbstractValidator<UpdateAmendmentBodyCommand>

@@ -1,0 +1,82 @@
+﻿@using Amendment.Shared.Responses
+@using Amendment.Client.Repository
+@inject IAmendmentBodyRepository AmendmentBodyRepository
+
+<h5>
+    <Row>
+        <Column>
+            @LanguageName
+            <Icon Name="IconName.ArrowUp" Clicked="PrevPage"></Icon>
+            <Icon Name="IconName.ArrowDown" Clicked="NextPage"></Icon>
+        </Column>
+        <Column TextAlignment="TextAlignment.Center">
+            @if (PrimaryLanguageId == Body.LanguageId)
+            {
+                <Badge Color="Color.Primary">PRIMARY</Badge>
+                <span></span>
+            }
+        </Column>
+        <Column TextAlignment="TextAlignment.End">
+            <Button Color=@(Body.IsLive ? Color.Danger : Color.Info) Size="Size.Small" Clicked="ToggleIsLive">LIVE</Button>
+        </Column>
+    </Row>
+</h5>
+@{
+    var textPrev = "";
+    if (ShowPreview)
+    {
+        textPrev = "text-preview";
+    }
+}
+<Div Class="@($"small-screen-container well {textPrev} fill-well")">
+    <div>
+        <AmendmentBodyMultiRenderer BodyText="@Body.AmendBody" ActivePage="@Body.Page"></AmendmentBodyMultiRenderer>
+    </div>
+</Div>
+<Div TextAlignment="TextAlignment.Center">
+    @if (!Body.IsLive)
+    {
+        <Button Color="Color.Success" Clicked="ToggleIsLive">GO LIVE</Button>
+    }
+    else
+    {
+        <Button Color="Color.Danger" Clicked="ToggleIsLive">TAKE DOWN</Button>
+    }
+</Div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public AmendmentBodyResponse Body { get; set; } = new();
+
+    [Parameter, EditorRequired]
+    public string LanguageName { get; set; }
+
+    [Parameter, EditorRequired]
+    public int PrimaryLanguageId { get; set; } = -1;
+
+    [Parameter, EditorRequired]
+    public bool ShowPreview { get; set; } = true;
+    
+    private async Task ToggleIsLive()
+    {
+        var bodyRequest = Body.ToRequest();
+        bodyRequest.IsLive = !bodyRequest.IsLive;
+        await AmendmentBodyRepository.PutAsync(Body.AmendId, Body.Id, bodyRequest);
+    }
+
+    private Task NextPage()
+    {
+        var bodyRequest = Body.ToRequest();
+        bodyRequest.ChangeBodyPage(bodyRequest.Page + 1);
+        return AmendmentBodyRepository.PutAsync(Body.AmendId, Body.Id, bodyRequest);
+    }
+
+    private Task PrevPage()
+    {
+        var bodyRequest = Body.ToRequest();
+        bodyRequest.ChangeBodyPage(bodyRequest.Page - 1);
+        return AmendmentBodyRepository.PutAsync(Body.AmendId, Body.Id, bodyRequest);
+    }
+
+}

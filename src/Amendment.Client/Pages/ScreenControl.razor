@@ -8,6 +8,7 @@
 @inject IAmendmentRepository AmendmentRepository
 @inject ILanguageRepository LanguageRepository
 @inject IHubEventService HubEventService
+@inject IAmendmentBodyRepository AmendmentBodyRepository
 
 <PageTitle>Screen Control</PageTitle>
 <h3>Screen Control</h3>
@@ -38,61 +39,33 @@
     <h4>Amendment Texts</h4>
     <Row>
         <Column ColumnSize="ColumnSize.Is4.OnDesktop">
-            <Button Color="Color.Success">Change Views</Button>
+            <Button Color="Color.Success" Clicked="() => _showPreview = !_showPreview">Change Views</Button>
         </Column>
         <Column ColumnSize="ColumnSize.Is4.OnDesktop">
             @if (_amendment.AmendmentBodies.Any(x => x.IsLive))
             {
-                <Button Color="Color.Danger" Block Size="Size.Large">Take all down</Button>
+                <Button Color="Color.Danger" Block Size="Size.Large" Clicked="TakeAllDown">Take all down</Button>
             }
             else
             {
-                <Button Color="Color.Success" Block Size="Size.Large">All Go Live</Button>
+                <Button Color="Color.Success" Block Size="Size.Large" Clicked="AllGoLive">All Go Live</Button>
             }
         </Column>
         <Column ColumnSize="ColumnSize.Is4.OnDesktop" TextAlignment="TextAlignment.End">
-            <Button Color="Color.Warning">Reset All</Button>
-            <Button Color="Color.Info">All Prev</Button>
-            <Button Color="Color.Info">All Next</Button>
+            <Button Color="Color.Warning" Clicked="ResetAllPages">Reset All</Button>
+            <Button Color="Color.Info" Clicked="AllPrevPage">All Prev</Button>
+            <Button Color="Color.Info" Clicked="AllNextPage">All Next</Button>
         </Column>
     </Row>
     <Row Style="margin-top:10px;">
-        <Repeater Items="_amendment.AmendmentBodies.OrderBy(x => x.Id)">
+        <Repeater Items="@_amendment.AmendmentBodies.OrderBy(x => x.Id)">
             <Column ColumnSize="ColumnSize.Is4.OnDesktop">
-                <h5>
-                    <Row>
-                        <Column>
-                            @_languages.First(x => x.Id == context.LanguageId).LanguageName
-                            <Icon Name="IconName.ArrowUp"></Icon>
-                            <Icon Name="IconName.ArrowDown"></Icon>
-                        </Column>
-                        <Column TextAlignment="TextAlignment.End">
-                            @if (_amendment.PrimaryLanguageId == context.LanguageId)
-                            {
-                                <Badge Color="Color.Primary">PRIMARY</Badge>
-                                <span></span>
-                            }
-                            <Badge Background=@(context.IsLive ? Background.Danger : Background.Info)>LIVE</Badge>
-                        </Column>
-                    </Row>
-                </h5>
-                <Div Class="small-screen-container well text-preview fill-well">
-                    <div>
-                        <AmendmentBodyMultiRenderer BodyText="@context.AmendBody"></AmendmentBodyMultiRenderer>
-                    </div>
-                </Div>
-                <Div TextAlignment="TextAlignment.Center">
-                    @if (!context.IsLive)
-                    {
-                        <Button Color="Color.Success">GO LIVE</Button>
-                    }
-                    else
-                    {
-                        <Button Color="Color.Danger">TAKE DOWN</Button>
-                    }
-                </Div>
+                <ScreenControlItem 
+                    Body="@context" 
+                    LanguageName="@_languages.First(x => x.Id == context.LanguageId).LanguageName"
+                    PrimaryLanguageId="_amendment.PrimaryLanguageId"
+                    ShowPreview="@_showPreview"></ScreenControlItem>
             </Column>
-
         </Repeater>
     </Row>
 }
@@ -105,6 +78,7 @@ else
 @code {
     AmendmentFullBodyResponse? _amendment = null;
     List<LanguageResponse> _languages = new();
+    bool _showPreview = true;
     protected override async Task OnInitializedAsync()
     {
         _languages = (await LanguageRepository.GetAsync()).ToList();
@@ -157,6 +131,32 @@ else
         }
     }
 
+    private async Task TakeAllDown()
+    {
+        if (_amendment == null)
+            return;
+
+        foreach (var body in _amendment.AmendmentBodies.Where(x => x.IsLive).ToArray())
+        {
+            var bodyRequest = body.ToRequest();
+            bodyRequest.IsLive = false;
+            await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
+        }
+    }
+
+    private async Task AllGoLive()
+    {
+        if (_amendment == null)
+            return;
+
+        foreach (var body in _amendment.AmendmentBodies.Where(x => !x.IsLive).ToArray())
+        {
+            var bodyRequest = body.ToRequest();
+            bodyRequest.IsLive = true;
+            await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
+        }
+    }
+
     private void ClearScreensEvent(object? sender, EventArgs e) => _amendment = null;
 
     public void Dispose()
@@ -164,6 +164,46 @@ else
         HubEventService.AmendmentUpdated -= AmendmentUpdatedEvent;
         HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
         HubEventService.ClearScreens -= ClearScreensEvent;
+    }
+
+    private async Task ResetAllPages()
+    {
+        if (_amendment == null)
+            return;
+
+        foreach (var body in _amendment.AmendmentBodies.ToArray())
+        {
+            var bodyRequest = body.ToRequest();
+            bodyRequest.Page = 0;
+            await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
+        }
+    }
+
+    private async Task AllPrevPage()
+    {
+        if (_amendment == null)
+            return;
+
+        foreach (var body in _amendment.AmendmentBodies.ToArray())
+        {
+            var bodyRequest = body.ToRequest();
+            bodyRequest.ChangeBodyPage(bodyRequest.Page - 1);
+            await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
+        }
+        
+    }
+
+    private async Task AllNextPage()
+    {
+        if (_amendment == null)
+            return;
+
+        foreach (var body in _amendment.AmendmentBodies.ToArray())
+        {
+            var bodyRequest = body.ToRequest();
+            bodyRequest.ChangeBodyPage(bodyRequest.Page + 1);
+            await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
+        }
     }
 
 }

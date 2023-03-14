@@ -1,8 +1,15 @@
 ﻿@using Amendment.Client.Repository
 @inject ILanguageRepository LanguageRepository
+@inject ISystemSettingRepository SystemSettingRepository
 @code {
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        return LanguageRepository.GetAsync();
+        var tasks = new List<Task>
+        {
+            SystemSettingRepository.GetAsync(),
+            LanguageRepository.GetAsync()
+        };
+
+        await Task.WhenAll(tasks);
     }
 }
