@@ -17,10 +17,12 @@ using Amendment.Service.Infrastructure;
 using Microsoft.AspNetCore.ResponseCompression;
 using Autofac.Core;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Amendment.Repository;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace Amendment
 {
-    public class Program
+    public class Program : IDesignTimeDbContextFactory<AmendmentContext>
     {
         public static async Task Main(string[] args)
         {
@@ -36,7 +38,6 @@ namespace Amendment
 
             builder.Services.AddDbContext<Repository.AmendmentContext>(options =>
             {
-                //options.UseSqlite("Filename=:memory:");
                 options.UseInMemoryDatabase("Amendment");
                 options.ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             });
@@ -151,6 +152,14 @@ namespace Amendment
             app.MapFallbackToFile("index.html");
 
             app.Run();
+        }
+
+        public AmendmentContext CreateDbContext(string[] args)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<AmendmentContext>();
+            optionsBuilder.UseSqlite("Data Source=blog.db");
+
+            return new AmendmentContext(optionsBuilder.Options);
         }
     }
 }
