@@ -1,9 +1,86 @@
 ﻿@page "/"
+@using Amendment.Client.Repository
+@using Amendment.Shared.Enums
+@using Amendment.Shared.Responses
+@inject ILanguageRepository LanguageRepository
+@inject IHubEventService HubEventService
+@inject IAmendmentRepository AmendmentRepository
+@implements IDisposable
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Amendments</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Amendments</h1>
 
-Welcome to your new app.
+<Row>
+    <Repeater Items="_languages">
+        <Column ColumnSize="ColumnSize.Is4">
+            <h4>@context.LanguageName</h4>
+            @{
+                var body = _bodies.FirstOrDefault(x => x.LanguageId == context.Id && x.IsLive);
+            }
+            
+            @if (body != null)
+            {
+                <div class="small-screen-container well slideonline">
+                    <AmendmentBodySingleRenderer BodyText="@body.AmendBodyPagedText"></AmendmentBodySingleRenderer>
+                </div>
+            }
+            else
+            {
+                <div class="small-screen-container well fill-well slideoffline"></div>
+            }
+            <Div TextAlignment="TextAlignment.Center">
+                <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/View/{context.LanguageName}")>View</Button>
+            </Div>
+        </Column>
+    </Repeater>
+</Row>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code
+{
+    List<LanguageResponse> _languages;
+    List<AmendmentBodyResponse> _bodies = new();
+    protected override async Task OnInitializedAsync()
+    {
+        _languages = (await LanguageRepository.GetAsync()).ToList();
+        var amendment = await AmendmentRepository.GetLiveAsync();
+        if (amendment != null)
+        {
+            _bodies = amendment.AmendmentBodies.ToList();
+        }
+        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+    }
+
+    private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
+    {
+        switch (e.OperationType)
+        {
+            case OperationType.Create:
+                if (e.Value.IsLive)
+                    _bodies.Add(e.Value);
+                break;
+            case OperationType.Update:
+                if (e.Value.IsLive)
+                {
+                    var i = _bodies.FindIndex(x => x.Id == e.Value.Id);
+                    if (i > -1)
+                        _bodies[i] = e.Value;
+                    else
+                        _bodies.Add(e.Value);
+                }
+                else
+                    _bodies.RemoveAll(x => x.Id == e.Value.Id);
+                break;
+            case OperationType.Delete:
+                _bodies.RemoveAll(x => x.Id == e.Value.Id);
+                break;
+        }
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+    }
+}

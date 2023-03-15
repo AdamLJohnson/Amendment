@@ -1,0 +1,109 @@
+﻿@page "/View/{Language}"
+@using Amendment.Shared.Responses
+@using Amendment.Shared.Enums
+@using Amendment.Client.Repository
+@inject ILanguageRepository LanguageRepository
+@inject IAmendmentRepository AmendmentRepository
+@inject IHubEventService HubEventService
+@inject IJSRuntime JS
+@implements IDisposable
+<PageTitle>@_title</PageTitle>
+<h3>@_title</h3>
+
+<Button Color="Color.Primary" Clicked="EnterFullScreen">Enter Fullscreen</Button>
+
+@{
+    var slideClass = "slideonline";
+    if (_body == null)
+        slideClass = "slideoffline";
+}
+<Div id="fullscreen" Class=@($"{slideClass} {Language}")>
+    @if (_body != null)
+    {
+        <AmendmentBodySingleRenderer BodyText=@(_body?.AmendBodyPagedText ?? "")></AmendmentBodySingleRenderer>
+    }
+</Div>
+
+@code {
+    [Parameter]
+    public string Language { get; set; }
+
+    int LanguageId = -1;
+    AmendmentBodyResponse? _body;
+    string _title = "";
+    IJSObjectReference module;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _title = Language;
+        var languages = (await LanguageRepository.GetAsync()).ToList();
+        LanguageId = languages.FirstOrDefault(x => x.LanguageName == Language)?.Id ?? -1;
+        var amendment = await AmendmentRepository.GetLiveAsync();
+        _body = amendment?.AmendmentBodies.FirstOrDefault(x => x.LanguageId == LanguageId && x.IsLive);
+        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/ViewFullScreen.js");
+    }
+
+    private async Task EnterFullScreen()
+    {
+        if (module == null)
+            return;
+
+        await module.InvokeVoidAsync("EnterFullScreen");
+    }
+
+    private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
+    {
+        if (e.Value.LanguageId != LanguageId)
+            return;
+
+        if (_body == null)
+        {
+            switch (e.OperationType)
+            {
+                case OperationType.Create:
+                    if (e.Value.IsLive)
+                        _body = e.Value;
+                    break;
+                case OperationType.Update:
+                    if (e.Value.IsLive)
+                        _body = e.Value;
+                    break;
+                case OperationType.Delete:
+                    break;
+            }
+        }
+        else if (_body.Id == e.Value.Id)
+        {
+            switch (e.OperationType)
+            {
+                case OperationType.Create:
+                    break;
+                case OperationType.Update:
+                    _body = e.Value;
+                    if (!e.Value.IsLive)
+                        _body = null;
+                    break;
+                case OperationType.Delete:
+                    _body = null;
+                    break;
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+    }
+
+}

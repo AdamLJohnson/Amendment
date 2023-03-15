@@ -3,6 +3,7 @@
 @inject ISystemSettingRepository SystemSettingRepository
 @implements IDisposable
 
+
 <div class="screen-page-text">
     <div class="deafSignerPusher"></div>
     @if (SystemSettingRepository.ShowDeafSigner)
@@ -11,8 +12,6 @@
     }
     <div>@((MarkupString)Markdig.Markdown.ToHtml(BodyText))</div>
 </div>
-
-
 
 @code {
     [Parameter]

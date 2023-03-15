@@ -10,6 +10,7 @@ namespace Amendment.Shared.Responses
 {
     public sealed class AmendmentBodyResponse
     {
+        private const string _pageSplit = "**NEWSLIDE**";
         public int Id { get; set; }
         public int AmendId { get; set; }
         public int LanguageId { get; set; }
@@ -28,6 +29,35 @@ namespace Amendment.Shared.Responses
                 IsLive = IsLive,
                 Page = Page
             };
+        }
+
+        public string AmendBodyPagedText
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(AmendBody))
+                    return "";
+
+                var pages = AmendBody.Split(_pageSplit);
+                if (Page > Pages)
+                    return pages[0];
+
+                if (Page < pages.Length)
+                    return pages[Page];
+
+                return "";
+            }
+        }
+
+        public int Pages
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(AmendBody))
+                    return 0;
+
+                return AmendBody.Split(_pageSplit).Length;
+            }
         }
     }
 }

@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <Content Remove="compilerconfig.json" />
+    <Content Remove="wwwroot\js\ViewFullScreen.js" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="compilerconfig.json" />
+    <None Include="wwwroot\js\ViewFullScreen.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +39,11 @@
 
 	<ItemGroup>
 		<Watch Include="**\*.css" />
+		<Watch Include="**\*.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Watch Remove="wwwroot\js\ViewFullScreen.js" />
 	</ItemGroup>
 
 </Project>

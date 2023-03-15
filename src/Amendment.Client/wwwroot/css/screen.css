@@ -33,7 +33,7 @@
   -webkit-transform: translateX(16.66666667px);
   transform: translateX(16.66666667px);
 }
-.fullscreen .connection-error {
+[fullscreen] .connection-error {
   position: absolute;
   top: 40px;
   z-index: 1000;
@@ -129,31 +129,31 @@
   max-width: 1720px;
   max-height: 880px;
 }
-.fullscreen .screen-page-text {
+[fullscreen] .screen-page-text {
   width: 286.66666667px;
   height: 180px;
   background-size: cover;
 }
-.fullscreen .screen-page-text h1,
-.fullscreen .screen-page-text h2,
-.fullscreen .screen-page-text h3,
-.fullscreen .screen-page-text h4,
-.fullscreen .screen-page-text h5,
-.fullscreen .screen-page-text h6 {
+[fullscreen] .screen-page-text h1,
+[fullscreen] .screen-page-text h2,
+[fullscreen] .screen-page-text h3,
+[fullscreen] .screen-page-text h4,
+[fullscreen] .screen-page-text h5,
+[fullscreen] .screen-page-text h6 {
   font-weight: 900;
   font-size: 11.66666667px;
   margin-top: 0px;
   margin-bottom: 6.66666667px;
 }
-.fullscreen .screen-page-text blockquote {
+[fullscreen] .screen-page-text blockquote {
   font-weight: 600;
   font-size: 10px;
 }
-.fullscreen .screen-page-text .img {
+[fullscreen] .screen-page-text .img {
   max-width: 1720px;
   max-height: 880px;
 }
-.fullscreen .screen-page-text {
+[fullscreen] .screen-page-text {
   -ms-transform: scale(6);
   -webkit-transform: scale(6);
   transform: scale(6);
@@ -263,8 +263,8 @@
 .screen-page-text .deafSignerPusher {
   display: none;
 }
-#fullscreen.fullscreen .deafSignerBox,
-#fullscreen.fullscreen .deafSignerPusher,
+#fullscreen[fullscreen] .deafSignerBox,
+#fullscreen[fullscreen] .deafSignerPusher,
 .text-preview .screen-page-text .deafSignerBox,
 .text-preview .screen-page-text .deafSignerPusher {
   display: unset;
@@ -272,7 +272,7 @@
 .notLiveSlide > img {
   max-width: 100%;
 }
-.fullscreen .notLiveSlide > img {
+[fullscreen] .notLiveSlide > img {
   width: 320px !important;
   max-width: none;
   position: absolute;
@@ -284,7 +284,7 @@
   display: flex;
   justify-content: center;
 }
-#fullscreen.fullscreen,
+#fullscreen[fullscreen],
 .text-preview .screen-page {
   background-color: #fff;
   background-image: url("../images/amend_background_full.png");
@@ -292,23 +292,23 @@
   background-repeat: no-repeat;
 }
 .small-screen-container.well.slideoffline,
-#fullscreen.fullscreen.slideoffline {
+#fullscreen[fullscreen].slideoffline {
   background-image: url("../images/ConferenceLogo_1.png");
 }
 .small-screen-container.well.slideoffline.English,
-#fullscreen.fullscreen.slideoffline.English {
+#fullscreen[fullscreen].slideoffline.English {
   background-image: url("../images/static_title_eng.png");
 }
 .small-screen-container.well.slideoffline.Spanish,
-#fullscreen.fullscreen.slideoffline.Spanish {
+#fullscreen[fullscreen].slideoffline.Spanish {
   background-image: url("../images/static_title_esp.png");
 }
 .small-screen-container.well.slideoffline.French,
-#fullscreen.fullscreen.slideoffline.French {
+#fullscreen[fullscreen].slideoffline.French {
   background-image: url("../images/static_title_fra.png");
 }
 .small-screen-container.well.slideoffline {
-  background-size: cover;
+  background-size: 360px;
   background-position: center;
   background-repeat: no-repeat;
 }
