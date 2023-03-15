@@ -29,7 +29,7 @@ namespace Amendment.Service
 
         public Task<User> GetAsync(string userName)
         {
-            return _repository.GetAsync(u => String.Equals(u.Username, userName, StringComparison.CurrentCultureIgnoreCase));
+            return _repository.GetAsync(u => u.Username.ToLower() == userName.ToLower());
         }
 
         public override async Task<IOperationResult> CreateAsync(User item, int userId)

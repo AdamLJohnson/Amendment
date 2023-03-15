@@ -22,7 +22,7 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Amendment
 {
-    public class Program : IDesignTimeDbContextFactory<AmendmentContext>
+    public class Program
     {
         public static async Task Main(string[] args)
         {
@@ -40,6 +40,8 @@ namespace Amendment
             {
                 options.UseInMemoryDatabase("Amendment");
                 options.ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                // DOCKER COMMAND: docker run -p 5432:5432 --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_USER=amendment -d postgres
+                //options.UseNpgsql("Host=localhost;Database=amendment;Username=amendment;Password=mysecretpassword");
             });
 
             var jwtSettings = builder.Configuration.GetSection("JWTSettings");
@@ -125,6 +127,7 @@ namespace Amendment
 
                 var context = services.GetRequiredService<Repository.AmendmentContext>();
                 context.Database.EnsureCreated();
+                //context.Database.Migrate();
                 //DbInitializer.Initialize(context);
 #if DEBUG
                 var seeder = new SeedDatabase(app.Services);
@@ -152,14 +155,6 @@ namespace Amendment
             app.MapFallbackToFile("index.html");
 
             app.Run();
-        }
-
-        public AmendmentContext CreateDbContext(string[] args)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<AmendmentContext>();
-            optionsBuilder.UseSqlite("Data Source=blog.db");
-
-            return new AmendmentContext(optionsBuilder.Options);
         }
     }
 }

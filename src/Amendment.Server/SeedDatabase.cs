@@ -32,6 +32,10 @@ namespace Amendment.Server
 
         private async Task SeedSampleAmendment(IUnitOfWork unitOfWork, IRepository<Model.DataModel.Amendment> amendmentRepository)
         {
+            var dbCount = await amendmentRepository.CountAsync();
+            if (dbCount > 0)
+                return;
+
             amendmentRepository.Add(new Model.DataModel.Amendment()
             {
                 Title = "Test Amendment 1",

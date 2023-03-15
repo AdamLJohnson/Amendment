@@ -12,9 +12,7 @@ namespace Amendment.Model.DataModel
         [Key]
         public int Id { get; set; }
         [Required]
-        [Column(TypeName = "longtext character set utf16")]
         public string Title { get; set; }
-        [Column(TypeName = "longtext character set utf16")]
         public string Author { get; set; }
         public string Motion { get; set; }
         public string Source { get; set; }

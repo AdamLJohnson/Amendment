@@ -10,7 +10,7 @@ namespace Amendment.Model.DataModel
 {
     public class AmendmentBody : ITableBase
     {
-        private const string PageSplit = "**NEWSLIDE**";
+        private const string _pageSplit = "**NEWSLIDE**";
 
         [Key]
         public int Id { get; set; }
@@ -19,7 +19,6 @@ namespace Amendment.Model.DataModel
         [Required]
         public int LanguageId { get; set; }
         [Required]
-        [Column(TypeName = "longtext character set utf16")]
         public string AmendBody { get; set; }
         public AmendmentBodyStatus AmendStatus { get; set; }
         public bool IsLive { get; set; }
@@ -41,7 +40,7 @@ namespace Amendment.Model.DataModel
                 if (string.IsNullOrEmpty(AmendBody))
                     return 0;
 
-                return AmendBody.Split(PageSplit).Length;
+                return AmendBody.Split(_pageSplit).Length;
             }
         }
 
@@ -62,7 +61,7 @@ namespace Amendment.Model.DataModel
                 if (string.IsNullOrEmpty(AmendBody))
                     return "";
 
-                var pages = AmendBody.Split(PageSplit);
+                var pages = AmendBody.Split(_pageSplit);
                 if (Page > Pages)
                     return renderHtml(pages[0]);
 
@@ -81,7 +80,7 @@ namespace Amendment.Model.DataModel
                     return new string[0];
                 var output = new List<string>();
 
-                foreach (var p in AmendBody.Split(PageSplit))
+                foreach (var p in AmendBody.Split(_pageSplit))
                     output.Add(renderHtml(p));
 
                 return output.ToArray();

@@ -4,6 +4,7 @@ using System.Text;
 using Amendment.Model.DataModel;
 using Amendment.Model.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace Amendment.Repository
 {
@@ -13,6 +14,7 @@ namespace Amendment.Repository
         public AmendmentContext(DbContextOptions<AmendmentContext> options)
             : base(options)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             try
             {
                 Database.GetDbConnection();
@@ -137,19 +139,19 @@ namespace Amendment.Repository
                         Key = SystemSettingKeys.ShowDeafSigner,
                         Value = "1",
                         EnteredBy = -1,
-                        EnteredDate = DateTime.UtcNow,
+                        EnteredDate = DateTime.Parse("2018-01-01"),
                         LastUpdatedBy = -1,
-                        LastUpdated = DateTime.UtcNow
-                    },
+                        LastUpdated = DateTime.Parse("2018-01-01")
+                },
                     new SystemSetting()
                     {
                         Id = 2,
                         Key = SystemSettingKeys.ShowDeafSignerBox,
                         Value = "1",
                         EnteredBy = -1,
-                        EnteredDate = DateTime.UtcNow,
+                        EnteredDate = DateTime.Parse("2018-01-01"),
                         LastUpdatedBy = -1,
-                        LastUpdated = DateTime.UtcNow
+                        LastUpdated = DateTime.Parse("2018-01-01")
                     },
                     new SystemSetting()
                     {
@@ -157,10 +159,28 @@ namespace Amendment.Repository
                         Key = SystemSettingKeys.InvertedSlideText,
                         Value = "1",
                         EnteredBy = -1,
-                        EnteredDate = DateTime.UtcNow,
+                        EnteredDate = DateTime.Parse("2018-01-01"),
                         LastUpdatedBy = -1,
-                        LastUpdated = DateTime.UtcNow
+                        LastUpdated = DateTime.Parse("2018-01-01")
                     });
         }
+    }
+    public class MyClass : IDesignTimeDbContextFactory<AmendmentContext>
+    {
+        public AmendmentContext CreateDbContext(string[] args)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<AmendmentContext>();
+            //optionsBuilder.UseSqlite("Data Source=blog.db", opt =>
+            //{
+            //    opt.MigrationsAssembly("Amendment.Server");
+            //});
+            optionsBuilder.UseNpgsql("Host=localhost;Database=amendment;Username=amendment;Password=mysecretpassword", opt =>
+            {
+                //opt.MigrationsAssembly("Amendment.Server");
+            });
+
+            return new AmendmentContext(optionsBuilder.Options);
+        }
+
     }
 }
