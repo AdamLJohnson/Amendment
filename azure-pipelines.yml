@@ -2,6 +2,8 @@
 # Build and test ASP.NET Core web applications targeting .NET Core.
 # Add steps that run tests, create a NuGet package, deploy, and more:
 # https://docs.microsoft.com/vsts/pipelines/languages/dotnet-core
+trigger:
+- main
 
 pool:
   vmImage: 'ubuntu-latest'
