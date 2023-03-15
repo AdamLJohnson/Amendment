@@ -1,4 +1,9 @@
-﻿<Repeater Items="@_renderedBodyText">
+﻿@inject ISystemSettingRepository SystemSettingRepository
+@using Amendment.Client.Repository
+@using System.ComponentModel
+@implements IDisposable
+
+<Repeater Items="@_renderedBodyText">
     <div class="screen-page-height">
         <div class="screen-page screen-border@(ActivePage == context.Index ? " activepage" : "")">
             <AmendmentBodySingleRenderer BodyText="@context.Body"></AmendmentBodySingleRenderer>
@@ -15,6 +20,8 @@
 
     List<AmendmentId> _renderedBodyText = new();
 
+    string _invertedClass => SystemSettingRepository.InvertedSlideText ? "inverted" : "";
+
     protected override void OnParametersSet()
     {
         var text = BodyText.Split("**NEWSLIDE**");
@@ -24,6 +31,22 @@
         {
             _renderedBodyText.Add(new AmendmentId(i, text[i]));
         }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        SystemSettingRepository.PropertyChanged += SystemSettingRepositoryOnPropertyChanged;
+        return Task.CompletedTask;
+    }
+
+    private void SystemSettingRepositoryOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        SystemSettingRepository.PropertyChanged -= SystemSettingRepositoryOnPropertyChanged;
     }
 
     private record AmendmentId(int Index, string Body);

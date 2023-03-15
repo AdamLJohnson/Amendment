@@ -19,6 +19,7 @@ namespace Amendment.Client.Repository
     {
         bool ShowDeafSigner { get; }
         bool ShowDeafSignerBox { get; }
+        bool InvertedSlideText { get; }
     }
     public class SystemSettingRepository : HttpRepository<SystemSettingRequest, SystemSettingResponse>, ISystemSettingRepository, IDisposable
     {
@@ -46,10 +47,22 @@ namespace Amendment.Client.Repository
             }
         }
 
+        public bool InvertedSlideText
+        {
+            get => _invertedSlideText;
+            private set
+            {
+                if (value == _invertedSlideText) return;
+                _invertedSlideText = value;
+                OnPropertyChanged();
+            }
+        }
+
         protected override string _baseUrl { get; set; } = "api/SystemSetting";
         private List<SystemSettingResponse> _systemSettings = new();
         private bool _showDeafSigner;
         private bool _showDeafSignerBox;
+        private bool _invertedSlideText;
 
         public SystemSettingRepository(HttpClient client, IHubEventService hubEventService) : base(client)
         {
@@ -82,6 +95,7 @@ namespace Amendment.Client.Repository
         {
             ShowDeafSigner = convertToBool(_systemSettings?.FirstOrDefault(x => x.Key == "ShowDeafSigner")?.Value);
             ShowDeafSignerBox = convertToBool(_systemSettings?.FirstOrDefault(x => x.Key == "ShowDeafSignerBox")?.Value);
+            InvertedSlideText = convertToBool(_systemSettings?.FirstOrDefault(x => x.Key == "InvertedSlideText")?.Value);
         }
 
         private bool convertToBool(string? input)

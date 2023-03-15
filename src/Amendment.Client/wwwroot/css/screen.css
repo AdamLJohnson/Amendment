@@ -291,6 +291,11 @@
   background-position: center;
   background-repeat: no-repeat;
 }
+#fullscreen[fullscreen].inverted,
+.text-preview .screen-page.inverted {
+  background-color: #000;
+  color: #fff;
+}
 .small-screen-container.well.slideoffline,
 #fullscreen[fullscreen].slideoffline {
   background-image: url("../images/ConferenceLogo_1.png");

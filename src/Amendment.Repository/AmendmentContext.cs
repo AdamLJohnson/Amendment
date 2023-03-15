@@ -130,8 +130,37 @@ namespace Amendment.Repository
                 , new Language() { Id = 3, LanguageName = "French", LanguageCode = "FRA" });
 
             builder.Entity<SystemSetting>().HasIndex(x => x.Key).IsUnique();
-            builder.Entity<SystemSetting>().HasData(new SystemSetting() { Id = 1, Key = SystemSettingKeys.ShowDeafSigner, Value = "1", EnteredBy = -1, EnteredDate = DateTime.UtcNow, LastUpdatedBy = -1, LastUpdated = DateTime.UtcNow},
-                new SystemSetting() { Id = 2, Key = SystemSettingKeys.ShowDeafSignerBox, Value = "1", EnteredBy = -1, EnteredDate = DateTime.UtcNow, LastUpdatedBy = -1, LastUpdated = DateTime.UtcNow });
+            builder.Entity<SystemSetting>()
+                .HasData(new SystemSetting()
+                    {
+                        Id = 1,
+                        Key = SystemSettingKeys.ShowDeafSigner,
+                        Value = "1",
+                        EnteredBy = -1,
+                        EnteredDate = DateTime.UtcNow,
+                        LastUpdatedBy = -1,
+                        LastUpdated = DateTime.UtcNow
+                    },
+                    new SystemSetting()
+                    {
+                        Id = 2,
+                        Key = SystemSettingKeys.ShowDeafSignerBox,
+                        Value = "1",
+                        EnteredBy = -1,
+                        EnteredDate = DateTime.UtcNow,
+                        LastUpdatedBy = -1,
+                        LastUpdated = DateTime.UtcNow
+                    },
+                    new SystemSetting()
+                    {
+                        Id = 3,
+                        Key = SystemSettingKeys.InvertedSlideText,
+                        Value = "1",
+                        EnteredBy = -1,
+                        EnteredDate = DateTime.UtcNow,
+                        LastUpdatedBy = -1,
+                        LastUpdated = DateTime.UtcNow
+                    });
         }
     }
 }

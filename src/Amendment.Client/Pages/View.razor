@@ -2,10 +2,12 @@
 @using Amendment.Shared.Responses
 @using Amendment.Shared.Enums
 @using Amendment.Client.Repository
+@using System.ComponentModel
 @inject ILanguageRepository LanguageRepository
 @inject IAmendmentRepository AmendmentRepository
 @inject IHubEventService HubEventService
 @inject IJSRuntime JS
+@inject ISystemSettingRepository SystemSettingRepository
 @implements IDisposable
 <PageTitle>@_title</PageTitle>
 <h3>@_title</h3>
@@ -17,7 +19,7 @@
     if (_body == null)
         slideClass = "slideoffline";
 }
-<Div id="fullscreen" Class=@($"{slideClass} {Language}")>
+<Div id="fullscreen" Class=@($"{slideClass} {Language} {_invertedClass}")>
     @if (_body != null)
     {
         <AmendmentBodySingleRenderer BodyText=@(_body?.AmendBodyPagedText ?? "")></AmendmentBodySingleRenderer>
@@ -33,15 +35,23 @@
     string _title = "";
     IJSObjectReference module;
 
+    string _invertedClass => SystemSettingRepository.InvertedSlideText ? "inverted" : "";
+
 
     protected override async Task OnInitializedAsync()
     {
+        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+        SystemSettingRepository.PropertyChanged += SystemSettingRepositoryOnPropertyChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _title = Language;
         _title = Language;
         var languages = (await LanguageRepository.GetAsync()).ToList();
         LanguageId = languages.FirstOrDefault(x => x.LanguageName == Language)?.Id ?? -1;
         var amendment = await AmendmentRepository.GetLiveAsync();
         _body = amendment?.AmendmentBodies.FirstOrDefault(x => x.LanguageId == LanguageId && x.IsLive);
-        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -101,9 +111,15 @@
         StateHasChanged();
     }
 
+    private void SystemSettingRepositoryOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
     public void Dispose()
     {
         HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+        SystemSettingRepository.PropertyChanged -= SystemSettingRepositoryOnPropertyChanged;
     }
 
 }

@@ -24,6 +24,7 @@ namespace Amendment.Client
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
+            builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) }.EnableIntercept(sp));
             builder.Services.AddHttpClientInterceptor();
             builder.Services.AddScoped<HttpInterceptorService>();

@@ -8,5 +8,6 @@ namespace Amendment.Model.Infrastructure
     {
         public static string ShowDeafSigner => "ShowDeafSigner";
         public static string ShowDeafSignerBox => "ShowDeafSignerBox";
+        public static string InvertedSlideText => "InvertedSlideText";
     }
 }

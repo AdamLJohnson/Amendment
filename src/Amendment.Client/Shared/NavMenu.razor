@@ -7,30 +7,33 @@
         <BarItem>
             <BarLink To="/">Home</BarLink>
         </BarItem>
-
+        <BarItem>
+            <BarDropdown>
+                <BarDropdownToggle>View Amendments</BarDropdownToggle>
+                <BarDropdownMenu>
+                    <BarDropdownItem>
+                        <BarLink To="/View/English" TextColor="TextColor.Dark">English</BarLink>
+                    </BarDropdownItem>
+                    <BarDropdownItem>
+                        <BarLink To="/View/Spanish" TextColor="TextColor.Dark">Spanish</BarLink>
+                    </BarDropdownItem>
+                    <BarDropdownItem>
+                        <BarLink To="/View/French" TextColor="TextColor.Dark">French</BarLink>
+                    </BarDropdownItem>
+                </BarDropdownMenu>
+            </BarDropdown>
+        </BarItem>
         <AuthorizeView>
             <Authorized>
-                <BarItem>
-                    <BarDropdown>
-                        <BarDropdownToggle>View Amendments</BarDropdownToggle>
-                        <BarDropdownMenu>
-                            <BarDropdownItem>
-                                <BarLink To="/View/English" TextColor="TextColor.Dark">English</BarLink>
-                            </BarDropdownItem>
-                            <BarDropdownItem>
-                                <BarLink To="/View/Spanish" TextColor="TextColor.Dark">Spanish</BarLink>
-                            </BarDropdownItem>
-                            <BarDropdownItem>
-                                <BarLink To="/View/French" TextColor="TextColor.Dark">French</BarLink>
-                            </BarDropdownItem>
-                        </BarDropdownMenu>
-                    </BarDropdown>
-                </BarItem>
                 <BarItem>
                     <BarLink To="/Amendment">
                         Amendments
                     </BarLink>
                 </BarItem>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="System Administrator">
+            <Authorized>
                 <BarItem>
                     <BarDropdown Background="Background.Light">
                         <BarDropdownToggle>Admin</BarDropdownToggle>

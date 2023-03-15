@@ -3,6 +3,8 @@
 /*@slideOfflineBackground: url("../images/500ColorCircle.png");*/
 @slideBackground: url("../images/amend_background_full.png");
 @slideBackgroundColor: #fff;
+@invertedSlideBackgroundColor: #000;
+@invertedSlideColor: #fff;
 @slideOfflineBackground: url("../images/ConferenceLogo_1.png");
 @slideOfflineBackgroundEng: url("../images/static_title_eng.png");
 @slideOfflineBackgroundEsp: url("../images/static_title_esp.png");
@@ -246,6 +248,11 @@
 }
 
 #fullscreen[fullscreen], .text-preview .screen-page {
+    &.inverted {
+        background-color: @invertedSlideBackgroundColor;
+        color: @invertedSlideColor
+    }
+
     .mixin-slide-text-background
 }
 
