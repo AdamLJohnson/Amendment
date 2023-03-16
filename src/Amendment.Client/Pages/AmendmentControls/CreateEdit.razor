@@ -127,7 +127,7 @@
     protected async Task OnSave()
     {
         var isValid = await fluentValidations.ValidateAll();
-        if (string.IsNullOrEmpty(bodyModel.AmendBody))
+        if (Id == null && string.IsNullOrEmpty(bodyModel.AmendBody))
         {
             await NotificationService.Error("Amendment Body can not be empty", "Error");
             isValid = false;

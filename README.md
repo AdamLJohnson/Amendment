@@ -42,7 +42,7 @@ Description=Amendment translation web site
 
 [Service]
 WorkingDirectory=/var/aspnetcore/amendments
-ExecStart=/usr/bin/dotnet /var/aspnetcore/amendments/Amendment.Server.dll
+ExecStart=/usr/bin/dotnet /var/aspnetcore/amendments/Amendment.Server.dll --urls=http://*:5000
 Restart=always
 # Restart service after 10 seconds if the dotnet service crashes:
 RestartSec=10

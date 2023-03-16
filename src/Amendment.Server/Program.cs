@@ -33,16 +33,34 @@ namespace Amendment
             builder.Services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "application/octet-stream" });
+                    new[]
+                    {
+                        "application/octet-stream", 
+                        "image/png", 
+                        "text/javascript",
+                        "text/css",
+                        "application/json"
+                    });
             });
 
-            builder.Services.AddDbContext<Repository.AmendmentContext>(options =>
+
+
+            if (builder.Configuration["DbType"] == "DB")
             {
-                options.UseInMemoryDatabase("Amendment");
-                options.ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                // DOCKER COMMAND: docker run -p 5432:5432 --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_USER=amendment -d postgres
-                //options.UseNpgsql("Host=localhost;Database=amendment;Username=amendment;Password=mysecretpassword");
-            });
+                builder.Services.AddDbContext<Repository.AmendmentContext>(options =>
+                {
+                    // DOCKER COMMAND: docker run -p 5432:5432 --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_USER=amendment -d postgres
+                    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+                });
+            }
+            else
+            {
+                builder.Services.AddDbContext<Repository.AmendmentContext>(options =>
+                {
+                    options.UseInMemoryDatabase("Amendment");
+                    options.ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                });
+            }
 
             var jwtSettings = builder.Configuration.GetSection("JWTSettings");
             builder.Services.AddAuthentication(opt =>
@@ -129,13 +147,12 @@ namespace Amendment
                 context.Database.EnsureCreated();
                 //context.Database.Migrate();
                 //DbInitializer.Initialize(context);
-#if DEBUG
                 var seeder = new SeedDatabase(app.Services);
                 await seeder.Seed();
-#endif
+
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
