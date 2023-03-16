@@ -167,7 +167,6 @@ namespace Amendment
 
             app.MapHub<AmendmentHub>("/amendmentHub");
             app.MapHub<ScreenHub>("/screenHub");
-            //app.MapHub<DiffHub>("/diffHub");
 
             app.MapFallbackToFile("index.html");
 

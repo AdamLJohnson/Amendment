@@ -33,6 +33,8 @@ sudo journalctl -fu aspnetcore-amendment.service
 
 ## Setup
 
+Be sure that the user that runs the Azure DevOps agent has Read/Write permissions to `/var/aspnetcore/amendments`. You may need to create the directory.
+
 ### Startup Service Script
 
 Save to `/etc/systemd/system/aspnetcore-amendment.service`
@@ -50,7 +52,7 @@ SyslogIdentifier=amendment-web
 User=adamlj
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=true
-Environment=ConnectionStrings__DefaultConnection=Server=<HOST>;Port=8715;Database=<DATABASENAME>;Uid=<USERNAME>;Pwd=<PASSWORD>;
+Environment=ConnectionStrings__DefaultConnection=Host=<HOST>;Database=<DB>;Username=<USERNAME>;Password=<PASSWORD>;
 
 [Install]
 WantedBy=multi-user.target
@@ -61,4 +63,147 @@ WantedBy=multi-user.target
 Add the following to `/etc/sudoers`:
 ```
 %sudo   ALL=NOPASSWD: /bin/systemctl restart aspnetcore-amendment.service
+```
+
+### nginx.conf
+
+**NOTE** Replace `DOMAINNAME` with the real domain name. You will also need to remove the let's encrypt/Certbot config until you are ready.
+
+```
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+        worker_connections 768;
+        # multi_accept on;
+}
+
+http {
+    include       mime.types;
+    # anything written in /opt/nginx/conf/mime.types is interpreted as if written inside the http { } block
+
+    default_type  application/octet-stream;
+
+    map $http_connection $connection_upgrade {
+        "~*Upgrade" $http_connection;
+        default keep-alive;
+    }
+
+    server {
+            server_name amendments.DOMAINNAME.com www.amendments.DOMAINNAME.com;
+
+            # Configure the SignalR Endpoint
+            location / {
+                      # App server url
+                      proxy_pass http://localhost:5000;
+
+                      # Configuration for WebSockets
+                      proxy_set_header Upgrade $http_upgrade;
+                      proxy_set_header Connection $connection_upgrade;
+                      proxy_cache off;
+                      # WebSockets were implemented after http/1.0
+                      proxy_http_version 1.1;
+
+                      # Configuration for ServerSentEvents
+                      proxy_buffering off;
+
+                      # Configuration for LongPolling or if your KeepAliveInterval is longer than 60 seconds
+                      proxy_read_timeout 100s;
+
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+                     }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/amendments.DOMAINNAME.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/amendments.DOMAINNAME.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+
+    server {
+            server_name dev-amendments.DOMAINNAME.com www.dev-amendments.DOMAINNAME.com;
+
+            # Configure the SignalR Endpoint
+            location / {
+                      # App server url
+                      proxy_pass http://localhost:5050;
+
+                      # Configuration for WebSockets
+                      proxy_set_header Upgrade $http_upgrade;
+                      proxy_set_header Connection $connection_upgrade;
+                      proxy_cache off;
+                      # WebSockets were implemented after http/1.0
+                      proxy_http_version 1.1;
+
+                      # Configuration for ServerSentEvents
+                      proxy_buffering off;
+
+                      # Configuration for LongPolling or if your KeepAliveInterval is longer than 60 seconds
+                      proxy_read_timeout 100s;
+
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+                     }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/dev-amendments.DOMAINNAME.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/dev-amendments.DOMAINNAME.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+
+
+
+    server {
+    if ($host = www.amendments.DOMAINNAME.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = amendments.DOMAINNAME.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+            listen 80;
+            server_name amendments.DOMAINNAME.com www.amendments.DOMAINNAME.com;
+    return 404; # managed by Certbot
+
+
+
+
+}
+
+
+    server {
+    if ($host = www.dev-amendments.DOMAINNAME.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = dev-amendments.DOMAINNAME.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+            listen 80;
+            server_name dev-amendments.DOMAINNAME.com www.dev-amendments.DOMAINNAME.com;
+    return 404; # managed by Certbot
+
+
+
+
+}}
+
 ```
