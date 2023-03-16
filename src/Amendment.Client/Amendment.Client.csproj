@@ -8,12 +8,10 @@
 
   <ItemGroup>
     <Content Remove="compilerconfig.json" />
-    <Content Remove="wwwroot\js\ViewFullScreen.js" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="compilerconfig.json" />
-    <None Include="wwwroot\js\ViewFullScreen.js" />
   </ItemGroup>
 
   <ItemGroup>
