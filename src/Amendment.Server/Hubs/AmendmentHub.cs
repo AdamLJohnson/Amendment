@@ -21,13 +21,22 @@ namespace Amendment.Server.Hubs
             _mediator = mediator;
         }
 
-        public async Task  AmendmentLive(int amendmentId, bool isLive)
+        public Task AmendmentLive(int amendmentId, bool isLive)
+        {
+            AmendmentLiveWork(amendmentId, isLive);
+            return Task.CompletedTask;
+        }
+
+        private async Task AmendmentLiveWork(int amendmentId, bool isLive)
         {
             var amendment = await _mediator.Send(new GetSingleAmendmentQuery(amendmentId));
             if (!isLive && amendment.Result != null)
             {
-                await _mediator.Send(new BulkSetAmendmentBodyLiveCommand(new SetAmendmentBodyLiveCommands(amendment.Result.AmendmentBodies.Select(x => new SetAmendmentBodyLiveCommand() { AmendId = amendmentId, Id = x.Id, IsLive = false }).ToArray())));
+                await _mediator.Send(new BulkSetAmendmentBodyLiveCommand(new SetAmendmentBodyLiveCommands(amendment.Result
+                    .AmendmentBodies.Select(x => new SetAmendmentBodyLiveCommand()
+                        { AmendId = amendmentId, Id = x.Id, IsLive = false }).ToArray())));
             }
+
             var command = amendment.Result.Adapt<UpdateAmendmentCommand>();
             command.SavingUserId = amendmentId;
             command.IsLive = isLive;
