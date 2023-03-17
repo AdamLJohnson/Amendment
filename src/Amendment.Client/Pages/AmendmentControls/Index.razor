@@ -4,6 +4,7 @@
 @using Amendment.Client.Repository
 @using Amendment.Client.Services
 @using Amendment.Shared.Enums
+@using Amendment.Shared.SignalRCommands
 @implements IDisposable
 @attribute [Authorize]
 @inject IAmendmentRepository AmendmentRepository
@@ -158,15 +159,7 @@
         var amendmentRequest = liveAmendment.ToRequest();
         amendmentRequest.IsLive = false;
 
-        var tasks = new List<Task>();
-        foreach (var body in amendmentBodies.Where(x => x.IsLive))
-        {
-            var bodyRequest = body.ToRequest();
-            bodyRequest.IsLive = false;
-            bodyRequest.Page = 0;
-            tasks.Add(AmendmentBodyRepository.PutAsync(amendmentId, body.Id, bodyRequest));
-        }
-        await Task.WhenAll(tasks);
+        await AmendmentHubCommandService.SetAmendmentBodyLiveAsync(amendmentBodies.Where(x => x.IsLive).Select(x => new SetAmendmentBodyLiveCommand() { AmendId = amendmentId, Id = x.Id, IsLive = false }).ToArray());
         await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
     }
 
