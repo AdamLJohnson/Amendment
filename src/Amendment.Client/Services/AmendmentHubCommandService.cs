@@ -9,6 +9,7 @@ using Amendment.Client.AuthProviders;
 using Amendment.Shared.Responses;
 using Amendment.Shared.SignalRCommands;
 using Microsoft.AspNetCore.Components;
+using Amendment.Client.Helpers;
 
 namespace Amendment.Client.Services
 {
@@ -39,6 +40,7 @@ namespace Amendment.Client.Services
         {
             var token = await _refreshTokenService.TryRefreshToken();
             _hubConnection = new HubConnectionBuilder()
+                .WithAutomaticReconnect(new SignalRRetryPolicy())
                 .WithUrl(_navigationManager.ToAbsoluteUri("/amendmentHub"), options =>
                 {
                     options.AccessTokenProvider = () => Task.FromResult(token)!;
@@ -70,7 +72,22 @@ namespace Amendment.Client.Services
                 _hubEventService.OnClearScreens();
             });
 
-            await _hubConnection.StartAsync();
+            await StartAsync();
+        }
+
+        public async Task StartAsync()
+        {
+            try
+            {
+                await _hubConnection.StartAsync();
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Closed, starting delay");
+                await Task.Delay(5000);
+                Console.WriteLine("Restarting");
+                await StartAsync();
+            }
         }
 
         public Task Disconnect()
