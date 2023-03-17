@@ -49,38 +49,55 @@
             _bodies = amendment.AmendmentBodies.ToList();
         }
         HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
+    }
+
+    private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
+    {
+        foreach (var item in e.Value)
+        {
+            AmendmendBodyUpdatedWork(e.OperationType, item);
+        }
+        StateHasChanged();
     }
 
     private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
     {
-        switch (e.OperationType)
-        {
-            case OperationType.Create:
-                if (e.Value.IsLive)
-                    _bodies.Add(e.Value);
-                break;
-            case OperationType.Update:
-                if (e.Value.IsLive)
-                {
-                    var i = _bodies.FindIndex(x => x.Id == e.Value.Id);
-                    if (i > -1)
-                        _bodies[i] = e.Value;
-                    else
-                        _bodies.Add(e.Value);
-                }
-                else
-                    _bodies.RemoveAll(x => x.Id == e.Value.Id);
-                break;
-            case OperationType.Delete:
-                _bodies.RemoveAll(x => x.Id == e.Value.Id);
-                break;
-        }
+        AmendmendBodyUpdatedWork(e.OperationType, e.Value);
 
         StateHasChanged();
+    }
+
+    private void AmendmendBodyUpdatedWork(OperationType operationType, AmendmentBodyResponse body)
+    {
+        switch (operationType)
+        {
+            case OperationType.Create:
+                if (body.IsLive)
+                    _bodies.Add(body);
+                break;
+            case OperationType.Update:
+                if (body.IsLive)
+                {
+                    var i = _bodies.FindIndex(x => x.Id == body.Id);
+                    if (i > -1)
+                        _bodies[i] = body;
+                    else
+                        _bodies.Add(body);
+                }
+                else
+                    _bodies.RemoveAll(x => x.Id == body.Id);
+
+                break;
+            case OperationType.Delete:
+                _bodies.RemoveAll(x => x.Id == body.Id);
+                break;
+        }
     }
 
     public void Dispose()
     {
         HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
     }
 }

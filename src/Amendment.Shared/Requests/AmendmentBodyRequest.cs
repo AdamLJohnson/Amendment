@@ -17,11 +17,12 @@ namespace Amendment.Shared.Requests
         public bool IsLive { get; set; }
         public int Page { get; set; } = 0;
 
-        public void ChangeBodyPage(int page)
+        public int ChangeBodyPage(int page)
         {
             if (page < 0 || page > Pages - 1)
                 page = 0;
             Page = page;
+            return Page;
         }
 
         public int Pages

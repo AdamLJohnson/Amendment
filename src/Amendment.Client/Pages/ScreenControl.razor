@@ -10,7 +10,6 @@
 @inject IAmendmentRepository AmendmentRepository
 @inject ILanguageRepository LanguageRepository
 @inject IHubEventService HubEventService
-@inject IAmendmentBodyRepository AmendmentBodyRepository
 @inject IAmendmentHubCommandService AmendmentHubCommandService
 
 <PageTitle>Screen Control</PageTitle>
@@ -88,32 +87,47 @@ else
         _amendment = await AmendmentRepository.GetLiveAsync();
         HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
         HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
         HubEventService.ClearScreens += ClearScreensEvent;
     }
-    
+
+    private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
+    {
+        foreach (var item in e.Value)
+        {
+            AmendmentBodyUpdatedWork(e.OperationType, item);
+        }
+        StateHasChanged();
+    }
+
     private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
+    {
+        AmendmentBodyUpdatedWork(e.OperationType, e.Value);
+
+        StateHasChanged();
+    }
+
+    private void AmendmentBodyUpdatedWork(OperationType operationType, AmendmentBodyResponse body)
     {
         if (_amendment == null)
             return;
-        if (_amendment.Id != e.Value.AmendId)
+        if (_amendment.Id != body.AmendId)
             return;
-            
-        switch (e.OperationType)
+
+        switch (operationType)
         {
             case OperationType.Create:
-                _amendment.AmendmentBodies.Add(e.Value);
+                _amendment.AmendmentBodies.Add(body);
                 break;
             case OperationType.Update:
-                var i = _amendment.AmendmentBodies.FindIndex(x => x.Id == e.Value.Id);
+                var i = _amendment.AmendmentBodies.FindIndex(x => x.Id == body.Id);
                 if (i > -1)
-                    _amendment.AmendmentBodies[i] = e.Value;
+                    _amendment.AmendmentBodies[i] = body;
                 break;
             case OperationType.Delete:
-                _amendment?.AmendmentBodies.RemoveAll(x => x.Id == e.Value.Id);
+                _amendment?.AmendmentBodies.RemoveAll(x => x.Id == body.Id);
                 break;
         }
-
-        StateHasChanged();
     }
 
     private async void AmendmentUpdatedEvent(object? sender, SignalRResponse<AmendmentResponse> e)
@@ -139,13 +153,7 @@ else
             return;
         await AmendmentHubCommandService.SetAmendmentBodyLiveAsync(
             _amendment.AmendmentBodies.Where(x => x.IsLive).Select(x => new SetAmendmentBodyLiveCommand { AmendId = _amendment.Id, Id = x.Id, IsLive = false})
-                .ToArray()); 
-        //foreach (var body in _amendment.AmendmentBodies.Where(x => x.IsLive).ToArray())
-        //{
-        //    var bodyRequest = body.ToRequest();
-        //    bodyRequest.IsLive = false;
-        //    await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
-        //}
+                .ToArray());
     }
 
     private async Task AllGoLive()
@@ -156,12 +164,6 @@ else
         await AmendmentHubCommandService.SetAmendmentBodyLiveAsync(
             _amendment.AmendmentBodies.Where(x => !x.IsLive).Select(x => new SetAmendmentBodyLiveCommand { AmendId = _amendment.Id, Id = x.Id, IsLive = true })
                 .ToArray());
-    //foreach (var body in _amendment.AmendmentBodies.Where(x => !x.IsLive).ToArray())
-    //{
-    //    var bodyRequest = body.ToRequest();
-    //    bodyRequest.IsLive = true;
-    //    await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
-    //}
     }
 
     private void ClearScreensEvent(object? sender, EventArgs e) => _amendment = null;
@@ -170,6 +172,7 @@ else
     {
         HubEventService.AmendmentUpdated -= AmendmentUpdatedEvent;
         HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
         HubEventService.ClearScreens -= ClearScreensEvent;
     }
 
@@ -178,12 +181,9 @@ else
         if (_amendment == null)
             return;
 
-        foreach (var body in _amendment.AmendmentBodies.ToArray())
-        {
-            var bodyRequest = body.ToRequest();
-            bodyRequest.Page = 0;
-            await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
-        }
+        await AmendmentHubCommandService.SetAmendmentBodyPage(
+            _amendment.AmendmentBodies.Select(x => new SetAmendmentBodyPageCommand { AmendId = _amendment.Id, Id = x.Id, Page = 0})
+                .ToArray());
     }
 
     private async Task AllPrevPage()
@@ -191,13 +191,10 @@ else
         if (_amendment == null)
             return;
 
-        foreach (var body in _amendment.AmendmentBodies.ToArray())
-        {
-            var bodyRequest = body.ToRequest();
-            bodyRequest.ChangeBodyPage(bodyRequest.Page - 1);
-            await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
-        }
-        
+        await AmendmentHubCommandService.SetAmendmentBodyPage(
+            _amendment.AmendmentBodies.Select(x => new SetAmendmentBodyPageCommand { AmendId = _amendment.Id, Id = x.Id, Page = x.ChangeBodyPage(x.Page - 1) })
+                .ToArray());
+
     }
 
     private async Task AllNextPage()
@@ -205,12 +202,9 @@ else
         if (_amendment == null)
             return;
 
-        foreach (var body in _amendment.AmendmentBodies.ToArray())
-        {
-            var bodyRequest = body.ToRequest();
-            bodyRequest.ChangeBodyPage(bodyRequest.Page + 1);
-            await AmendmentBodyRepository.PutAsync(_amendment.Id, body.Id, bodyRequest);
-        }
+        await AmendmentHubCommandService.SetAmendmentBodyPage(
+            _amendment.AmendmentBodies.Select(x => new SetAmendmentBodyPageCommand { AmendId = _amendment.Id, Id = x.Id, Page = x.ChangeBodyPage(x.Page + 1) })
+                .ToArray());
     }
 
 }

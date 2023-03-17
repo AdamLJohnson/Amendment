@@ -24,6 +24,10 @@ namespace Amendment.Server.Hubs
         public async Task  AmendmentLive(int amendmentId, bool isLive)
         {
             var amendment = await _mediator.Send(new GetSingleAmendmentQuery(amendmentId));
+            if (!isLive && amendment.Result != null)
+            {
+                await _mediator.Send(new BulkSetAmendmentBodyLiveCommand(new SetAmendmentBodyLiveCommands(amendment.Result.AmendmentBodies.Select(x => new SetAmendmentBodyLiveCommand() { AmendId = amendmentId, Id = x.Id, IsLive = false }).ToArray())));
+            }
             var command = amendment.Result.Adapt<UpdateAmendmentCommand>();
             command.SavingUserId = amendmentId;
             command.IsLive = isLive;
@@ -32,26 +36,28 @@ namespace Amendment.Server.Hubs
 
         public async Task AmendmentBodyLive(SetAmendmentBodyLiveCommands bodies)
         {
-            foreach (var bodyInfo in bodies.Commands)
-            {
-                var body = await _mediator.Send(new GetSingleAmendmentBodyQuery(bodyInfo.Id, bodyInfo.AmendId));
-                var command = body.Result.Adapt<UpdateAmendmentBodyCommand>();
-                command.SavingUserId = SignedInUserId;
-                command.IsLive = bodyInfo.IsLive;
-                await _mediator.Send(command);
-            }
+            await _mediator.Send(new BulkSetAmendmentBodyLiveCommand(bodies));
+            //foreach (var bodyInfo in bodies.Commands)
+            //{
+            //    var body = await _mediator.Send(new GetSingleAmendmentBodyQuery(bodyInfo.Id, bodyInfo.AmendId));
+            //    var command = body.Result.Adapt<UpdateAmendmentBodyCommand>();
+            //    command.SavingUserId = SignedInUserId;
+            //    command.IsLive = bodyInfo.IsLive;
+            //    await _mediator.Send(command);
+            //}
         }
 
         public async Task AmendmentBodyPage(SetAmendmentBodyPageCommands bodies)
         {
-            foreach (var bodyInfo in bodies.Commands)
-            {
-                var body = await _mediator.Send(new GetSingleAmendmentBodyQuery(bodyInfo.Id, bodyInfo.AmendId));
-                var command = body.Result.Adapt<UpdateAmendmentBodyCommand>();
-                command.SavingUserId = SignedInUserId;
-                command.Page = bodyInfo.Page;
-               await _mediator.Send(command);
-            }
+            await _mediator.Send(new BulkSetAmendmentBodyPageCommand(bodies));
+            //foreach (var bodyInfo in bodies.Commands)
+            //{
+            //    var body = await _mediator.Send(new GetSingleAmendmentBodyQuery(bodyInfo.Id, bodyInfo.AmendId));
+            //    var command = body.Result.Adapt<UpdateAmendmentBodyCommand>();
+            //    command.SavingUserId = SignedInUserId;
+            //    command.Page = bodyInfo.Page;
+            //   await _mediator.Send(command);
+            //}
         }
 
         protected int SignedInUserId

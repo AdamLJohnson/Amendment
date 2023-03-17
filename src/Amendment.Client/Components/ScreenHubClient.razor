@@ -25,6 +25,11 @@
             HubEventService.OnAmendmentBodyUpdated(response);
         });
 
+        hubConnection.On<SignalRResponse<List<AmendmentBodyResponse>>>("AmendmentBodyUpdateMany", response =>
+        {
+            HubEventService.OnAmendmentBodyUpdatedMany(response);
+        });
+
         hubConnection.On<SignalRResponse<SystemSettingResponse>>("SystemSettingUpdate", response =>
         {
             HubEventService.OnSystemSettingUpdated(response);

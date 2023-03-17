@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
+using Amendment.Model.Infrastructure;
 using Amendment.Repository;
 using Amendment.Repository.Infrastructure;
 using Amendment.Service.Infrastructure;
@@ -13,6 +15,8 @@ namespace Amendment.Service
     {
         Task<List<AmendmentBody>> GetByAmentmentId(int amendmentId);
         Task<bool> ValidateLanguageId(AmendmentBody body);
+        Task<IEnumerable<AmendmentBody>> SetIsLiveForManyAsync(SetIsLive[] data);
+        Task<IEnumerable<AmendmentBody>> SetPageForManyAsync(SetPage[] data);
     }
 
     public class AmendmentBodyService : BaseDataService<AmendmentBody>, IAmendmentBodyService
@@ -80,6 +84,58 @@ namespace Amendment.Service
                 q.AmendId == body.AmendId && q.LanguageId == body.LanguageId && q.Id != body.Id)).FilteredCount == 0;
 
             return result;
+        }
+
+        public async Task<IEnumerable<AmendmentBody>> SetIsLiveForManyAsync(SetIsLive[] data)
+        {
+            var ids = data.Select(x => x.Id).ToArray();
+            if (!_unitOfWork.InMemory)
+            {
+                foreach (var item in data)
+                {
+                    await _repository.ExecuteUpdate(
+                        x => x.Id == item.Id,
+                        x => x.SetProperty(p => p.IsLive, p => item.IsLive));
+                }
+            }
+            else
+            {
+                foreach (var item in data)
+                {
+                    var body = await _repository.GetByIdAsync(item.Id);
+                    body.IsLive = item.IsLive;
+                    _repository.Update(body);
+                }
+                await _unitOfWork.SaveChangesAsync(0);
+            }
+            var output = await _repository.GetManyAsync(where: x => ids.Contains(x.Id));
+            return output.Results;
+        }
+
+        public async Task<IEnumerable<AmendmentBody>> SetPageForManyAsync(SetPage[] data)
+        {
+            var ids = data.Select(x => x.Id).ToArray();
+            if (!_unitOfWork.InMemory)
+            {
+                foreach (var item in data)
+                {
+                    await _repository.ExecuteUpdate(
+                        x => x.Id == item.Id,
+                        x => x.SetProperty(p => p.Page, p => item.Page));
+                }
+            }
+            else
+            {
+                foreach (var item in data)
+                {
+                    var body = await _repository.GetByIdAsync(item.Id);
+                    body.Page = item.Page;
+                    _repository.Update(body);
+                }
+                await _unitOfWork.SaveChangesAsync(0);
+            }
+            var output = await _repository.GetManyAsync(where: x => ids.Contains(x.Id));
+            return output.Results;
         }
     }
 }

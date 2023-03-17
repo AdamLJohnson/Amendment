@@ -3,6 +3,7 @@ using Amendment.Server.Mediator.Commands;
 using Amendment.Server.Mediator.Commands.AmendmentBodyCommands;
 using Amendment.Server.Mediator.Commands.AmendmentCommands;
 using Amendment.Server.Mediator.Commands.SystemSettingCommands;
+using Amendment.Server.Mediator.Queries.AmendmentQueries;
 using Amendment.Shared;
 using Amendment.Shared.Enums;
 using Amendment.Shared.Responses;
@@ -17,11 +18,13 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
 {
     private readonly IHubContext<AmendmentHub> _amendmentHub;
     private readonly IHubContext<ScreenHub> _screenHub;
+    private readonly IMediator _mediator;
 
-    public ClientNotificationBehavior(IHubContext<AmendmentHub> amendmentHub, IHubContext<ScreenHub> screenHub)
+    public ClientNotificationBehavior(IHubContext<AmendmentHub> amendmentHub, IHubContext<ScreenHub> screenHub, IMediator mediator)
     {
         _amendmentHub = amendmentHub;
         _screenHub = screenHub;
+        _mediator = mediator;
     }
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -52,6 +55,11 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
             case ClearScreensCommand csc:
                 await NotifyClearScreens();
                 break;
+            case BulkSetAmendmentBodyLiveCommand:
+            case BulkSetAmendmentBodyPageCommand:
+                await NotifyAmendmentBodyChange(OperationType.Update, (IApiResult<List<AmendmentBodyResponse>>)result!);
+                break;
+
         }
         return result;
     }
@@ -76,10 +84,27 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
         var tasks = new List<Task>();
         tasks.Add(_amendmentHub.Clients.All.SendAsync("AmendmentBodyUpdate", new SignalRResponse<AmendmentBodyResponse>(operationType, result.Result)));
 
-        if (result.Result.IsLive)
+        var amendment = await _mediator.Send(new GetLiveAmendmentQuery());
+        if (amendment?.Result != null && amendment.Result.Id == result.Result.AmendId)
+        {
             tasks.Add(_screenHub.Clients.All.SendAsync("AmendmentBodyUpdate", new SignalRResponse<AmendmentBodyResponse>(operationType, result.Result)));
+        }
         await Task.WhenAll(tasks);
     }
+
+    private async Task NotifyAmendmentBodyChange(OperationType operationType,
+        IApiResult<List<AmendmentBodyResponse>>? result)
+    {
+        if (!result.Result.Any())
+            return;
+
+        await _amendmentHub.Clients.All.SendAsync("AmendmentBodyUpdateMany", new SignalRResponse<IEnumerable<AmendmentBodyResponse>>(operationType, result.Result));
+
+        var amendment = await _mediator.Send(new GetLiveAmendmentQuery());
+        if (amendment?.Result != null && amendment.Result.Id == (result.Result.FirstOrDefault()?.AmendId ?? -1))
+            await _screenHub.Clients.All.SendAsync("AmendmentBodyUpdateMany", new SignalRResponse<IEnumerable<AmendmentBodyResponse>>(operationType, result.Result));
+    }
+
     private Task NotifyAmendmentBodyDelete(int id, int amendmentId)
     {
         return _amendmentHub.Clients.All.SendAsync("AmendmentBodyUpdate", new SignalRResponse<AmendmentBodyResponse>(OperationType.Delete, new AmendmentBodyResponse() { Id = id, AmendId = amendmentId }));

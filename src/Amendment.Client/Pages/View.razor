@@ -41,6 +41,7 @@
     protected override async Task OnInitializedAsync()
     {
         HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
         SystemSettingRepository.PropertyChanged += SystemSettingRepositoryOnPropertyChanged;
     }
 
@@ -70,36 +71,52 @@
         await module.InvokeVoidAsync("EnterFullScreen");
     }
 
+    private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
+    {
+        foreach (var item in e.Value)
+        {
+            AmendmentBodyUpdatedWork(e.OperationType, item);
+        }
+        StateHasChanged();
+    }
+
     private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
     {
-        if (e.Value.LanguageId != LanguageId)
+        AmendmentBodyUpdatedWork(e.OperationType, e.Value);
+
+        StateHasChanged();
+    }
+
+    private void AmendmentBodyUpdatedWork(OperationType operationType, AmendmentBodyResponse body)
+    {
+        if (body.LanguageId != LanguageId)
             return;
 
         if (_body == null)
         {
-            switch (e.OperationType)
+            switch (operationType)
             {
                 case OperationType.Create:
-                    if (e.Value.IsLive)
-                        _body = e.Value;
+                    if (body.IsLive)
+                        _body = body;
                     break;
                 case OperationType.Update:
-                    if (e.Value.IsLive)
-                        _body = e.Value;
+                    if (body.IsLive)
+                        _body = body;
                     break;
                 case OperationType.Delete:
                     break;
             }
         }
-        else if (_body.Id == e.Value.Id)
+        else if (_body.Id == body.Id)
         {
-            switch (e.OperationType)
+            switch (operationType)
             {
                 case OperationType.Create:
                     break;
                 case OperationType.Update:
-                    _body = e.Value;
-                    if (!e.Value.IsLive)
+                    _body = body;
+                    if (!body.IsLive)
                         _body = null;
                     break;
                 case OperationType.Delete:
@@ -107,8 +124,6 @@
                     break;
             }
         }
-
-        StateHasChanged();
     }
 
     private void SystemSettingRepositoryOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -119,6 +134,7 @@
     public void Dispose()
     {
         HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
         SystemSettingRepository.PropertyChanged -= SystemSettingRepositoryOnPropertyChanged;
     }
 

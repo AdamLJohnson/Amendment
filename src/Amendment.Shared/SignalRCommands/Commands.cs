@@ -9,6 +9,15 @@ namespace Amendment.Shared.SignalRCommands
     public class SetAmendmentBodyLiveCommands
     {
         public IEnumerable<SetAmendmentBodyLiveCommand> Commands { get; set; } = Enumerable.Empty<SetAmendmentBodyLiveCommand>();
+
+        public SetAmendmentBodyLiveCommands()
+        {
+
+        }
+        public SetAmendmentBodyLiveCommands(IEnumerable<SetAmendmentBodyLiveCommand> commands)
+        {
+            Commands = commands;
+        }
     }
     public class SetAmendmentBodyLiveCommand
     {
@@ -20,6 +29,15 @@ namespace Amendment.Shared.SignalRCommands
     public class SetAmendmentBodyPageCommands
     {
         public IEnumerable<SetAmendmentBodyPageCommand> Commands { get; set; } = Enumerable.Empty<SetAmendmentBodyPageCommand>();
+        public SetAmendmentBodyPageCommands()
+        {
+
+        }
+
+        public SetAmendmentBodyPageCommands(IEnumerable<SetAmendmentBodyPageCommand> commands)
+        {
+            Commands = commands;
+        }
     }
 
     public class SetAmendmentBodyPageCommand

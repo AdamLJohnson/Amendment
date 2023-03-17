@@ -6,7 +6,9 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Amendment.Model.Infrastructure;
+using LoremNET;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Amendment.Repository.Infrastructure
 {
@@ -46,6 +48,15 @@ namespace Amendment.Repository.Infrastructure
             IEnumerable<T> objects = DbSet.WhereMany<T>(where).AsEnumerable();
             foreach (T obj in objects)
                 Delete(obj);
+        }
+
+        public virtual Task<int> ExecuteUpdate(Expression<Func<T, bool>> where, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> setPropertyCalls)
+        {
+            return DbSet.Where(where).ExecuteUpdateAsync(setPropertyCalls);
+        }
+        public virtual Task<int> ExecuteDelete(Expression<Func<T, bool>> where)
+        {
+            return DbSet.Where(where).ExecuteDeleteAsync();
         }
     }
 }

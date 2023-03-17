@@ -56,6 +56,11 @@ namespace Amendment.Client.Services
                 _hubEventService.OnAmendmentBodyUpdated(response);
             });
 
+            _hubConnection.On<SignalRResponse<List<AmendmentBodyResponse>>>("AmendmentBodyUpdateMany", response =>
+            {
+                _hubEventService.OnAmendmentBodyUpdatedMany(response);
+            });
+
             _hubConnection.On<SignalRResponse<SystemSettingResponse>>("SystemSettingUpdate", response =>
             {
                 _hubEventService.OnSystemSettingUpdated(response);
@@ -83,13 +88,13 @@ namespace Amendment.Client.Services
 
         public Task SetAmendmentBodyLiveAsync(SetAmendmentBodyLiveCommand[] bodies)
         {
-            var output = new SetAmendmentBodyLiveCommands { Commands = bodies };
+            var output = new SetAmendmentBodyLiveCommands(commands: bodies);
             return _hubConnection?.InvokeAsync("AmendmentBodyLive", output) ?? Task.CompletedTask;
         }
 
         public Task SetAmendmentBodyPage(SetAmendmentBodyPageCommand[] bodies)
         {
-            var output = new SetAmendmentBodyPageCommands { Commands = bodies };
+            var output = new SetAmendmentBodyPageCommands(commands: bodies);
             return _hubConnection?.InvokeAsync("AmendmentBodyPage", output) ?? Task.CompletedTask;
         }
         #endregion

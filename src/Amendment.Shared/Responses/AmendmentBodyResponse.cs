@@ -31,6 +31,14 @@ namespace Amendment.Shared.Responses
             };
         }
 
+        public int ChangeBodyPage(int page)
+        {
+            if (page < 0 || page > Pages - 1)
+                page = 0;
+            Page = page;
+            return Page;
+        }
+
         public string AmendBodyPagedText
         {
             get

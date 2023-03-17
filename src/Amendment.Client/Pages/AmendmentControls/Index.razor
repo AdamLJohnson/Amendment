@@ -2,12 +2,14 @@
 @using Microsoft.AspNetCore.Authorization
 @using Amendment.Shared.Responses
 @using Amendment.Client.Repository
+@using Amendment.Client.Services
 @using Amendment.Shared.Enums
 @implements IDisposable
 @attribute [Authorize]
 @inject IAmendmentRepository AmendmentRepository
 @inject IAmendmentBodyRepository AmendmentBodyRepository
 @inject IHubEventService HubEventService
+@inject IAmendmentHubCommandService AmendmentHubCommandService
 
 <PageTitle>Amendments</PageTitle>
 
@@ -65,16 +67,36 @@
     {
         HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
         HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
         _amendments = (await AmendmentRepository.GetAsync()).ToList();
+    }
+
+    private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
+    {
+        foreach (var item in e.Value)
+        {
+            AmendmentBodyUpdatedWork(e.OperationType, item);
+        }
+        StateHasChanged();
     }
 
     private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
     {
-        var amendment = _amendments.SingleOrDefault(x => x.Id == e.Value.AmendId);
+        AmendmentBodyUpdatedWork(e.OperationType, e.Value);
+        StateHasChanged();
+    }
+
+    private void AmendmentBodyUpdatedWork(OperationType operationType, AmendmentBodyResponse body)
+    {
+        var amendment = _amendments.SingleOrDefault(x => x.Id == body.AmendId);
         if (amendment == null)
             return;
-        var amendmentBodySummary = new AmendmentBodySummary { Id = e.Value.Id, AmendId = e.Value.AmendId, LanguageId = e.Value.LanguageId, AmendStatus = e.Value.AmendStatus, IsLive = e.Value.IsLive };
-        switch (e.OperationType)
+        var amendmentBodySummary = new AmendmentBodySummary
+        {
+            Id = body.Id, AmendId = body.AmendId, LanguageId = body.LanguageId, AmendStatus = body.AmendStatus,
+            IsLive = body.IsLive
+        };
+        switch (operationType)
         {
             case OperationType.Create:
                 amendment.AmendmentBodies.Add(amendmentBodySummary);
@@ -85,10 +107,11 @@
                     amendment.AmendmentBodies[i] = amendmentBodySummary;
                 break;
             case OperationType.Delete:
-                amendment?.AmendmentBodies.RemoveAll(x => x.Id == e.Value.Id);
+                amendment?.AmendmentBodies.RemoveAll(x => x.Id == body.Id);
                 break;
         }
-        StateHasChanged();
+
+        return;
     }
 
     private void AmendmentUpdatedEvent(object? sender, SignalRResponse<AmendmentResponse> e)
@@ -120,6 +143,7 @@
     {
         HubEventService.AmendmentUpdated -= AmendmentUpdatedEvent;
         HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
+        HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
     }
 
     private async Task ClearScreens()
@@ -128,21 +152,22 @@
         if (liveAmendment == null)
             return;
 
-        var amendmentId = liveAmendment.Id;
-        var amendmentBodies = await AmendmentBodyRepository.GetAsync(amendmentId);
+        await AmendmentHubCommandService.SetAmendmentLiveAsync(liveAmendment.Id, false);
+        //var amendmentId = liveAmendment.Id;
+        //var amendmentBodies = await AmendmentBodyRepository.GetAsync(amendmentId);
 
-        var amendmentRequest = liveAmendment.ToRequest();
-        amendmentRequest.IsLive = false;
+        //var amendmentRequest = liveAmendment.ToRequest();
+        //amendmentRequest.IsLive = false;
 
-        await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
+        //await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
 
-        foreach (var body in amendmentBodies.Where(x => x.IsLive))
-        {
-            var bodyRequest = body.ToRequest();
-            bodyRequest.IsLive = false;
-            bodyRequest.Page = 0;
-            await AmendmentBodyRepository.PutAsync(amendmentId, body.Id, bodyRequest);
-        }
+        //foreach (var body in amendmentBodies.Where(x => x.IsLive))
+        //{
+        //    var bodyRequest = body.ToRequest();
+        //    bodyRequest.IsLive = false;
+        //    bodyRequest.Page = 0;
+        //    await AmendmentBodyRepository.PutAsync(amendmentId, body.Id, bodyRequest);
+        //}
     }
 
 }
