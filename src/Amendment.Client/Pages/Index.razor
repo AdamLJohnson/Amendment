@@ -12,7 +12,7 @@
 <h1>Amendments</h1>
 
 <Row>
-    <Repeater Items="_languages">
+    <Repeater Items="_languages" TItem="LanguageResponse">
         <Column ColumnSize="ColumnSize.Is4">
             <h4>@context.LanguageName</h4>
             @{
@@ -21,13 +21,13 @@
             
             @if (body != null)
             {
-                <div class="small-screen-container well slideonline">
+                <div class=@($"small-screen-container well slideonline {@context.LanguageName}")>
                     <AmendmentBodySingleRenderer BodyText="@body.AmendBodyPagedText"></AmendmentBodySingleRenderer>
                 </div>
             }
             else
             {
-                <div class="small-screen-container well fill-well slideoffline"></div>
+                <div class=@($"small-screen-container well fill-well slideoffline {@context.LanguageName}")></div>
             }
             <Div TextAlignment="TextAlignment.Center">
                 <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/View/{context.LanguageName}")>View</Button>
