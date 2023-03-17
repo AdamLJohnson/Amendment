@@ -13,6 +13,7 @@ using Blazorise.Icons.FontAwesome;
 using Blazorise.FluentValidation;
 using FluentValidation;
 using Amendment.Client.Repository.Infrastructure;
+using Amendment.Client.Services;
 
 namespace Amendment.Client
 {
@@ -40,6 +41,8 @@ namespace Amendment.Client
             builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
             builder.Services.AddScoped<IHubEventService, HubEventService>();
+            builder.Services.AddScoped<IAmendmentHubCommandService, AmendmentHubCommandService>();
+
 
             builder.Services
                 .AddBlazorise(options =>

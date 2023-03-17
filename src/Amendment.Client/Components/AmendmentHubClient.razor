@@ -2,57 +2,20 @@
 @using Amendment.Shared.Responses
 @using Amendment.Client.Repository
 @using Amendment.Client.AuthProviders
-@inject NavigationManager NavigationManager
-@inject IHubEventService HubEventService
-@inject IRefreshTokenService RefreshTokenService
-@implements IAsyncDisposable
+@using Amendment.Client.Services
+@inject IAmendmentHubCommandService AmendmentHubCommandService
 @implements IDisposable
 
 @code {
-
-    private HubConnection? hubConnection;
-    protected override async Task OnInitializedAsync()
+    
+    protected override Task OnInitializedAsync()
     {
-        var token = await RefreshTokenService.TryRefreshToken();
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/amendmentHub"), options =>
-            {
-                options.AccessTokenProvider = () => Task.FromResult(token)!;
-            })
-            .Build();
-
-        hubConnection.On<SignalRResponse<AmendmentResponse>>("AmendmentUpdate", response =>
-        {
-            HubEventService.OnAmendmentUpdated(response);
-        });
-
-        hubConnection.On<SignalRResponse<AmendmentBodyResponse>>("AmendmentBodyUpdate", response =>
-        {
-            HubEventService.OnAmendmentBodyUpdated(response);
-        });
-
-        hubConnection.On<SignalRResponse<SystemSettingResponse>>("SystemSettingUpdate", response =>
-        {
-            HubEventService.OnSystemSettingUpdated(response);
-        });
-
-        hubConnection.On("ClearScreens", () =>
-        {
-            HubEventService.OnClearScreens();
-        });
-
-        await hubConnection.StartAsync(); 
+        return AmendmentHubCommandService.Connect();
     }
 
     public void Dispose()
     {
-        hubConnection?.DisposeAsync();
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        hubConnection?.DisposeAsync();
-        return ValueTask.CompletedTask;
+        AmendmentHubCommandService.Disconnect();
     }
 
 }
