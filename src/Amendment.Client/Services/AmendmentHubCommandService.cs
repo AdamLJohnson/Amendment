@@ -16,7 +16,6 @@ namespace Amendment.Client.Services
     {
         Task Connect();
         Task Disconnect();
-        Task SetAmendmentLiveAsync(int amendmentId, bool isLive);
         Task SetAmendmentBodyLiveAsync(params SetAmendmentBodyLiveCommand[] bodies);
         Task SetAmendmentBodyPage(params SetAmendmentBodyPageCommand[] bodies);
     }
@@ -81,11 +80,6 @@ namespace Amendment.Client.Services
         #endregion
 
         #region IAmendmentHubClientService
-        public Task SetAmendmentLiveAsync(int amendmentId, bool isLive)
-        {
-            return _hubConnection?.InvokeAsync("AmendmentLive", amendmentId, isLive) ?? Task.CompletedTask;
-        }
-
         public Task SetAmendmentBodyLiveAsync(SetAmendmentBodyLiveCommand[] bodies)
         {
             var output = new SetAmendmentBodyLiveCommands(commands: bodies);

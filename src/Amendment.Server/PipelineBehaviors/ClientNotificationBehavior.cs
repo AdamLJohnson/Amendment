@@ -56,8 +56,10 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
                 await NotifyClearScreens();
                 break;
             case BulkSetAmendmentBodyLiveCommand:
+                await NotifyAmendmentBulkPageChange(OperationType.Update, (IApiResult<List<AmendmentBodyResponse>>)result!);
+                break;
             case BulkSetAmendmentBodyPageCommand:
-                await NotifyAmendmentBodyChange(OperationType.Update, (IApiResult<List<AmendmentBodyResponse>>)result!);
+                await NotifyAmendmentBulkPageChange(OperationType.Update, (IApiResult<List<AmendmentBodyResponse>>)result!);
                 break;
 
         }
@@ -92,7 +94,7 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
         await Task.WhenAll(tasks);
     }
 
-    private async Task NotifyAmendmentBodyChange(OperationType operationType,
+    private async Task NotifyAmendmentBulkPageChange(OperationType operationType,
         IApiResult<List<AmendmentBodyResponse>>? result)
     {
         if (!result.Result.Any())

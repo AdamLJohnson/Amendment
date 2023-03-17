@@ -21,52 +21,14 @@ namespace Amendment.Server.Hubs
             _mediator = mediator;
         }
 
-        public Task AmendmentLive(int amendmentId, bool isLive)
-        {
-            AmendmentLiveWork(amendmentId, isLive);
-            return Task.CompletedTask;
-        }
-
-        private async Task AmendmentLiveWork(int amendmentId, bool isLive)
-        {
-            var amendment = await _mediator.Send(new GetSingleAmendmentQuery(amendmentId));
-            if (!isLive && amendment.Result != null)
-            {
-                await _mediator.Send(new BulkSetAmendmentBodyLiveCommand(new SetAmendmentBodyLiveCommands(amendment.Result
-                    .AmendmentBodies.Select(x => new SetAmendmentBodyLiveCommand()
-                        { AmendId = amendmentId, Id = x.Id, IsLive = false }).ToArray())));
-            }
-
-            var command = amendment.Result.Adapt<UpdateAmendmentCommand>();
-            command.SavingUserId = amendmentId;
-            command.IsLive = isLive;
-            await _mediator.Send(command);
-        }
-
         public async Task AmendmentBodyLive(SetAmendmentBodyLiveCommands bodies)
         {
             await _mediator.Send(new BulkSetAmendmentBodyLiveCommand(bodies));
-            //foreach (var bodyInfo in bodies.Commands)
-            //{
-            //    var body = await _mediator.Send(new GetSingleAmendmentBodyQuery(bodyInfo.Id, bodyInfo.AmendId));
-            //    var command = body.Result.Adapt<UpdateAmendmentBodyCommand>();
-            //    command.SavingUserId = SignedInUserId;
-            //    command.IsLive = bodyInfo.IsLive;
-            //    await _mediator.Send(command);
-            //}
         }
 
         public async Task AmendmentBodyPage(SetAmendmentBodyPageCommands bodies)
         {
             await _mediator.Send(new BulkSetAmendmentBodyPageCommand(bodies));
-            //foreach (var bodyInfo in bodies.Commands)
-            //{
-            //    var body = await _mediator.Send(new GetSingleAmendmentBodyQuery(bodyInfo.Id, bodyInfo.AmendId));
-            //    var command = body.Result.Adapt<UpdateAmendmentBodyCommand>();
-            //    command.SavingUserId = SignedInUserId;
-            //    command.Page = bodyInfo.Page;
-            //   await _mediator.Send(command);
-            //}
         }
 
         protected int SignedInUserId

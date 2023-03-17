@@ -151,23 +151,23 @@
         var liveAmendment = _amendments.FirstOrDefault(a => a.IsLive);
         if (liveAmendment == null)
             return;
+            
+        var amendmentId = liveAmendment.Id;
+        var amendmentBodies = await AmendmentBodyRepository.GetAsync(amendmentId);
 
-        await AmendmentHubCommandService.SetAmendmentLiveAsync(liveAmendment.Id, false);
-        //var amendmentId = liveAmendment.Id;
-        //var amendmentBodies = await AmendmentBodyRepository.GetAsync(amendmentId);
+        var amendmentRequest = liveAmendment.ToRequest();
+        amendmentRequest.IsLive = false;
 
-        //var amendmentRequest = liveAmendment.ToRequest();
-        //amendmentRequest.IsLive = false;
-
-        //await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
-
-        //foreach (var body in amendmentBodies.Where(x => x.IsLive))
-        //{
-        //    var bodyRequest = body.ToRequest();
-        //    bodyRequest.IsLive = false;
-        //    bodyRequest.Page = 0;
-        //    await AmendmentBodyRepository.PutAsync(amendmentId, body.Id, bodyRequest);
-        //}
+        var tasks = new List<Task>();
+        foreach (var body in amendmentBodies.Where(x => x.IsLive))
+        {
+            var bodyRequest = body.ToRequest();
+            bodyRequest.IsLive = false;
+            bodyRequest.Page = 0;
+            tasks.Add(AmendmentBodyRepository.PutAsync(amendmentId, body.Id, bodyRequest));
+        }
+        await Task.WhenAll(tasks);
+        await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
     }
 
 }
