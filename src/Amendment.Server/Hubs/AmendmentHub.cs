@@ -38,7 +38,7 @@ namespace Amendment.Server.Hubs
                 var command = body.Result.Adapt<UpdateAmendmentBodyCommand>();
                 command.SavingUserId = SignedInUserId;
                 command.IsLive = bodyInfo.IsLive;
-                _mediator.Send(command);
+                await _mediator.Send(command);
             }
         }
 
@@ -50,7 +50,7 @@ namespace Amendment.Server.Hubs
                 var command = body.Result.Adapt<UpdateAmendmentBodyCommand>();
                 command.SavingUserId = SignedInUserId;
                 command.Page = bodyInfo.Page;
-                _mediator.Send(command);
+               await _mediator.Send(command);
             }
         }
 
