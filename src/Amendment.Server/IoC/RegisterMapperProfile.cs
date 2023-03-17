@@ -1,5 +1,4 @@
-﻿using Amendment.Model.Mapping;
-using Amendment.Server.Mediator.Mapping;
+﻿using Amendment.Server.Mediator.Mapping;
 using Amendment.Shared;
 using Autofac;
 using AutoMapper;
@@ -21,7 +20,6 @@ namespace Amendment.Server.IoC
             {
                 //cfg.AddProfiles(typeof(Program), typeof(UserProfile));
                 cfg.CreateMap(typeof(IRequest<>), typeof(IRequest<IApiResult>));
-                cfg.AddProfile(typeof(UserProfile));
                 cfg.AddProfile(typeof(MappingProfile));
             });
             builder.Register(c => config).AsSelf().SingleInstance();

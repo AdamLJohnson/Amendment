@@ -12,7 +12,6 @@ using Amendment.Server.Mediator.Handlers.UserHandlers;
 using Mapster;
 using Microsoft.Extensions.Logging;
 using Amendment.Model.DataModel;
-using Amendment.Model.ViewModel.AmendmentBody;
 
 namespace Amendment.Server.Mediator.Handlers.AmendmentHandlers;
 

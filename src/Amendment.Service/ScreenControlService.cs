@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
-using Amendment.Model.ViewModel.ScreenView;
 using Amendment.Repository;
 using Amendment.Repository.Infrastructure;
 using Amendment.Service.Infrastructure;
