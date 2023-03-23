@@ -11,7 +11,7 @@
 <EditForm Model="_userForAuthentication" OnValidSubmit="ExecuteLogin" class="card card-body bg-light mt-5">
     <DataAnnotationsValidator />
     <div class="form-group row">
-        <label for="email" class="col-md-2 col-form-label">Email:</label>
+        <label for="email" class="col-md-2 col-form-label">Username:</label>
         <div class="col-md-10">
             <InputText id="email" class="form-control" @bind-Value="_userForAuthentication.Username" />
             <ValidationMessage For="@(() => _userForAuthentication.Username)" />
