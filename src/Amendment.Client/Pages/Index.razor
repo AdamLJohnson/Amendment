@@ -30,7 +30,7 @@
                 <div class=@($"small-screen-container well fill-well slideoffline {@context.LanguageName}")></div>
             }
             <Div TextAlignment="TextAlignment.Center">
-                <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/View/{context.LanguageName}")>View</Button>
+                <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/View/{context.LanguageName ?? ""}")>View</Button>
             </Div>
         </Column>
     </Repeater>

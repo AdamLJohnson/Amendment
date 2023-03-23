@@ -9,6 +9,7 @@ using Amendment.Client.Repository.Infrastructure;
 using Amendment.Shared;
 using Amendment.Shared.Requests;
 using Amendment.Shared.Responses;
+using Microsoft.Extensions.Logging;
 
 namespace Amendment.Client.Repository
 {
@@ -20,7 +21,7 @@ namespace Amendment.Client.Repository
     {
         protected override string _baseUrl { get; set; } = "api/Language";
         private IEnumerable<LanguageResponse>? _languages;
-        public LanguageRepository(HttpClient client) : base(client)
+        public LanguageRepository(ILogger<LanguageRepository> logger, HttpClient client, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
         {
         }
 

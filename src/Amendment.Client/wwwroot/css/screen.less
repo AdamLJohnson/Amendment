@@ -5,12 +5,11 @@
 @slideBackgroundColor: #fff;
 @invertedSlideBackgroundColor: #000;
 @invertedSlideColor: #fff;
-@slideOfflineBackground: url("../images/ConferenceLogo_1.png");
+@slideOfflineBackground: url("../images/static_title_eng.png");
 @slideOfflineBackgroundEng: url("../images/static_title_eng.png");
 @slideOfflineBackgroundEsp: url("../images/static_title_esp.png");
 @slideOfflineBackgroundFra: url("../images/static_title_fra.png");
 @slideBackgroundTest: url("../images/1080test.png");
-@headerLogo: url(../images/wc_app_header.png);
 
 
 @screenFontFamily: 'Open Sans', sans-serif;
@@ -18,9 +17,9 @@
 
 @fullScreenMaxWidth: 1920px;
 @fullScreenMaxHeight: 1080px;
-@fullScreenPadding: 100px;
+@fullScreenPadding: 80px;
 
-
+@textLineHeight: 14.2833px;
 
 @scaleUpRatio: unit(@fullScreenMaxWidth) / unit(@smallScreenWidth);
 @scaleDownRatio: unit(@smallScreenWidth) / unit(@fullScreenMaxWidth);
@@ -45,11 +44,15 @@
 @deafSignerWidth: 73px;
 @deafSignerHeight: @deafSignerWidth - 2.5px;
 @deafSignerPusherHeight: @smallScreenHeight - @deafSignerHeight - @smallScreenPadding;
-
 /*H1*/
 @fullScreenH1Size: @fullScreenFontSize + 10px * @scaleDownRatio;
 @fullScreenH1Weight: @fullScreenFontWeight + 300;
 @fullScreenH1MarBottom: 40px * @scaleDownRatio;
+
+footer .footer-content {
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
 
 .scaleUp {
     -ms-transform: scale(@scaleUpRatio);
@@ -180,7 +183,7 @@
     width: @smallScreenTextWidth;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
-    line-height: 14.2833px;
+    line-height: @textLineHeight;
     .mixin-fullscreen-special-elements()
 }
 
@@ -279,31 +282,26 @@
     }
 }
 
-nav {
-    .conference-color-line {
-        height: 5px;
-        position: absolute;
-    }
-}
+@barSectionPercent: 100% / 6;
+@barSectionPercentTwo: @barSectionPercent;
+@barSectionPercentThree: @barSectionPercentTwo + @barSectionPercent;
+@barSectionPercentFour: @barSectionPercentThree + @barSectionPercent;
+@barSectionPercentFive: @barSectionPercentFour + @barSectionPercent;
+@barSectionPercentSix: @barSectionPercentFive + @barSectionPercent;
+@barSectionPercentSeven: @barSectionPercentSix + @barSectionPercent;
 
-@barSectionPercent: 100% / 7;
-@wcColorPurple: #7450A1;
-@wcColorPlum: #404479;
-@barSectionPercentPlum: @barSectionPercent;
-@wcColorMidnight: #0C3B60;
-@barSectionPercentMidnight: @barSectionPercentPlum + @barSectionPercent;
-@wcColorNavy: #0B4F81;
-@barSectionPercentNavy: @barSectionPercentMidnight + @barSectionPercent;
-@wcColorBlue: #005F9C;
-@barSectionPercentBlue: @barSectionPercentNavy + @barSectionPercent;
-@wcColorTeal: #00767C;
-@barSectionPercentTeal: @barSectionPercentBlue + @barSectionPercent;
-@wcColorGreen: #009318;
-@barSectionPercentGreen: @barSectionPercentTeal + @barSectionPercent;
+@wcColorOne: #F2B132;
+@wcColorTwo: #EC563C;
+@wcColorThree: #4EB99F;
+@wcColorFour: #098587;
+@wcColorFive: #009ED8;
+@wcColorSix: #112F41;
+@wcColorSeven: #FFFFFF;
 
 .conference-color-line {
-    background-image: linear-gradient( to right, @wcColorPurple, @wcColorPurple @barSectionPercentPlum, @wcColorPlum @barSectionPercentPlum, @wcColorPlum @barSectionPercentMidnight, @wcColorMidnight @barSectionPercentMidnight, @wcColorMidnight @barSectionPercentNavy, @wcColorNavy @barSectionPercentNavy, @wcColorNavy @barSectionPercentBlue, @wcColorBlue @barSectionPercentBlue, @wcColorBlue @barSectionPercentTeal, @wcColorTeal @barSectionPercentTeal, @wcColorTeal @barSectionPercentGreen, @wcColorGreen @barSectionPercentGreen );
+    background-image: linear-gradient( to right, @wcColorOne, @wcColorOne @barSectionPercentTwo, @wcColorTwo @barSectionPercentTwo, @wcColorTwo @barSectionPercentThree, @wcColorThree @barSectionPercentThree, @wcColorThree @barSectionPercentFour, @wcColorFour @barSectionPercentFour, @wcColorFour @barSectionPercentFive, @wcColorFive @barSectionPercentFive, @wcColorFive @barSectionPercentSix, @wcColorSix @barSectionPercentSix);
     width: 100%;
+    height: 5px;
 }
 
 
@@ -353,6 +351,7 @@ nav {
     font-family: @screenFontFamily;
     font-weight: @fullScreenFontWeight;
     font-size: @fullScreenFontSize;
+    line-height: @textLineHeight;
     .scaleUp;
 
     .screen-page-text {

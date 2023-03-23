@@ -12,6 +12,7 @@ using Amendment.Client.Repository.Infrastructure;
 using Amendment.Shared;
 using Amendment.Shared.Requests;
 using Amendment.Shared.Responses;
+using Microsoft.Extensions.Logging;
 
 namespace Amendment.Client.Repository
 {
@@ -64,7 +65,7 @@ namespace Amendment.Client.Repository
         private bool _showDeafSignerBox;
         private bool _invertedSlideText;
 
-        public SystemSettingRepository(HttpClient client, IHubEventService hubEventService) : base(client)
+        public SystemSettingRepository(ILogger<SystemSettingRepository> logger, HttpClient client, IHubEventService hubEventService, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
         {
             _hubEventService = hubEventService;
             _hubEventService.SystemSettingUpdated += HubEventServiceOnSystemSettingUpdated;

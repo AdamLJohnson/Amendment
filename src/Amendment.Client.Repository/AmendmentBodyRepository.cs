@@ -9,6 +9,7 @@ using Amendment.Client.Repository.Infrastructure;
 using Amendment.Shared;
 using Amendment.Shared.Requests;
 using Amendment.Shared.Responses;
+using Microsoft.Extensions.Logging;
 
 namespace Amendment.Client.Repository
 {
@@ -23,7 +24,7 @@ namespace Amendment.Client.Repository
     public class AmendmentBodyRepository : HttpRepository<AmendmentBodyRequest, AmendmentBodyResponse>, IAmendmentBodyRepository
     {
         protected override string _baseUrl { get; set; } = "api/AmendmentBody";
-        public AmendmentBodyRepository(HttpClient client) : base(client)
+        public AmendmentBodyRepository(ILogger<AmendmentBodyRepository> logger, HttpClient client, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
         {
         }
 

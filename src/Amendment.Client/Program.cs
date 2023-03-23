@@ -1,5 +1,6 @@
 using Amendment.Client;
 using Amendment.Client.AuthProviders;
+using Amendment.Client.Helpers;
 using Amendment.Client.Repository;
 using Amendment.Shared.Responses;
 using Blazored.LocalStorage;
@@ -42,7 +43,7 @@ namespace Amendment.Client
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
             builder.Services.AddScoped<IHubEventService, HubEventService>();
             builder.Services.AddScoped<IAmendmentHubCommandService, AmendmentHubCommandService>();
-
+            builder.Services.AddScoped<INotificationServiceWrapper, NotificationServiceWrapper>();
 
             builder.Services
                 .AddBlazorise(options =>
