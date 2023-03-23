@@ -1,0 +1,13 @@
+﻿@if (ChildContent == null)
+{
+    <PageTitle>Amendments</PageTitle>
+}
+else
+{
+    <PageTitle>@this.ChildContent | Amendments</PageTitle>
+}
+
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
