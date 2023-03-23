@@ -3,11 +3,14 @@
 @using Amendment.Shared.Enums
 @using Amendment.Client.Repository
 @using System.ComponentModel
+@using Amendment.Client.Services
 @inject ILanguageRepository LanguageRepository
 @inject IAmendmentRepository AmendmentRepository
 @inject IHubEventService HubEventService
 @inject IJSRuntime JS
 @inject ISystemSettingRepository SystemSettingRepository
+@inject IAmendmentHubCommandService AmendmentHubCommandService
+@inject IScreenHubCommandService ScreenHubCommandService
 @implements IDisposable
 <CustomPageTitle>@_title</CustomPageTitle>
 <h3>@_title</h3>
@@ -20,6 +23,10 @@
         slideClass = "slideoffline";
 }
 <Div id="fullscreen" Class=@($"{slideClass} {Language} {_invertedClass}")>
+    @if (!_screenHubConnected && !_amendmentHubConnected)
+    {
+        <div class="connection-error alert alert-danger">Connection to server lost. Attempting to reconnect.</div>
+    }
     @if (_body != null)
     {
         <AmendmentBodySingleRenderer BodyText=@(_body?.AmendBodyPagedText ?? "")></AmendmentBodySingleRenderer>
@@ -35,11 +42,19 @@
     string _title = "";
     IJSObjectReference module;
 
+    bool _amendmentHubConnected = true;
+    bool _screenHubConnected = true;
+
     string _invertedClass => SystemSettingRepository.InvertedSlideText ? "inverted" : "";
 
 
     protected override async Task OnInitializedAsync()
     {
+        _amendmentHubConnected = AmendmentHubCommandService.IsConnected;
+        _screenHubConnected = ScreenHubCommandService.IsConnected;
+        AmendmentHubCommandService.PropertyChanged += AmendmentHubCommandServiceOnPropertyChanged;
+        ScreenHubCommandService.PropertyChanged += ScreenHubCommandServiceOnPropertyChanged;
+
         HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
         HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
         SystemSettingRepository.PropertyChanged += SystemSettingRepositoryOnPropertyChanged;
@@ -61,6 +76,20 @@
             return;
 
         module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/ViewFullScreen.js");
+    }
+
+    private void ScreenHubCommandServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == "IsConnected")
+            _screenHubConnected = ScreenHubCommandService.IsConnected;
+        StateHasChanged();
+    }
+
+    private void AmendmentHubCommandServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == "IsConnected")
+            _amendmentHubConnected = AmendmentHubCommandService.IsConnected;
+        StateHasChanged();
     }
 
     private async Task EnterFullScreen()
@@ -136,6 +165,8 @@
         HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
         HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
         SystemSettingRepository.PropertyChanged -= SystemSettingRepositoryOnPropertyChanged;
+        AmendmentHubCommandService.PropertyChanged -= AmendmentHubCommandServiceOnPropertyChanged;
+        ScreenHubCommandService.PropertyChanged -= ScreenHubCommandServiceOnPropertyChanged;
     }
 
 }

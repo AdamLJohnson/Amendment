@@ -197,6 +197,13 @@ footer .footer-content {
     .scaleUp;
 }
 
+#fullscreen[fullscreen] {
+    > .connection-error {
+        .scaleUp;
+        transform-origin: top left;
+    }
+}
+
 #fullscreen:-moz-full-screen {
     .mixin-fullscreen-for-vendors
 }

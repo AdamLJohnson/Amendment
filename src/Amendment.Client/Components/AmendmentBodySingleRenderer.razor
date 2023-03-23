@@ -2,17 +2,11 @@
 @using System.ComponentModel
 @using Amendment.Client.Services
 @inject ISystemSettingRepository SystemSettingRepository
-@inject IAmendmentHubCommandService AmendmentHubCommandService
-@inject IScreenHubCommandService ScreenHubCommandService
 @implements IDisposable
 
 
 <div class="screen-page-text">
     <div class="deafSignerPusher"></div>
-    @if (!_screenHubConnected && !_amendmentHubConnected)
-    {
-        <div class="connection-error alert alert-danger">Connection to server lost. Attempting to reconnect.</div>
-    }
     @if (SystemSettingRepository.ShowDeafSigner)
     {
         <div class="deafSignerBox@(SystemSettingRepository.ShowDeafSignerBox ? " deafSignerBackground" : "")"></div>
@@ -24,31 +18,10 @@
     [Parameter]
     public string BodyText { get; set; } = "";
 
-    bool _amendmentHubConnected = true;
-    bool _screenHubConnected = true;
-
     protected override Task OnInitializedAsync()
     {
         SystemSettingRepository.PropertyChanged += SystemSettingRepositoryOnPropertyChanged;
-        _amendmentHubConnected = AmendmentHubCommandService.IsConnected;
-        _screenHubConnected = ScreenHubCommandService.IsConnected;
-        AmendmentHubCommandService.PropertyChanged += AmendmentHubCommandServiceOnPropertyChanged;
-        ScreenHubCommandService.PropertyChanged += ScreenHubCommandServiceOnPropertyChanged;
         return Task.CompletedTask;
-    }
-
-    private void ScreenHubCommandServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == "IsConnected")
-            _screenHubConnected = ScreenHubCommandService.IsConnected;
-        StateHasChanged();
-    }
-
-    private void AmendmentHubCommandServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == "IsConnected")
-            _amendmentHubConnected = AmendmentHubCommandService.IsConnected;
-        StateHasChanged();
     }
 
     private void SystemSettingRepositoryOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -58,8 +31,6 @@
 
     public void Dispose()
     {
-        AmendmentHubCommandService.PropertyChanged -= AmendmentHubCommandServiceOnPropertyChanged;
-        ScreenHubCommandService.PropertyChanged -= ScreenHubCommandServiceOnPropertyChanged;
         SystemSettingRepository.PropertyChanged -= SystemSettingRepositoryOnPropertyChanged;
     }
 

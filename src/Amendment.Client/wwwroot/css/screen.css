@@ -161,6 +161,12 @@ footer .footer-content {
   -webkit-transform: scale(6);
   transform: scale(6);
 }
+#fullscreen[fullscreen] > .connection-error {
+  -ms-transform: scale(6);
+  -webkit-transform: scale(6);
+  transform: scale(6);
+  transform-origin: top left;
+}
 #fullscreen:-moz-full-screen {
   border: 0px solid #f00;
   padding: 80px;
