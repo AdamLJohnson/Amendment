@@ -37,9 +37,8 @@ footer .footer-content {
   -webkit-transform: translateX(13.33333333px);
   transform: translateX(13.33333333px);
 }
-[fullscreen] .connection-error {
+.connection-error {
   position: absolute;
-  top: 40px;
   z-index: 1000;
 }
 .small-screen-container {

@@ -2,71 +2,17 @@
 @using Amendment.Shared.Responses
 @using Amendment.Client.Repository
 @using Amendment.Client.Helpers
-@inject NavigationManager NavigationManager
-@inject IHubEventService HubEventService
-@implements IAsyncDisposable
+@using Amendment.Client.Services
+@inject IScreenHubCommandService ScreenHubCommandService
 @implements IDisposable
 @code {
-
-    private HubConnection? hubConnection;
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithAutomaticReconnect(new SignalRRetryPolicy())
-            .WithUrl(NavigationManager.ToAbsoluteUri("/screenHub"))
-            .Build();
-            
-        hubConnection.On<SignalRResponse<AmendmentResponse>>("AmendmentUpdate", response =>
-        {
-            HubEventService.OnAmendmentUpdated(response);
-        });
-
-        hubConnection.On<SignalRResponse<AmendmentBodyResponse>>("AmendmentBodyUpdate", response =>
-        {
-            HubEventService.OnAmendmentBodyUpdated(response);
-        });
-
-        hubConnection.On<SignalRResponse<List<AmendmentBodyResponse>>>("AmendmentBodyUpdateMany", response =>
-        {
-            HubEventService.OnAmendmentBodyUpdatedMany(response);
-        });
-
-        hubConnection.On<SignalRResponse<SystemSettingResponse>>("SystemSettingUpdate", response =>
-        {
-            HubEventService.OnSystemSettingUpdated(response);
-        });
-
-        hubConnection.On("ClearScreens", () =>
-        {
-            HubEventService.OnClearScreens();
-        });
-
-        await StartAsync();
-    }
-
-    public async Task StartAsync()
-    {
-        try
-        {
-            await hubConnection.StartAsync();
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("Closed, starting delay");
-            await Task.Delay(5000);
-            Console.WriteLine("Restarting");
-            await StartAsync();
-        }
+        return ScreenHubCommandService.Connect();
     }
 
     public void Dispose()
     {
-        hubConnection?.DisposeAsync();
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        hubConnection?.DisposeAsync();
-        return ValueTask.CompletedTask;
+        ScreenHubCommandService.Disconnect();
     }
 }

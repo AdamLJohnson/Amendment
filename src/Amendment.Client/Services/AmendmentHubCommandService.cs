@@ -10,42 +10,92 @@ using Amendment.Shared.Responses;
 using Amendment.Shared.SignalRCommands;
 using Microsoft.AspNetCore.Components;
 using Amendment.Client.Helpers;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Amendment.Client.Services
 {
-    public interface IAmendmentHubCommandService
+    public interface IScreenHubCommandService : IDisposable, INotifyPropertyChanged
+    {
+        Task Connect();
+        Task Disconnect();
+        bool IsConnected { get; }
+    }
+    public interface IAmendmentHubCommandService : IDisposable, INotifyPropertyChanged
     {
         Task Connect();
         Task Disconnect();
         Task SetAmendmentBodyLiveAsync(params SetAmendmentBodyLiveCommand[] bodies);
         Task SetAmendmentBodyPage(params SetAmendmentBodyPageCommand[] bodies);
+        bool IsConnected { get; }
     }
 
-    public sealed class AmendmentHubCommandService : IAmendmentHubCommandService, IDisposable
+    public class ScreenHubCommandService : BaseHubCommandService, IScreenHubCommandService
     {
+        public ScreenHubCommandService(IHubEventService hubEventService, IRefreshTokenService refreshTokenService, NavigationManager navigationManager) : base("/screenHub", false, hubEventService, refreshTokenService, navigationManager)
+        {
+        }
+    }
+
+    public class AmendmentHubCommandService : BaseHubCommandService, IAmendmentHubCommandService
+    {
+        public AmendmentHubCommandService(IHubEventService hubEventService, IRefreshTokenService refreshTokenService, NavigationManager navigationManager) : base("/amendmentHub", true, hubEventService, refreshTokenService, navigationManager)
+        {
+        }
+    }
+
+    public class BaseHubCommandService : IDisposable, INotifyPropertyChanged
+    {
+        private readonly string _url;
+        private readonly bool _needAuth;
         private readonly IHubEventService _hubEventService;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly NavigationManager _navigationManager;
 
         private HubConnection? _hubConnection;
-        public AmendmentHubCommandService(IHubEventService hubEventService, IRefreshTokenService refreshTokenService, NavigationManager navigationManager)
+        private bool _isConnected;
+
+        public BaseHubCommandService(string url, bool needAuth, IHubEventService hubEventService, IRefreshTokenService refreshTokenService, NavigationManager navigationManager)
         {
+            _url = url;
+            _needAuth = needAuth;
             _hubEventService = hubEventService;
             _refreshTokenService = refreshTokenService;
             _navigationManager = navigationManager;
         }
 
+        public bool IsConnected
+        {
+            get => _isConnected;
+            private set
+            {
+                if (value == _isConnected) return;
+                _isConnected = value;
+                OnPropertyChanged();
+            }
+        }
+
         #region IAmendmentHubCommandService
         public async Task Connect()
         {
-            var token = await _refreshTokenService.TryRefreshToken();
+            var token = "";
+            if (_needAuth)
+                token = await _refreshTokenService.TryRefreshToken();
+
             _hubConnection = new HubConnectionBuilder()
                 .WithAutomaticReconnect(new SignalRRetryPolicy())
-                .WithUrl(_navigationManager.ToAbsoluteUri("/amendmentHub"), options =>
+                .WithUrl(_navigationManager.ToAbsoluteUri(_url), options =>
                 {
-                    options.AccessTokenProvider = () => Task.FromResult(token)!;
+                    if (_needAuth)
+                    {
+                        options.AccessTokenProvider = () => Task.FromResult(token)!;
+                    }
                 })
                 .Build();
+            
+            _hubConnection.Closed += HubConnectionOnClosed;
+            _hubConnection.Reconnecting += HubConnectionOnClosed;
+            _hubConnection.Reconnected += HubConnectionOnReconnected;
 
             _hubConnection.On<SignalRResponse<AmendmentResponse>>("AmendmentUpdate", response =>
             {
@@ -75,11 +125,24 @@ namespace Amendment.Client.Services
             await StartAsync();
         }
 
+        private Task HubConnectionOnReconnected(string? arg)
+        {
+            IsConnected = true;
+            return Task.CompletedTask;
+        }
+
+        private Task HubConnectionOnClosed(Exception? arg)
+        {
+            IsConnected = false;
+            return Task.CompletedTask;
+        }
+
         public async Task StartAsync()
         {
             try
             {
                 await _hubConnection.StartAsync();
+                IsConnected = true;
             }
             catch (Exception)
             {
@@ -92,6 +155,14 @@ namespace Amendment.Client.Services
 
         public Task Disconnect()
         {
+            if (_hubConnection != null)
+            {
+                _hubConnection.Closed -= HubConnectionOnClosed;
+                _hubConnection.Reconnecting -= HubConnectionOnClosed;
+                _hubConnection.Reconnected -= HubConnectionOnReconnected;
+            }
+
+            IsConnected = false;
             return _hubConnection?.StopAsync() ?? Task.CompletedTask;
         }
         #endregion
@@ -111,7 +182,28 @@ namespace Amendment.Client.Services
         #endregion
         public void Dispose()
         {
+            if (_hubConnection != null)
+            {
+                _hubConnection.Closed -= HubConnectionOnClosed;
+                _hubConnection.Reconnecting -= HubConnectionOnClosed;
+                _hubConnection.Reconnected -= HubConnectionOnReconnected;
+            }
             _hubConnection?.DisposeAsync();
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }
