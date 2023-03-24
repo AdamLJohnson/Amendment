@@ -78,17 +78,13 @@ namespace Amendment.Client.Services
         #region IAmendmentHubCommandService
         public async Task Connect()
         {
-            var token = "";
-            if (_needAuth)
-                token = await _refreshTokenService.TryRefreshToken();
-
             _hubConnection = new HubConnectionBuilder()
                 .WithAutomaticReconnect(new SignalRRetryPolicy())
                 .WithUrl(_navigationManager.ToAbsoluteUri(_url), options =>
                 {
                     if (_needAuth)
                     {
-                        options.AccessTokenProvider = () => Task.FromResult(token)!;
+                        options.AccessTokenProvider = () => _refreshTokenService.TryRefreshToken()!;
                     }
                 })
                 .Build();
