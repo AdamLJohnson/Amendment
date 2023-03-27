@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-    <PackageReference Include="Blazorise.Bootstrap5" Version="1.2.1" />
+    <PackageReference Include="Blazorise.Bootstrap5" Version="1.2.2" />
     <PackageReference Include="Blazorise.Components" Version="1.2.1" />
     <PackageReference Include="Blazorise.FluentValidation" Version="1.2.1" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.2.1" />
