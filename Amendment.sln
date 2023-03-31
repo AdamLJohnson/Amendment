@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Server.Mediator",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Client.Repository", "src\Amendment.Client.Repository\Amendment.Client.Repository.csproj", "{F5BC33B0-B6E1-49F1-8362-E26D0FF72E09}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amendment.Client.Repository.Tests", "test\Amendment.Client.Repository.Tests\Amendment.Client.Repository.Tests.csproj", "{012F5DFD-41DD-471A-B896-C2503950AE3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{F5BC33B0-B6E1-49F1-8362-E26D0FF72E09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5BC33B0-B6E1-49F1-8362-E26D0FF72E09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5BC33B0-B6E1-49F1-8362-E26D0FF72E09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{012F5DFD-41DD-471A-B896-C2503950AE3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{012F5DFD-41DD-471A-B896-C2503950AE3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{012F5DFD-41DD-471A-B896-C2503950AE3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{012F5DFD-41DD-471A-B896-C2503950AE3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +93,7 @@ Global
 		{893201C5-258C-4B74-9AD8-98357E42C066} = {80D57FF3-F691-46C8-A6A7-461AE5D10DB9}
 		{15C1124C-DC5B-4109-97B3-55FE1682C7CA} = {D93ED188-9808-4EE7-A989-897DA66874C0}
 		{F5BC33B0-B6E1-49F1-8362-E26D0FF72E09} = {D93ED188-9808-4EE7-A989-897DA66874C0}
+		{012F5DFD-41DD-471A-B896-C2503950AE3A} = {80D57FF3-F691-46C8-A6A7-461AE5D10DB9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F8D34C5C-B2DB-4944-80C1-7E37DC315399}
