@@ -29,9 +29,9 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             Assert.Equal("application/json; charset=utf-8",
-                response.Content.Headers.ContentType.ToString());
+                response.Content.Headers.ContentType?.ToString());
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AccountLoginResponse>>();
-            Assert.True(jsonResponse.IsSuccess);
+            Assert.True(jsonResponse?.IsSuccess);
         }
 
         [Fact]
@@ -47,11 +47,11 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             var str = await response.Content.ReadAsStringAsync();
             Assert.Equal("application/json; charset=utf-8",
-                response.Content.Headers.ContentType.ToString());
+                response.Content.Headers.ContentType?.ToString());
             var j = Newtonsoft.Json.JsonConvert.DeserializeObject<Amendment.Shared.ApiFailedResult>(str, new JsonSerializerSettings{ CheckAdditionalContent = true});
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiFailedResult>();
-            Assert.False(jsonResponse.IsSuccess);
-            Assert.True(jsonResponse.Errors.Count() == 1);
+            Assert.False(jsonResponse?.IsSuccess);
+            Assert.True(jsonResponse?.Errors.Count() == 1);
         }
 
         [Fact]

@@ -47,10 +47,10 @@ namespace Amendment.Server.Controllers
             if (!results.IsSuccess)
                 return results.ToResult();
 
-            if (results is ApiSuccessResult<SystemSettingResponse>)
+            if (results is ApiSuccessResult<SystemSettingResponse> typedResults)
             {
-                var typedResults = (ApiSuccessResult<SystemSettingResponse>)results;
-                return results.ToResult(Url.Action(nameof(Get), new { id = typedResults.Result.Id }));
+                var url = Url.Action(nameof(Get), new { id = typedResults.Result?.Id }) ?? "/";
+                return typedResults.ToResult(url);
             }
             return results.ToResult();
         }

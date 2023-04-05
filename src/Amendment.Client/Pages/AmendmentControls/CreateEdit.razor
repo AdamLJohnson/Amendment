@@ -11,18 +11,18 @@
 @inject NavigationManager NavigationManager
 @inject INotificationService NotificationService
 
-<CustomPageTitle>@title</CustomPageTitle>
+<CustomPageTitle>@_title</CustomPageTitle>
 
-<h3>@title</h3>
+<h3>@_title</h3>
 
-<EditForm Model="model" OnValidSubmit="OnSave">
-    <Validations @ref="@fluentValidations" Mode="ValidationMode.Manual" Model="@model" HandlerType="typeof(FluentValidationHandler)">
+<EditForm Model="_model" OnValidSubmit="OnSave">
+    <Validations @ref="@_fluentValidations" Mode="ValidationMode.Manual" Model="@_model" HandlerType="typeof(FluentValidationHandler)">
         <Row>
             <Column ColumnSize="ColumnSize.Is6">
                 <Validation>
                     <Field>
                         <FieldLabel For="amendmentTitle">Amendment Title</FieldLabel>
-                        <TextEdit id="amendmentTitle" @bind-Text="model.Title" Placeholder="Amendment Title">
+                        <TextEdit id="amendmentTitle" @bind-Text="_model.Title" Placeholder="Amendment Title">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
@@ -32,7 +32,7 @@
                 <Validation>
                     <Field>
                         <FieldLabel For="author">Author</FieldLabel>
-                        <TextEdit id="author" @bind-Text="model.Author" Placeholder="Author">
+                        <TextEdit id="author" @bind-Text="_model.Author" Placeholder="Author">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
@@ -42,7 +42,7 @@
                 <Validation>
                     <Field>
                         <FieldLabel For="motion">Motion</FieldLabel>
-                        <TextEdit id="motion" @bind-Text="model.Motion" Placeholder="Motion">
+                        <TextEdit id="motion" @bind-Text="_model.Motion" Placeholder="Motion">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
@@ -52,7 +52,7 @@
                 <Validation>
                     <Field>
                         <FieldLabel For="source">Source</FieldLabel>
-                        <TextEdit id="source" @bind-Text="model.Source" Placeholder="Source">
+                        <TextEdit id="source" @bind-Text="_model.Source" Placeholder="Source">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
@@ -62,7 +62,7 @@
                 <Validation>
                     <Field>
                         <FieldLabel For="legisId">Legislative ID</FieldLabel>
-                        <TextEdit id="legisId" @bind-Text="model.LegisId" Placeholder="Legislative ID">
+                        <TextEdit id="legisId" @bind-Text="_model.LegisId" Placeholder="Legislative ID">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
@@ -73,9 +73,9 @@
             <Column ColumnSize="ColumnSize.Is6">
                 <Field>
                     <FieldLabel For="primaryLanguage">Primary Language</FieldLabel>
-                    <Select id="primaryLanguage" @bind-SelectedValue="@model.PrimaryLanguageId" TValue="int">
+                    <Select id="primaryLanguage" @bind-SelectedValue="@_model.PrimaryLanguageId" TValue="int">
                         <ChildContent>
-                            <Repeater Items="language">
+                            <Repeater Items="_language">
                                 <ChildContent Context="languageItem">
                                     <SelectItem Value="@languageItem.Id">@languageItem.LanguageName</SelectItem>
                                 </ChildContent>
@@ -87,12 +87,12 @@
                 {
                     <Field>
                         <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
-                        <Markdown @bind-Value="@bodyModel.AmendBody" id="amendmentBody" UploadImage="false"></Markdown>
+                        <Markdown @bind-Value="@_bodyModel.AmendBody" id="amendmentBody" UploadImage="false"></Markdown>
                     </Field>
                 }
                 else
                 {
-                    <AmendmentEditBodies AmendmentId="Id.Value" PrimaryLanguageId="model.PrimaryLanguageId" AmendmentBodies="amendmentBodySummaries.ToList()"></AmendmentEditBodies>
+                    <AmendmentEditBodies AmendmentId="Id.Value" PrimaryLanguageId="_model.PrimaryLanguageId" AmendmentBodies="_amendmentBodySummaries.ToList()"></AmendmentEditBodies>
                 }
             </Column>
         </Row>
@@ -104,30 +104,30 @@
 @code {
     [Parameter]
     public int? Id { get; set; }
-    string title = "";
-    Validations fluentValidations;
-    IEnumerable<LanguageResponse> language = Enumerable.Empty<LanguageResponse>();
-    IEnumerable<AmendmentBodySummary> amendmentBodySummaries = Enumerable.Empty<AmendmentBodySummary>();
+    string _title = "";
+    Validations _fluentValidations = null!;
+    IEnumerable<LanguageResponse> _language = Enumerable.Empty<LanguageResponse>();
+    IEnumerable<AmendmentBodySummary> _amendmentBodySummaries = Enumerable.Empty<AmendmentBodySummary>();
 
-    AmendmentRequest model = new () { PrimaryLanguageId = 1 };
-    AmendmentBodyRequest bodyModel = new (){ AmendBody = "" };
+    AmendmentRequest _model = new () { PrimaryLanguageId = 1 };
+    readonly AmendmentBodyRequest _bodyModel = new (){ AmendBody = "" };
 
     protected override async Task OnInitializedAsync()
     {
-        title = Id == null ? "Create Amendment" : "Edit Amendment";
-        language = await LanguageRepository.GetAsync();
+        _title = Id == null ? "Create Amendment" : "Edit Amendment";
+        _language = await LanguageRepository.GetAsync();
         if (Id != null)
         {
             var response = await AmendmentRepository.GetAsync(Id.Value);
-            model = response.ToRequest();
-            amendmentBodySummaries = response.AmendmentBodies;
+            _model = response.ToRequest();
+            _amendmentBodySummaries = response.AmendmentBodies;
         }
     }
 
     protected async Task OnSave()
     {
-        var isValid = await fluentValidations.ValidateAll();
-        if (Id == null && string.IsNullOrEmpty(bodyModel.AmendBody))
+        var isValid = await _fluentValidations.ValidateAll();
+        if (Id == null && string.IsNullOrEmpty(_bodyModel.AmendBody))
         {
             await NotificationService.Error("Amendment Body can not be empty", "Error");
             isValid = false;
@@ -136,12 +136,12 @@
         {
             if (Id == null)
             {
-                var amendModel = await AmendmentRepository.PostAsync(model);
-                bodyModel.LanguageId = amendModel.PrimaryLanguageId;
-                await AmendmentBodyRepository.PostAsync(amendModel.Id, bodyModel);
+                var amendModel = await AmendmentRepository.PostAsync(_model);
+                _bodyModel.LanguageId = amendModel.PrimaryLanguageId;
+                await AmendmentBodyRepository.PostAsync(amendModel.Id, _bodyModel);
             }
             else
-                await AmendmentRepository.PutAsync(Id ?? 0, model);
+                await AmendmentRepository.PutAsync(Id ?? 0, _model);
             NavigationManager.NavigateTo("/Amendment");
         }
         StateHasChanged();

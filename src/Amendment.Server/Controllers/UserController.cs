@@ -47,10 +47,10 @@ public class UserController : ControllerBase
         if (!results.IsSuccess)
             return results.ToResult();
 
-        if (results is ApiSuccessResult<UserResponse>)
+        if (results is ApiSuccessResult<UserResponse> typedResults)
         {
-            var typedResults = (ApiSuccessResult<UserResponse>)results;
-            return results.ToResult(Url.Action(nameof(Get), new { id = typedResults.Result.Id }));
+            var url = Url.Action(nameof(Get), new { id = typedResults.Result?.Id }) ?? "/";
+            return typedResults.ToResult(url);
         }   
         return results.ToResult();
     }

@@ -8,7 +8,7 @@ namespace Amendment.Shared
 {
     public sealed class ValidationErrorsResult
     {
-        public string PropertyName { get; set; }
-        public string ErrorMessage { get; set; }
+        public string PropertyName { get; set; } = "";
+        public string ErrorMessage { get; set; } = "";
     }
 }

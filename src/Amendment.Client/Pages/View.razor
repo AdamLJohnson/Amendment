@@ -34,13 +34,14 @@
 </Div>
 
 @code {
+
     [Parameter]
-    public string Language { get; set; }
+    public string Language { get; set; } = "";
 
     int LanguageId = -1;
     AmendmentBodyResponse? _body;
     string _title = "";
-    IJSObjectReference module;
+    IJSObjectReference? _module;
 
     bool _amendmentHubConnected = true;
     bool _screenHubConnected = true;
@@ -48,7 +49,7 @@
     string _invertedClass => SystemSettingRepository.InvertedSlideText ? "inverted" : "";
 
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         _amendmentHubConnected = AmendmentHubCommandService.IsConnected;
         _screenHubConnected = ScreenHubCommandService.IsConnected;
@@ -58,6 +59,8 @@
         HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
         HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
         SystemSettingRepository.PropertyChanged += SystemSettingRepositoryOnPropertyChanged;
+
+        return Task.CompletedTask;
     }
 
     protected override async Task OnParametersSetAsync()
@@ -75,7 +78,7 @@
         if (!firstRender)
             return;
 
-        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/ViewFullScreen.js");
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/ViewFullScreen.js");
     }
 
     private void ScreenHubCommandServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -94,10 +97,10 @@
 
     private async Task EnterFullScreen()
     {
-        if (module == null)
+        if (_module == null)
             return;
 
-        await module.InvokeVoidAsync("EnterFullScreen");
+        await _module.InvokeVoidAsync("EnterFullScreen");
     }
 
     private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)

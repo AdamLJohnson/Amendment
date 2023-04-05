@@ -34,7 +34,8 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<List<AmendmentBodyResponse>>>();
-            Assert.True(jsonResponse.IsSuccess);
+            Assert.True(jsonResponse?.IsSuccess);
+            Assert.NotNull(jsonResponse?.Result);
             Assert.NotEmpty(jsonResponse.Result);
         }
 
@@ -52,8 +53,8 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AmendmentBodyResponse>>();
-            Assert.True(jsonResponse.IsSuccess);
-            Assert.NotNull(jsonResponse.Result);
+            Assert.True(jsonResponse?.IsSuccess);
+            Assert.NotNull(jsonResponse?.Result);
             Assert.Equal(testSetup.Id, jsonResponse.Result.Id);
         }
 
@@ -76,8 +77,8 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AmendmentBodyResponse>>();
-            Assert.True(jsonResponse.IsSuccess);
-            Assert.NotNull(jsonResponse.Result);
+            Assert.True(jsonResponse?.IsSuccess);
+            Assert.NotNull(jsonResponse?.Result);
             Assert.Equal(model.AmendBody, jsonResponse.Result.AmendBody);
             Assert.Equal(model.AmendStatus, jsonResponse.Result.AmendStatus);
             Assert.Equal(model.IsLive, jsonResponse.Result.IsLive);
@@ -97,6 +98,7 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
             var jsonResponse = await response.Content.ReadFromJsonAsync<ApiFailedResult>();
+            Assert.NotNull(jsonResponse);
             Assert.False(jsonResponse.IsSuccess);
             Assert.Equal(2, jsonResponse.Errors.Count);
             Assert.Contains(jsonResponse.Errors, x => x.Name == "AmendBody");
@@ -125,6 +127,7 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AmendmentBodyResponse>>();
+            Assert.NotNull(jsonResponse);
             Assert.True(jsonResponse.IsSuccess);
             Assert.NotNull(jsonResponse.Result);
             Assert.Equal(testSetup.Id, jsonResponse.Result.Id);

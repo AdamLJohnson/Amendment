@@ -14,9 +14,12 @@ public static class JwtParser
 
         var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
 
-        ExtractRolesFromJWT(claims, keyValuePairs);
+        if (keyValuePairs != null)
+        {
+            ExtractRolesFromJWT(claims, keyValuePairs);
+            claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!)));
+        }
 
-        claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString())));
         return claims;
     }
     private static byte[] ParseBase64WithoutPadding(string base64)
@@ -31,11 +34,11 @@ public static class JwtParser
 
     private static void ExtractRolesFromJWT(List<Claim> claims, Dictionary<string, object> keyValuePairs)
     {
-        keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
+        keyValuePairs.TryGetValue(ClaimTypes.Role, out var roles);
 
         if (roles != null)
         {
-            var parsedRoles = roles.ToString().Trim().TrimStart('[').TrimEnd(']').Split(',');
+            var parsedRoles = roles.ToString()!.Trim().TrimStart('[').TrimEnd(']').Split(',');
 
             if (parsedRoles.Length > 1)
             {

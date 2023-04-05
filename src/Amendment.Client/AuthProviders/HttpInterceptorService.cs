@@ -25,6 +25,9 @@ namespace Amendment.Client.AuthProviders
         public void RegisterEvent() => _interceptor.BeforeSendAsync += InterceptBeforeHttpAsync;
         public async Task InterceptBeforeHttpAsync(object sender, HttpClientInterceptorEventArgs e)
         {
+            if (e.Request.RequestUri == null)
+                return;
+
             var absPath = e.Request.RequestUri.AbsolutePath;
             if (_anonymousUrls.Any(z => absPath.Equals(z, StringComparison.CurrentCultureIgnoreCase)))
             {

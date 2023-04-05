@@ -14,7 +14,7 @@ using ValidationException = FluentValidation.ValidationException;
 
 namespace Amendment.Server.PipelineBehaviors;
 
-public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
 {
     private readonly IHubContext<AmendmentHub> _amendmentHub;
     private readonly IHubContext<ScreenHub> _screenHub;
@@ -67,8 +67,10 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
     }
 
 
-    private async Task NotifyAmendmentChange(OperationType operationType, IApiResult<AmendmentResponse>? result)
+    private async Task NotifyAmendmentChange(OperationType operationType, IApiResult<AmendmentResponse> result)
     {
+        if (result.Result == null) return;
+
         var tasks = new List<Task>();
         tasks.Add(_amendmentHub.Clients.All.SendAsync("AmendmentUpdate", new SignalRResponse<AmendmentResponse>(operationType, result.Result)));
 
@@ -83,6 +85,8 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
     }
     private async Task NotifyAmendmentBodyChange(OperationType operationType, IApiResult<AmendmentBodyResponse>? result)
     {
+        if (result?.Result == null) return;
+
         var tasks = new List<Task>();
         tasks.Add(_amendmentHub.Clients.All.SendAsync("AmendmentBodyUpdate", new SignalRResponse<AmendmentBodyResponse>(operationType, result.Result)));
 
@@ -97,7 +101,7 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
     private async Task NotifyAmendmentBulkPageChange(OperationType operationType,
         IApiResult<List<AmendmentBodyResponse>>? result)
     {
-        if (!result.Result.Any())
+        if (result == null || result.Result == null || !result.Result.Any())
             return;
 
         await _amendmentHub.Clients.All.SendAsync("AmendmentBodyUpdateMany", new SignalRResponse<IEnumerable<AmendmentBodyResponse>>(operationType, result.Result));
@@ -113,6 +117,8 @@ public class ClientNotificationBehavior<TRequest, TResponse> : IPipelineBehavior
     }
     private Task NotifySystemSettingUpdate(OperationType update, IApiResult<SystemSettingResponse> result)
     {
+        if (result.Result == null) return Task.CompletedTask;
+
         return _amendmentHub.Clients.All.SendAsync("SystemSettingUpdate", new SignalRResponse<SystemSettingResponse>(OperationType.Update, result.Result));
     }
     private async Task NotifyClearScreens()

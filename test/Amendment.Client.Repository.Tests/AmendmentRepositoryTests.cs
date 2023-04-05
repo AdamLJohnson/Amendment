@@ -111,7 +111,7 @@ namespace Amendment.Client.Repository.Tests
             var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
             var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
             //Act
-            AmendmentResponse result = await amendmentRepository.GetAsync(1);
+            var result = await amendmentRepository.GetAsync(1);
             //Assert
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
@@ -119,15 +119,15 @@ namespace Amendment.Client.Repository.Tests
             mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
         }
         [Fact]
-        public async Task GetAsync_ShouldReturnNull_WhenTheApiReturnsNull()
+        public async Task GetAsync_ShouldReturnException_WhenTheAmendmentNotFound()
         {
             //Arrange
             var logger = new Mock<ILogger<AmendmentRepository>>();
             var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(JsonSerializer.Serialize(new ApiResult<AmendmentResponse>() { Result = null }))
+                StatusCode = HttpStatusCode.NotFound,
+                Content = null
             };
             mockHttpMessageHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
@@ -137,9 +137,8 @@ namespace Amendment.Client.Repository.Tests
             var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
             var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
             //Act
-            AmendmentResponse result = await amendmentRepository.GetAsync(1);
+            await amendmentRepository.GetAsync(1);
             //Assert
-            Assert.Null(result);
             mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
         }
 
@@ -161,7 +160,7 @@ namespace Amendment.Client.Repository.Tests
             var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
             var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
             //Act
-            AmendmentResponse result = await amendmentRepository.PostAsync(new AmendmentRequest());
+            var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
@@ -187,7 +186,7 @@ namespace Amendment.Client.Repository.Tests
             var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
             var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
             //Act
-            AmendmentResponse result = await amendmentRepository.PostAsync(new AmendmentRequest());
+            var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
             Assert.NotNull(result);
             mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
@@ -211,9 +210,8 @@ namespace Amendment.Client.Repository.Tests
             var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
             var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
             //Act
-            AmendmentResponse result = await amendmentRepository.PostAsync(new AmendmentRequest());
+            var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
-            Assert.Null(result);
             mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
         }
 
@@ -236,7 +234,7 @@ namespace Amendment.Client.Repository.Tests
             var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
             var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
             //Act
-            AmendmentResponse result = await amendmentRepository.PutAsync(1, new AmendmentRequest());
+            var result = await amendmentRepository.PutAsync(1, new AmendmentRequest());
             //Assert
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
@@ -263,7 +261,7 @@ namespace Amendment.Client.Repository.Tests
             var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
             var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
             //Act
-            AmendmentResponse result = await amendmentRepository.PutAsync(1, new AmendmentRequest());
+            var result = await amendmentRepository.PutAsync(1, new AmendmentRequest());
             //Assert
             Assert.NotNull(result);
             mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());

@@ -15,7 +15,7 @@ namespace Amendment.Shared
 
     public interface IApiResult<T> : IApiResult
     {
-        T Result { get; set; }
+        T? Result { get; set; }
     }
 
     public sealed class ApiCommandSuccessResult : IApiResult
@@ -34,7 +34,7 @@ namespace Amendment.Shared
     {
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
         public bool IsSuccess { get; set; } = true;
-        public T Result { get; set; }
+        public T? Result { get; set; }
 
         public ApiSuccessResult(T result)
         {
@@ -53,7 +53,7 @@ namespace Amendment.Shared
 
     public sealed class ApiResult<T> : ApiResult, IApiResult<T>
     {
-        public T Result { get; set; }
+        public T? Result { get; set; }
     }
 
     public class ApiFailedResult : IApiResult
@@ -85,7 +85,7 @@ namespace Amendment.Shared
 
     public sealed class ApiFailedResult<T> : ApiFailedResult, IApiResult<T> where T : new()
     {
-        public T Result { get; set; } = new T();
+        public T? Result { get; set; } = new T();
 
         public ApiFailedResult()
         {

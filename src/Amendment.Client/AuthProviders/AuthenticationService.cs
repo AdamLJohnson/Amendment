@@ -59,16 +59,18 @@ public class AuthenticationService : IAuthenticationService
         if (!authResult.IsSuccessStatusCode)
             return new AuthResponseDto { IsAuthSuccessful = false, ErrorMessage = "Login Failed"};
 
-        var result = JsonSerializer.Deserialize<ApiResult<AccountLoginResponse>>(authContent, _options);
+        var result = JsonSerializer.Deserialize<ApiResult<AccountLoginResponse>>(authContent, _options) ?? throw new ArgumentNullException("JsonSerializer.Deserialize<ApiResult<AccountLoginResponse>>(authContent, _options)");
 
 
-
-        await _localStorage.SetItemAsync("authToken", result.Result.Token);
-        await _localStorage.SetItemAsync("refreshToken", result.Result.RefreshToken);
-        ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(result.Result.Token);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Result.Token);
-
-        return new AuthResponseDto { IsAuthSuccessful = true };
+        if (result.Result != null)
+        {
+            await _localStorage.SetItemAsync("authToken", result.Result.Token);
+            await _localStorage.SetItemAsync("refreshToken", result.Result.RefreshToken);
+            ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(result.Result.Token!);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Result.Token);
+            return new AuthResponseDto { IsAuthSuccessful = true };
+        }
+        return new AuthResponseDto { IsAuthSuccessful = false, ErrorMessage = "Login Failed" };
     }
 
     public async Task Logout()
@@ -91,20 +93,23 @@ public class AuthenticationService : IAuthenticationService
         if(!refreshResult.IsSuccessStatusCode)
         {
             await Logout();
-            return null;
+            return "";
         }
 
-        var result = JsonSerializer.Deserialize<ApiResult<AccountLoginResponse>>(refreshContent, _options);
+        var result = JsonSerializer.Deserialize<ApiResult<AccountLoginResponse>>(refreshContent, _options) ?? throw new ArgumentNullException("JsonSerializer.Deserialize<ApiResult<AccountLoginResponse>>(refreshContent, _options)");
+
+        if (result.Result == null)
+            return "";
 
         await _localStorage.SetItemAsync("authToken", result.Result.Token);
         await _localStorage.SetItemAsync("refreshToken", result.Result.RefreshToken);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Result.Token);
-        return result.Result.Token;
+        return result.Result.Token!;
     }
 }
 
 public class AuthResponseDto
 {
     public bool IsAuthSuccessful { get; set; }
-    public string ErrorMessage { get; set; }
+    public string? ErrorMessage { get; set; }
 }

@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Server.Mediator",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Client.Repository", "src\Amendment.Client.Repository\Amendment.Client.Repository.csproj", "{F5BC33B0-B6E1-49F1-8362-E26D0FF72E09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amendment.Client.Repository.Tests", "test\Amendment.Client.Repository.Tests\Amendment.Client.Repository.Tests.csproj", "{012F5DFD-41DD-471A-B896-C2503950AE3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amendment.Client.Repository.Tests", "test\Amendment.Client.Repository.Tests\Amendment.Client.Repository.Tests.csproj", "{012F5DFD-41DD-471A-B896-C2503950AE3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

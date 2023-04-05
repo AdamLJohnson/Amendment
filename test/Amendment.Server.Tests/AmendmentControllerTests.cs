@@ -33,7 +33,9 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<List<AmendmentResponse>>>();
+            Assert.NotNull(jsonResponse);
             Assert.True(jsonResponse.IsSuccess);
+            Assert.NotNull(jsonResponse.Result);
             Assert.NotEmpty(jsonResponse.Result);
         }
 
@@ -49,6 +51,7 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AmendmentFullBodyResponse>>();
+            Assert.NotNull(jsonResponse);
             Assert.True(jsonResponse.IsSuccess);
             Assert.NotNull(jsonResponse.Result);
             Assert.True(jsonResponse.Result.IsLive);
@@ -66,6 +69,7 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AmendmentResponse>>();
+            Assert.NotNull(jsonResponse);
             Assert.True(jsonResponse.IsSuccess);
             Assert.NotNull(jsonResponse.Result);
             Assert.Equal(2, jsonResponse.Result.Id);
@@ -84,6 +88,7 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AmendmentResponse>>();
+            Assert.NotNull(jsonResponse);
             Assert.True(jsonResponse.IsSuccess);
             Assert.NotNull(jsonResponse.Result);
             Assert.Empty(jsonResponse.Result.AmendmentBodies);
@@ -108,6 +113,7 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
             var jsonResponse = await response.Content.ReadFromJsonAsync<ApiFailedResult>();
+            Assert.NotNull(jsonResponse);
             Assert.False(jsonResponse.IsSuccess);
             Assert.Equal(3, jsonResponse.Errors.Count);
             Assert.Contains(jsonResponse.Errors, x => x.Name == "Title");
@@ -138,6 +144,7 @@ namespace Amendment.Server.Tests
             Assert.NotNull(response);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiSuccessResult<AmendmentResponse>>();
+            Assert.NotNull(jsonResponse);
             Assert.True(jsonResponse.IsSuccess);
             Assert.NotNull(jsonResponse.Result);
             Assert.Equal(1, jsonResponse.Result.Id);
@@ -158,11 +165,11 @@ namespace Amendment.Server.Tests
             var client = _factory.CreateClient();
 
             //Act
-            var response = await client.DeleteAsync("/api/Amendment/1");
+            var response = await client.DeleteAsync("/api/Amendment/2");
 
             //Assert
             var repo = _factory.Services.GetRequiredService<IAmendmentRepository>();
-            var test = await repo.GetByIdAsync(1);
+            var test = await repo.GetByIdAsync(2);
             Assert.Null(test);
         }
     }

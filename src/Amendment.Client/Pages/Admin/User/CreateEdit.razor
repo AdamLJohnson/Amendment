@@ -14,7 +14,7 @@
 <h3>@title</h3>
 <Row>
     <Column ColumnSize="ColumnSize.Is6">
-        <Validations @ref="@fluentValidations" Mode="ValidationMode.Manual" Model="@model" HandlerType="typeof(FluentValidationHandler)">
+        <Validations @ref="@_fluentValidations" Mode="ValidationMode.Manual" Model="@model" HandlerType="typeof(FluentValidationHandler)">
             <Validation>
                 <Field>
                     <FieldLabel For="username">Username</FieldLabel>
@@ -73,7 +73,7 @@
     </Column>
     <Column ColumnSize="ColumnSize.Is6">
         <h3>Roles</h3>
-        <Repeater Items="@roleList">
+        <Repeater Items="@_roleList">
             <Check TValue="bool" Checked="model.Roles.Contains(context.Id)" CheckedChanged="(value) => OnChanged(value, context.Id)">@context.Name</Check>
         </Repeater>
     </Column>
@@ -85,15 +85,15 @@
     [Parameter]
     public int? Id { get; set; }
 
-    Validations fluentValidations;
+    Validations _fluentValidations = null!;
     string title = "";
     UserRequest model = new();
-    IEnumerable<RoleResponse> roleList;
+    IEnumerable<RoleResponse> _roleList = Enumerable.Empty<RoleResponse>();
 
     protected override async Task OnInitializedAsync()
     {
         title = Id == null ? "Create User" : "Edit User";
-        roleList = await RoleRepository.GetAsync();
+        _roleList = await RoleRepository.GetAsync();
         var userResponse = Id == null ? new UserResponse() : await UserRepository.GetAsync(Id.Value);
         model = userResponse.ToRequest();
         model.IsCreate = Id == null;
@@ -102,7 +102,7 @@
 
     protected async Task OnSavePerson()
     {
-        if ( await fluentValidations.ValidateAll() )
+        if ( await _fluentValidations.ValidateAll() )
         {
             if (Id == null)
                 await UserRepository.PostAsync( model);

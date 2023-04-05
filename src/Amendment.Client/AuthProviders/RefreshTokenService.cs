@@ -25,10 +25,10 @@ namespace Amendment.Client.AuthProviders
         {
             var authState = await _authProvider.GetAuthenticationStateAsync();
             var user = authState.User;
-            var exp = user.FindFirst(c => c.Type.Equals("exp")).Value;
+            var exp = user.FindFirst(c => c.Type.Equals("exp"))!.Value;
             var expTime = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(exp));
-            var timeUTC = DateTime.UtcNow;
-            var diff = expTime - timeUTC;
+            var timeUtc = DateTime.UtcNow;
+            var diff = expTime - timeUtc;
             if (diff.TotalMinutes <= 2)
                 return await _authService.RefreshToken();
 

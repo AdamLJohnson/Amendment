@@ -20,7 +20,7 @@ namespace Amendment.Shared.Enums
                 throw new ArgumentException("Argument must be of type Enum");
 
             DisplayAttribute? displayAttribute = enumValue.GetType()
-                .GetMember(enumValue.ToString())
+                .GetMember(enumValue.ToString() ?? "")
                 .First()
                 .GetCustomAttribute<DisplayAttribute>();
 

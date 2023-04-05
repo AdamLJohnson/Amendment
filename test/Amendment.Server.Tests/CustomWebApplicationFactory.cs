@@ -29,7 +29,7 @@ namespace Amendment.Server.Tests
                     d => d.ServiceType ==
                         typeof(DbContextOptions<AmendmentContext>));
 
-                services.Remove(descriptor);
+                if (descriptor != null) services.Remove(descriptor);
 
                 services.AddDbContext<AmendmentContext>(options =>
                 {
@@ -40,7 +40,7 @@ namespace Amendment.Server.Tests
                     s => s.ServiceType ==
                          typeof(JwtBearerHandler));
 
-                services.Remove(basicAuth);
+                if (basicAuth != null) services.Remove(basicAuth);
 
                 services.AddTransient<IAuthenticationSchemeProvider, MockSchemeProvider>();
             });
@@ -64,7 +64,7 @@ namespace Amendment.Server.Tests
         {
         }
 
-        public override Task<AuthenticationScheme> GetSchemeAsync(string name)
+        public override Task<AuthenticationScheme?> GetSchemeAsync(string name)
         {
             if (name == "Bearer")
             {
@@ -73,7 +73,7 @@ namespace Amendment.Server.Tests
                     "Bearer",
                     typeof(MockAuthenticationHandler)
                 );
-                return Task.FromResult(scheme);
+                return Task.FromResult(scheme)!;
             }
 
             return base.GetSchemeAsync(name);

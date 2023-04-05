@@ -4,21 +4,22 @@
 @inject ISystemSettingRepository SystemSettingRepository
 
 <TableRow>
-    <TableRowCell>@context.Key</TableRowCell>
+    <TableRowCell>@Context.Key</TableRowCell>
     <TableRowCell>
-        <TextEdit id="username" @bind-Text="context.Value" />
+        <TextEdit id="username" @bind-Text="Context.Value" />
     </TableRowCell>
     <TableRowCell TextAlignment="TextAlignment.End">
         <Button Color="Color.Primary" Clicked="OnSaveClick">Save</Button>
     </TableRowCell>
 </TableRow>
 @code {
+
     [Parameter]
-    public SystemSettingResponse context { get; set; }
+    public SystemSettingResponse Context { get; set; } = new();
 
     private Task OnSaveClick()
     {
-        return SystemSettingRepository.PutAsync(context.Id, new SystemSettingRequest { Key = context.Key, Value = context.Value });
+        return SystemSettingRepository.PutAsync(Context.Id, new SystemSettingRequest { Key = Context.Key, Value = Context.Value });
     }
 
 }

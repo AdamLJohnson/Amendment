@@ -11,7 +11,7 @@ namespace Amendment.Server.Mediator.Commands
 {
     public class RefreshTokenCommand : IRequest<IApiResult>
     {
-        public string Token { get; set; }
-        public string RefreshToken { get; set; }
+        public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace Amendment.Server.Mediator.Handlers
                 return new ApiFailedResult<AccountLoginResponse>(HttpStatusCode.BadRequest);
 
             var principal = _tokenService.GetPrincipalFromExpiredToken(request.Token);
-            var username = principal.Identity.Name;
+            var username = principal.Identity!.Name;
 
             var user = await _userService.GetAsync(username);
 

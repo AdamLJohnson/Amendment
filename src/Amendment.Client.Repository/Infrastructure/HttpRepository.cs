@@ -33,7 +33,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
             response.EnsureSuccessStatusCode();
 
             var result = JsonSerializer.Deserialize<ApiResult<IEnumerable<TResponse>>>(content, _options);
-            return result == null ? Enumerable.Empty<TResponse>() : result.Result;
+            return result?.Result ?? Enumerable.Empty<TResponse>();
         }
         catch (Exception e)
         {
@@ -53,7 +53,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
             response.EnsureSuccessStatusCode();
 
             var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, _options);
-            return result == null ? new TResponse() : result.Result;
+            return result?.Result ?? new TResponse();
         }
         catch (Exception e)
         {
@@ -75,7 +75,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
         
 
             var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, _options);
-            return result == null ? new TResponse() : result.Result;
+            return result?.Result ?? new TResponse();
         }
         catch (Exception e)
         {
@@ -97,7 +97,7 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
             response.EnsureSuccessStatusCode();
 
             var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, _options);
-            return result == null ? new TResponse() : result.Result;
+            return result?.Result ?? new TResponse();
         }
         catch (Exception e)
         {

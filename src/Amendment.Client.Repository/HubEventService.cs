@@ -17,11 +17,11 @@ namespace Amendment.Client.Repository
     }
     public sealed class HubEventService : IHubEventService
     {
-        public event EventHandler<SignalRResponse<AmendmentResponse>> AmendmentUpdated;
-        public event EventHandler<SignalRResponse<AmendmentBodyResponse>> AmendmentBodyUpdated;
-        public event EventHandler<SignalRResponse<List<AmendmentBodyResponse>>> AmendmentBodyUpdatedMany;
-        public event EventHandler<SignalRResponse<SystemSettingResponse>> SystemSettingUpdated;
-        public event EventHandler ClearScreens;
+        public event EventHandler<SignalRResponse<AmendmentResponse>> AmendmentUpdated = null!;
+        public event EventHandler<SignalRResponse<AmendmentBodyResponse>> AmendmentBodyUpdated = null!;
+        public event EventHandler<SignalRResponse<List<AmendmentBodyResponse>>> AmendmentBodyUpdatedMany = null!;
+        public event EventHandler<SignalRResponse<SystemSettingResponse>> SystemSettingUpdated = null!;
+        public event EventHandler ClearScreens = null!;
 
         public void OnAmendmentUpdated(SignalRResponse<AmendmentResponse> e)
         {

@@ -14,7 +14,7 @@ namespace Amendment.Shared.Responses
         public int Id { get; set; }
         public int AmendId { get; set; }
         public int LanguageId { get; set; }
-        public string AmendBody { get; set; }
+        public string AmendBody { get; set; } = "";
         public AmendmentBodyStatus AmendStatus { get; set; }
         public bool IsLive { get; set; }
         public int Page { get; set; } = 0;

@@ -50,7 +50,7 @@
     public AmendmentBodyResponse Body { get; set; } = new();
 
     [Parameter, EditorRequired]
-    public string LanguageName { get; set; }
+    public string? LanguageName { get; set; }
 
     [Parameter, EditorRequired]
     public int PrimaryLanguageId { get; set; } = -1;

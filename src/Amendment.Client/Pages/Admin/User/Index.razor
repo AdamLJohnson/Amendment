@@ -26,7 +26,7 @@
                 </TableRow>
             </TableHeader>
             <TableBody>
-                <Repeater Items="@users">
+                <Repeater Items="@_users">
                     <TableRow>
                         <TableRowCell>@context.Username</TableRowCell>
                         <TableRowCell>@context.Email</TableRowCell>
@@ -37,7 +37,7 @@
                         </TableRowCell>
                     </TableRow>
                 </Repeater>
-                @if (!users.Any())
+                @if (!_users.Any())
                 {
                     <TableRow>
                         <TableRowCell ColumnSpan="4">No Users Found</TableRowCell>
@@ -48,53 +48,43 @@
     </Column>
 </Row>
 
-<Modal @ref="@modalRef">
+<Modal @ref="@_modalRef">
     <ModalContent Centered>
         <ModalHeader>
             <ModalTitle>Delete User</ModalTitle>
-            <CloseButton />
+            <CloseButton/>
         </ModalHeader>
         <ModalBody>
             Are you sure you want to delete this user?
         </ModalBody>
         <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => modalRef.Hide()">Close</Button>
-            <Button Color="Color.Primary" Clicked="() => ConfirmUser()">Save Changes</Button>
+            <Button Color="Color.Secondary" Clicked="() => _modalRef!.Hide()">Close</Button>
+            <Button Color="Color.Primary" Clicked="ConfirmUser">Save Changes</Button>
         </ModalFooter>
     </ModalContent>
 </Modal>
 
 @code
 {
-    private Modal? modalRef;
-    private IEnumerable<UserResponse> users = Enumerable.Empty<UserResponse>();
-    
-    protected override async Task OnInitializedAsync()
-    {
-        var get = await UserRepository.GetAsync();
-        users = get;
+    private Modal? _modalRef;
+    private IEnumerable<UserResponse> _users = Enumerable.Empty<UserResponse>();
+    private int? _userIdToDelete = null;
 
-        if (modalRef.Attributes is null)
-            modalRef.Attributes = new Dictionary<string, object>();
-    }
+    protected override async Task OnInitializedAsync() => _users = await UserRepository.GetAsync();
 
     private Task OnDelete(int id)
     {
-        if (modalRef.Attributes.ContainsKey("userId"))
-            modalRef.Attributes["userId"] = id;
-            
-        else
-            modalRef.Attributes.Add("userId", id);
-        return modalRef.Show();
+        _userIdToDelete = id;
+        return _modalRef!.Show();
     }
 
     private async Task ConfirmUser()
     {
-        modalRef.Hide();
-        var id = Convert.ToInt32(modalRef.Attributes["userId"]);
-        modalRef.Attributes.Remove("userId");
-        await UserRepository.DeleteAsync(id);
+        await _modalRef!.Hide();
+        if (_userIdToDelete is null)
+            return;
+        await UserRepository.DeleteAsync(_userIdToDelete.Value);
         var get = await UserRepository.GetAsync();
-        users = get;
+        _users = get;
     }
 }

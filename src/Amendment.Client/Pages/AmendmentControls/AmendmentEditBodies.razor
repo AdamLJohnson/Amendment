@@ -13,7 +13,7 @@
         </TableRow>
     </TableHeader>
     <TableBody>
-        <Repeater Items="@languages">
+        <Repeater Items="@_languages">
             <TableRow>
                 <TableRowCell>@context.LanguageName</TableRowCell>
                 <TableRowCell TextAlignment="TextAlignment.Center">
@@ -37,7 +37,7 @@
     </TableBody>
 </Table>
 
-<Modal @ref="@modalRef" Closed="ModalClosed">
+<Modal @ref="@_modalRef" Closed="ModalClosed">
     <ModalContent Centered>
         <ModalHeader>
             <ModalTitle>Delete Text</ModalTitle>
@@ -47,15 +47,15 @@
             Are you sure you want to delete this amendment text?
         </ModalBody>
         <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => modalRef.Hide()">Close</Button>
-            <Button Color="Color.Primary" Clicked="() => DeleteBody()">Delete Text</Button>
+            <Button Color="Color.Secondary" Clicked="() => _modalRef!.Hide()">Close</Button>
+            <Button Color="Color.Primary" Clicked="DeleteBody">Delete Text</Button>
         </ModalFooter>
     </ModalContent>
 </Modal>
 
 @code
 {
-    private Modal? modalRef;
+    private Modal? _modalRef;
     [Parameter, EditorRequired]
     public int AmendmentId { get; set; }
     [Parameter, EditorRequired]
@@ -63,29 +63,29 @@
     [Parameter, EditorRequired]
     public List<AmendmentBodySummary> AmendmentBodies { get; set; } = new();
 
-    IEnumerable<LanguageResponse> languages = Enumerable.Empty<LanguageResponse>();
-    int deleteBody = 0;
+    IEnumerable<LanguageResponse> _languages = Enumerable.Empty<LanguageResponse>();
+    int _deleteBody = 0;
 
     protected override async Task OnInitializedAsync()
     {
-        languages = await LanguageRepository.GetAsync();
+        _languages = await LanguageRepository.GetAsync();
     }
 
     private async Task DeleteBody()
     {
-        await AmendmentBodyRepository.DeleteAsync(AmendmentId, deleteBody);
-        AmendmentBodies.RemoveAll(x => x.Id == deleteBody);
-        modalRef.Hide();
+        await AmendmentBodyRepository.DeleteAsync(AmendmentId, _deleteBody);
+        AmendmentBodies.RemoveAll(x => x.Id == _deleteBody);
+        await _modalRef!.Hide();
     }
 
     private void ShowConfirmDelete(int amendmentBodyId)
     {
-        deleteBody = amendmentBodyId;
-        modalRef.Show();
+        _deleteBody = amendmentBodyId;
+        _modalRef!.Show();
     }
 
     private void ModalClosed()
     {
-        deleteBody = 0;
+        _deleteBody = 0;
     }
 }

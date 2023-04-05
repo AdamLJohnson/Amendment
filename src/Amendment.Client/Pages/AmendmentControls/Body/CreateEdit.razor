@@ -19,7 +19,7 @@
 <Row>
     <Column>
         <EditForm Model="_model" OnValidSubmit="OnSave">
-            <Validations @ref="@fluentValidations" Mode="ValidationMode.Manual" Model="@_model" HandlerType="typeof(FluentValidationHandler)">
+            <Validations @ref="@_fluentValidations" Mode="ValidationMode.Manual" Model="@_model" HandlerType="typeof(FluentValidationHandler)">
                 <Validation>
                     <Field>
                         <FieldLabel For="source">Source</FieldLabel>
@@ -112,8 +112,8 @@
     AmendmentBodyResponse _primaryLanguageBody = new() { AmendBody = "" } ;
     string _primaryLanguageName = "English";
 
-    Validations fluentValidations;
-    Markdown _markdown;
+    Validations _fluentValidations = null!;
+    Markdown _markdown = null!;
     IEnumerable<AmendmentBodyStatus> _statusEnumerable = Enum.GetValues(typeof(AmendmentBodyStatus)).Cast<AmendmentBodyStatus>();
     List<LanguageResponse> _languages = new();
 
@@ -154,7 +154,7 @@
 
     protected async Task OnSave()
     {
-        var isValid = await fluentValidations.ValidateAll();
+        var isValid = await _fluentValidations.ValidateAll();
         if (string.IsNullOrEmpty(_model.AmendBody))
         {
             await NotificationService.Error("Amendment Body can not be empty", "Error");

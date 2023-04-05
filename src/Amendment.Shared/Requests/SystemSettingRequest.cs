@@ -8,7 +8,7 @@ namespace Amendment.Shared.Requests
 {
     public sealed class SystemSettingRequest
     {
-        public string Key { get; set; }
-        public string Value { get; set; }
+        public string Key { get; set; } = "";
+        public string Value { get; set; } = "";
     }
 }

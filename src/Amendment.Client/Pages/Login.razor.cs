@@ -21,16 +21,16 @@ namespace Amendment.Client.Pages
 {
     public partial class Login
     {
-        private AccountLoginRequest _userForAuthentication = new AccountLoginRequest();
+        private readonly AccountLoginRequest _userForAuthentication = new();
         [Inject]
-        public IAuthenticationService AuthenticationService { get; set; }
+        public IAuthenticationService AuthenticationService { get; set; } = null!;
 
         [Inject]
-        public NavigationManager NavigationManager { get; set; }
+        public NavigationManager NavigationManager { get; set; } = null!;
 
         public bool ShowAuthError { get; set; }
 
-        public string Error { get; set; }
+        public string Error { get; set; } = "";
 
         public async Task ExecuteLogin()
         {
@@ -38,7 +38,7 @@ namespace Amendment.Client.Pages
             var result = await AuthenticationService.Login(_userForAuthentication);
             if (!result.IsAuthSuccessful)
             {
-                Error = result.ErrorMessage;
+                Error = result.ErrorMessage ?? "";
                 ShowAuthError = true;
             }
             else

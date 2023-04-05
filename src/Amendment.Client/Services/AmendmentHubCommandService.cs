@@ -137,8 +137,11 @@ namespace Amendment.Client.Services
         {
             try
             {
-                await _hubConnection.StartAsync();
-                IsConnected = true;
+                if (_hubConnection != null)
+                {
+                    await _hubConnection.StartAsync();
+                    IsConnected = true;
+                }
             }
             catch (Exception)
             {

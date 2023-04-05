@@ -28,8 +28,8 @@ else
 }
 @code {
     [Parameter]
-    public AmendmentResponse Amendment { get; set; }
+    public AmendmentResponse Amendment { get; set; } = new();
 
     [Parameter]
-    public LanguageResponse Language { get; set; }
+    public LanguageResponse Language { get; set; } = new();
 }
