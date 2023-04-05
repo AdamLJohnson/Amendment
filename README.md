@@ -3,10 +3,16 @@
 [![Build Status](https://dev.azure.com/columbus0380/amendment/_apis/build/status/AdamLJohnson.Amendment)](https://dev.azure.com/columbus0380/amendment/_build/latest?definitionId=1)
 
 ## Build Prerequisites
-1. [DotNet Core v2.2 SDK](https://dotnet.microsoft.com/download)
+1. [DotNet 7 SDK](https://dotnet.microsoft.com/download)
 1. [Web Compiler VS Extension](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebCompiler)
 
 ## Some quick commands
+
+### Stand up Docker Postgres Database
+
+You can run a temp database in docker. To use docker you need to update the `appsettings.json` file as well.
+
+`docker run -p 5432:5432 --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_USER=amendment -d postgres`
 
 ### Compile a release
 To build a publish release. Run this command from the project's root folder: `dotnet publish --configuration Release`
