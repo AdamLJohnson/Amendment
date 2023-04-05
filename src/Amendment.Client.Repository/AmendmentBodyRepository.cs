@@ -23,38 +23,38 @@ namespace Amendment.Client.Repository
     }
     public class AmendmentBodyRepository : HttpRepository<AmendmentBodyRequest, AmendmentBodyResponse>, IAmendmentBodyRepository
     {
-        protected override string _baseUrl { get; set; } = "api/AmendmentBody";
+        protected override string BaseUrl { get; set; } = "api/AmendmentBody";
         public AmendmentBodyRepository(ILogger<AmendmentBodyRepository> logger, HttpClient client, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
         {
         }
 
         Task<IEnumerable<AmendmentBodyResponse>> IAmendmentBodyRepository.GetAsync(int amendmentId)
         {
-            _baseUrl = $"api/Amendment/{amendmentId}/Body";
+            BaseUrl = $"api/Amendment/{amendmentId}/Body";
             return base.GetAsync();
         }
 
         public Task<AmendmentBodyResponse> GetAsync(int amendmentId, int id)
         {
-            _baseUrl = $"api/Amendment/{amendmentId}/Body";
+            BaseUrl = $"api/Amendment/{amendmentId}/Body";
             return base.GetAsync(id);
         }
 
         public Task<AmendmentBodyResponse> PostAsync(int amendmentId, AmendmentBodyRequest request)
         {
-            _baseUrl = $"api/Amendment/{amendmentId}/Body";
+            BaseUrl = $"api/Amendment/{amendmentId}/Body";
             return base.PostAsync(request);
         }
 
         public Task<AmendmentBodyResponse> PutAsync(int amendmentId, int id, AmendmentBodyRequest request)
         {
-            _baseUrl = $"api/Amendment/{amendmentId}/Body";
+            BaseUrl = $"api/Amendment/{amendmentId}/Body";
             return base.PutAsync(id, request);
         }
 
         public Task DeleteAsync(int amendmentId, int id)
         {
-            _baseUrl = $"api/Amendment/{amendmentId}/Body";
+            BaseUrl = $"api/Amendment/{amendmentId}/Body";
             return base.DeleteAsync(id);
         }
     }

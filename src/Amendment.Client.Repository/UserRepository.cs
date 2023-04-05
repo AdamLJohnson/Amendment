@@ -19,7 +19,7 @@ namespace Amendment.Client.Repository
     }
     public class UserRepository : HttpRepository<UserRequest, UserResponse>, IUserRepository
     {
-        protected override string _baseUrl { get; set; } = "api/User";
+        protected override string BaseUrl { get; set; } = "api/User";
         public UserRepository(ILogger<UserRepository> logger, HttpClient client, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
         {
         }

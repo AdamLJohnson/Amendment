@@ -19,7 +19,7 @@ namespace Amendment.Client.Repository
     }
     public class LanguageRepository : HttpRepository<LanguageRequest, LanguageResponse>, ILanguageRepository
     {
-        protected override string _baseUrl { get; set; } = "api/Language";
+        protected override string BaseUrl { get; set; } = "api/Language";
         private IEnumerable<LanguageResponse>? _languages;
         public LanguageRepository(ILogger<LanguageRepository> logger, HttpClient client, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
         {

@@ -21,7 +21,7 @@ namespace Amendment.Client.Repository
     {
         private readonly ILogger<AmendmentRepository> _logger;
         private readonly INotificationServiceWrapper _notificationServiceWrapper;
-        protected override string _baseUrl { get; set; } = "api/Amendment";
+        protected override string BaseUrl { get; set; } = "api/Amendment";
         public AmendmentRepository(ILogger<AmendmentRepository> logger, HttpClient client, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
         {
             _logger = logger;
@@ -33,11 +33,11 @@ namespace Amendment.Client.Repository
             var url = $"api/Amendment/Live";
             try
             {
-                var response = await _client.GetAsync(url);
+                var response = await Client.GetAsync(url);
                 var content = await response.Content.ReadAsStringAsync();
                 response.EnsureSuccessStatusCode();
 
-                var result = JsonSerializer.Deserialize<ApiResult<AmendmentFullBodyResponse?>>(content, _options);
+                var result = JsonSerializer.Deserialize<ApiResult<AmendmentFullBodyResponse?>>(content, Options);
                 return result?.Result;
             }
             catch (Exception e)

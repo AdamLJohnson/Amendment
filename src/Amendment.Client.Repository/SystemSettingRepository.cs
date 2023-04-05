@@ -59,7 +59,7 @@ namespace Amendment.Client.Repository
             }
         }
 
-        protected override string _baseUrl { get; set; } = "api/SystemSetting";
+        protected override string BaseUrl { get; set; } = "api/SystemSetting";
         private List<SystemSettingResponse> _systemSettings = new();
         private bool _showDeafSigner;
         private bool _showDeafSignerBox;
