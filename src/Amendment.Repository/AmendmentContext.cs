@@ -122,7 +122,7 @@ namespace Amendment.Repository
 
             builder.Entity<Model.DataModel.Amendment>();
             builder.Entity<AmendmentBody>()
-                .HasIndex(x => new {x.AmendId, x.LanguageId});
+                .HasIndex(x => new {x.AmendId, x.LanguageId}).IsUnique();
             builder.Entity<AmendmentBody>()
                 .Property(x => x.Page).HasDefaultValue(0);
 
