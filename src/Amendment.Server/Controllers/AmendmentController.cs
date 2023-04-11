@@ -13,7 +13,6 @@ namespace Amendment.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = RoleGroups.AdminAmendEditor)]
     public class AmendmentController : ControllerBase
     {
         private readonly IMediator _mediator;

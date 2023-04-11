@@ -90,24 +90,6 @@ namespace Amendment.Repository
                     LastUpdatedBy = -1,
                     LastUpdated = DateTime.Parse("2018-01-01"),
                 });
-            //builder.Entity<UserXRole>()
-            //    .HasOne(u => u.User)
-            //    .WithMany(r => r.UserXRoles)
-            //    .HasForeignKey(ur => ur.UserId);
-
-            //builder.Entity<UserXRole>()
-            //    .HasOne(r => r.Role)
-            //    .WithMany(r => r.UserXRoles)
-            //    .HasForeignKey(r => r.RoleId);
-
-            //builder.Entity<UserXRole>()
-            //    .HasKey(x => new {x.UserId, x.RoleId});
-            //builder.Entity<UserXRole>()
-            //    .HasData(new UserXRole() {UserId = 1, RoleId = 1});
-            //builder.Entity<UserXRole>()
-            //    .HasData(new UserXRole() { UserId = 1, RoleId = 5 });
-
-            //builder.Entity<User>().HasData()
 
             builder.Entity<User>()
                 .HasMany(u => u.Roles)
@@ -116,9 +98,6 @@ namespace Amendment.Repository
                 {
                     x.ToTable("UserRoles");
                     x.HasData(new { RolesId = 1, UserId = 1 });
-                    x.HasData(new { RolesId = 2, UserId = 1 });
-                    x.HasData(new { RolesId = 3, UserId = 1 });
-                    x.HasData(new { RolesId = 4, UserId = 1 });
                 });
 
             //builder.Entity("UserRoles").HasData(new { RolesId = 1, UsersId = 1 });

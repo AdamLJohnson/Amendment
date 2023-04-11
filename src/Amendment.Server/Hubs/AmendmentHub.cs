@@ -21,14 +21,12 @@ namespace Amendment.Server.Hubs
         {
             _mediator = mediator;
         }
-
-        [Authorize (Roles = RoleGroups.AdminScreenController)]
+        
         public async Task AmendmentBodyLive(SetAmendmentBodyLiveCommands bodies)
         {
             await _mediator.Send(new BulkSetAmendmentBodyLiveCommand(bodies));
         }
-
-        [Authorize(Roles = RoleGroups.AdminScreenController)]
+        
         public async Task AmendmentBodyPage(SetAmendmentBodyPageCommands bodies)
         {
             await _mediator.Send(new BulkSetAmendmentBodyPageCommand(bodies));

@@ -16,5 +16,6 @@ namespace Amendment.Shared
         public const string AdminScreenController = $"{Admin}, {ScreenController}";
         public const string AdminAmendEditor = $"{Admin}, {AmendmentEditor}";
         public const string AdminTranslatorAmendEditor = $"{Admin}, {Translator}, {AmendmentEditor}";
+        public const string AdminAmendEditorScreenController = $"{Admin}, {AmendmentEditor}, {ScreenController}";
     }
 }
