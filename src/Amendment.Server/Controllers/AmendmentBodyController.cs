@@ -8,12 +8,14 @@ using Amendment.Shared.Responses;
 using Amendment.Shared;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amendment.Server.Controllers
 {
     [Route("api/Amendment/{amendmentId}/Body")]
     [ApiController]
+    [Authorize(Roles = RoleGroups.AdminTranslatorAmendEditor)]
     public class AmendmentBodyController : ControllerBase
     {
         private readonly IMediator _mediator;

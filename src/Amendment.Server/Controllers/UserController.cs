@@ -14,7 +14,7 @@ namespace Amendment.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = "System Administrator")]
+[Authorize(Roles = RoleGroups.Admin)]
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;

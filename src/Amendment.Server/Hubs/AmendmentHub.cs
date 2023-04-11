@@ -3,6 +3,7 @@ using Amendment.Server.Mediator.Commands.AmendmentBodyCommands;
 using Amendment.Server.Mediator.Commands.AmendmentCommands;
 using Amendment.Server.Mediator.Queries.AmendmentBodyQueries;
 using Amendment.Server.Mediator.Queries.AmendmentQueries;
+using Amendment.Shared;
 using Amendment.Shared.SignalRCommands;
 using Mapster;
 using MediatR;
@@ -21,11 +22,13 @@ namespace Amendment.Server.Hubs
             _mediator = mediator;
         }
 
+        [Authorize (Roles = RoleGroups.AdminScreenController)]
         public async Task AmendmentBodyLive(SetAmendmentBodyLiveCommands bodies)
         {
             await _mediator.Send(new BulkSetAmendmentBodyLiveCommand(bodies));
         }
 
+        [Authorize(Roles = RoleGroups.AdminScreenController)]
         public async Task AmendmentBodyPage(SetAmendmentBodyPageCommands bodies)
         {
             await _mediator.Send(new BulkSetAmendmentBodyPageCommand(bodies));

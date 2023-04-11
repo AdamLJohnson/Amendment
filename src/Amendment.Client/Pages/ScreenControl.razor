@@ -5,7 +5,8 @@
 @using Amendment.Shared.Enums
 @using Amendment.Shared.Responses
 @using Amendment.Shared.SignalRCommands
-@attribute [Authorize]
+@using Amendment.Shared
+@attribute [Authorize(Roles = RoleGroups.AdminScreenController)]
 @implements IDisposable
 @inject IAmendmentRepository AmendmentRepository
 @inject ILanguageRepository LanguageRepository

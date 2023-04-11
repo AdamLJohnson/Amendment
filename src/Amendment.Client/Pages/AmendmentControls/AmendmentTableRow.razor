@@ -1,5 +1,6 @@
 ﻿@using Amendment.Shared.Responses
 @using Amendment.Client.Repository
+@using Amendment.Shared
 @inject IAmendmentRepository AmendmentRepository
 @inject ILanguageRepository LanguageRepository
 <TableRow>
@@ -17,25 +18,33 @@
     <TableRowCell>
         <Repeater Items="_languages">
             <AmendmentBodyBadge Amendment="@Model" Language="@context"></AmendmentBodyBadge>
+            <span></span>
         </Repeater>
     </TableRowCell>
     <TableRowCell TextAlignment="TextAlignment.Center">
-
-        @if (Model.IsLive)
-        {
-            <Button Color="Color.Success" Type="ButtonType.Link" To=@("/ScreenControl")>Control Screens</Button>
-        }
-        @if ((LiveAmendmentId ?? 0) == 0)
-        {
-            <Button Color="Color.Warning" Clicked="GoLive">Go Live</Button> 
-        }
-        <span></span>
-        <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
-        <span></span>
-        @if (!Model.IsLive)
-        {
-            <Button Color="Color.Danger" Clicked="() => _modalRef!.Show()">Delete</Button>
-        }
+        <AuthorizeView Roles="@RoleGroups.AdminScreenController">
+            <Authorized>
+                @if (Model.IsLive)
+                {
+                    <Button Color="Color.Success" Type="ButtonType.Link" To=@("/ScreenControl")>Control Screens</Button>
+                }
+                @if ((LiveAmendmentId ?? 0) == 0)
+                {
+                    <Button Color="Color.Warning" Clicked="GoLive">Go Live</Button> 
+                }
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="@RoleGroups.AdminAmendEditor">
+            <Authorized>
+                <span></span>
+                <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
+                <span></span>
+                @if (!Model.IsLive)
+                {
+                    <Button Color="Color.Danger" Clicked="() => _modalRef!.Show()">Delete</Button>
+                }
+            </Authorized>
+        </AuthorizeView>
     </TableRowCell>
 </TableRow>
 

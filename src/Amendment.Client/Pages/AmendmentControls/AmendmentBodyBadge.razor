@@ -1,5 +1,6 @@
 ﻿@using Amendment.Shared.Responses
 @using Amendment.Shared.Enums
+@using Amendment.Shared
 
 @if (Amendment.AmendmentBodies.Any(x => x.LanguageId == Language.Id))
 {
@@ -13,18 +14,29 @@
     {
         bg = Background.Danger;
     }
-
-    <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Edit/{body.Id}")>
-        <Badge Background="bg">@Language.LanguageName</Badge>
-    </Anchor>
-    <span></span>
+    <AuthorizeView Roles="@RoleGroups.AdminTranslatorAmendEditor">
+        <Authorized>
+            <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Edit/{body.Id}")>
+                <Badge Background="bg">@Language.LanguageName</Badge>
+            </Anchor>
+        </Authorized>
+        <NotAuthorized>
+            <Badge Background="bg">@Language.LanguageName</Badge>
+        </NotAuthorized>
+    </AuthorizeView>
 }
 else
 {
-    <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Create/{Language.Id}")>
-        <Badge Background="Background.Light" TextColor="TextColor.Black50">@Language.LanguageName</Badge>
-    </Anchor>
-    <span></span>
+    <AuthorizeView Roles="@RoleGroups.AdminTranslatorAmendEditor">
+        <Authorized>
+            <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Create/{Language.Id}")>
+                <Badge Background="Background.Light" TextColor="TextColor.Black50">@Language.LanguageName</Badge>
+            </Anchor>
+        </Authorized>
+        <NotAuthorized>
+            <Badge Background="Background.Light" TextColor="TextColor.Black50">@Language.LanguageName</Badge>
+        </NotAuthorized>
+    </AuthorizeView>
 }
 @code {
     [Parameter]

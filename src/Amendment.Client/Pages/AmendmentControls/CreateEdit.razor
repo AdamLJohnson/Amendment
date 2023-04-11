@@ -4,7 +4,8 @@
 @using Amendment.Shared.Requests
 @using Amendment.Client.Repository
 @using Amendment.Shared.Responses
-@attribute [Authorize]
+@using Amendment.Shared
+@attribute [Authorize(Roles = RoleGroups.AdminAmendEditor)]
 @inject ILanguageRepository LanguageRepository
 @inject IAmendmentRepository AmendmentRepository
 @inject IAmendmentBodyRepository AmendmentBodyRepository

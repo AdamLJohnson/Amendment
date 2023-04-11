@@ -39,6 +39,7 @@ namespace Amendment.Server.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = RoleGroups.Admin)]
         public async Task<IResult> Post([FromBody] SystemSettingRequest model)
         {
             var command = model.Adapt<CreateSystemSettingCommand>();
@@ -56,6 +57,7 @@ namespace Amendment.Server.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = RoleGroups.Admin)]
         public async Task<IResult> Put(int id, [FromBody] SystemSettingRequest model)
         {
             var command = model.Adapt<UpdateSystemSettingCommand>();
@@ -67,6 +69,7 @@ namespace Amendment.Server.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = RoleGroups.Admin)]
         public async Task<IResult> Delete(int id)
         {
             var command = new DeleteSystemSettingCommand(id, SignedInUserId);

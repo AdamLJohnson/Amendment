@@ -5,8 +5,8 @@
 @using Amendment.Shared.Enums
 @using Amendment.Shared.Requests
 @using Amendment.Shared.Responses
-@using System.Runtime.InteropServices.JavaScript
-@attribute [Authorize]
+@using Amendment.Shared
+@attribute [Authorize(Roles = RoleGroups.AdminTranslatorAmendEditor)]
 @inject IAmendmentRepository AmendmentRepository
 @inject IAmendmentBodyRepository AmendmentBodyRepository
 @inject ILanguageRepository LanguageRepository
@@ -22,8 +22,8 @@
             <Validations @ref="@_fluentValidations" Mode="ValidationMode.Manual" Model="@_model" HandlerType="typeof(FluentValidationHandler)">
                 <Validation>
                     <Field>
-                        <FieldLabel For="source">Source</FieldLabel>
-                        <Select id="source" @bind-SelectedValue="@_model.AmendStatus" TValue="AmendmentBodyStatus">
+                        <FieldLabel For="status">Status</FieldLabel>
+                        <Select id="status" @bind-SelectedValue="@_model.AmendStatus" TValue="AmendmentBodyStatus">
                             <ChildContent>
                                 <Repeater Items="_statusEnumerable">
                                     <ChildContent Context="item">

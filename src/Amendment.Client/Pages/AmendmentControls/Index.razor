@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Amendment.Shared.Responses
 @using Amendment.Client.Repository
+@using Amendment.Shared
 @using Amendment.Client.Services
 @using Amendment.Shared.Enums
 @using Amendment.Shared.SignalRCommands
@@ -18,16 +19,22 @@
 
 <Row>
     <Column>
-        @if (_amendments.Any(a => a.IsLive))
-        {
-            <Button Color="Color.Danger" Clicked="ClearScreens">Clear Screens</Button>
-        }
+        <AuthorizeView Roles="@RoleGroups.AdminScreenController">
+            <Authorized>
+                @if (_amendments.Any(a => a.IsLive))
+                {
+                    <Button Color="Color.Danger" Clicked="ClearScreens">Clear Screens</Button>
+                }
+            </Authorized>
+        </AuthorizeView>
     </Column>
     <Column>
 
     </Column>
     <Column TextAlignment="TextAlignment.End">
-        <Button Color="Color.Success" Type="ButtonType.Link" To="/Amendment/Create">Create Amendment</Button>
+        <AuthorizeView Roles="@RoleGroups.AdminAmendEditor">
+            <Button Color="Color.Success" Type="ButtonType.Link" To="/Amendment/Create">Create Amendment</Button>
+        </AuthorizeView>
     </Column>
 </Row>
 
