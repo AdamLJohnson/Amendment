@@ -27,12 +27,12 @@ footer .footer-content {
   background-color: #767676;
 }
 .deafSignerPusher {
-  height: 96.16666667px;
+  height: 99.66666667px;
   float: right;
 }
 .deafSignerBox {
-  width: 73px;
-  height: 70.5px;
+  width: 67px;
+  height: 67px;
   -ms-transform: translateX(13.33333333px);
   -webkit-transform: translateX(13.33333333px);
   transform: translateX(13.33333333px);
