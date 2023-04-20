@@ -88,7 +88,7 @@
                 {
                     <Field>
                         <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
-                        <Markdown @bind-Value="@_bodyModel.AmendBody" id="amendmentBody" UploadImage="false"></Markdown>
+                        <Markdown @bind-Value="@_bodyModel.AmendBody" id="amendmentBody" UploadImage="false" SpellChecker="false"></Markdown>
                     </Field>
                 }
                 else
@@ -139,6 +139,7 @@
             {
                 var amendModel = await AmendmentRepository.PostAsync(_model);
                 _bodyModel.LanguageId = amendModel.PrimaryLanguageId;
+                _bodyModel.AmendStatus = Amendment.Shared.Enums.AmendmentBodyStatus.Ready;
                 await AmendmentBodyRepository.PostAsync(amendModel.Id, _bodyModel);
             }
             else

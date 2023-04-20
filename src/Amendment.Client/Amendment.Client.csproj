@@ -21,6 +21,7 @@
     <PackageReference Include="Blazorise.FluentValidation" Version="1.2.2" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.2.2" />
     <PackageReference Include="Blazorise.Markdown" Version="1.2.2" />
+    <PackageReference Include="Blazorise.Snackbar" Version="1.2.2" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.2" />
     <PackageReference Include="Markdig" Version="0.31.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />

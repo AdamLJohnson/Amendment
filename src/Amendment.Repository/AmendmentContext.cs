@@ -98,6 +98,7 @@ namespace Amendment.Repository
                 {
                     x.ToTable("UserRoles");
                     x.HasData(new { RolesId = 1, UserId = 1 });
+                    x.HasData(new { RolesId = 5, UserId = 1 });
                 });
 
             //builder.Entity("UserRoles").HasData(new { RolesId = 1, UsersId = 1 });

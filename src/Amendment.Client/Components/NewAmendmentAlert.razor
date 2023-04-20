@@ -1,0 +1,47 @@
+﻿@using Amendment.Client.Repository;
+@using Amendment.Shared.Enums;
+@using Amendment.Shared.Responses;
+@using Microsoft.AspNetCore.Authorization
+@inject IHubEventService HubEventService
+@implements IDisposable
+
+<Snackbar @ref="snackbar" Color="SnackbarColor.Warning" Interval="300000">
+    <SnackbarBody>
+        One or more new amendments have been added.
+    </SnackbarBody>
+</Snackbar>
+
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    Snackbar snackbar = null!;
+
+    protected override Task OnInitializedAsync()
+    {
+        HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
+        return base.OnInitializedAsync();
+    }
+
+    private async void AmendmentUpdatedEvent(object? sender, SignalRResponse<AmendmentResponse> e)
+    {
+        var authState = await AuthenticationState!;
+        var user = authState?.User;
+        switch (e.OperationType)
+        {
+            case OperationType.Create:
+                if (user!.IsInRole("Toast Notifications"))
+                    await snackbar.Show();
+                break;
+        }
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        HubEventService.AmendmentUpdated -= AmendmentUpdatedEvent;
+    }
+
+}

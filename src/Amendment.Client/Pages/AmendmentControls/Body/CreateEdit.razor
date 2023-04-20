@@ -109,7 +109,7 @@
     string _selectedTab = "primaryLanguageTab";
 
     AmendmentResponse _amendment = new();
-    AmendmentBodyResponse _primaryLanguageBody = new() { AmendBody = "" } ;
+    AmendmentBodyResponse _primaryLanguageBody = new() { AmendBody = "", AmendStatus = AmendmentBodyStatus.Ready } ;
     string _primaryLanguageName = "English";
 
     Validations _fluentValidations = null!;
