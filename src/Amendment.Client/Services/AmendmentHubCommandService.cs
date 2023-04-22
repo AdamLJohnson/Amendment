@@ -46,11 +46,11 @@ namespace Amendment.Client.Services
 
     public class BaseHubCommandService : IDisposable, INotifyPropertyChanged
     {
-        private readonly string _url;
-        private readonly bool _needAuth;
-        private readonly IHubEventService _hubEventService;
-        private readonly IRefreshTokenService _refreshTokenService;
-        private readonly NavigationManager _navigationManager;
+        protected readonly string _url;
+        protected readonly bool _needAuth;
+        protected readonly IHubEventService _hubEventService;
+        protected readonly IRefreshTokenService _refreshTokenService;
+        protected readonly NavigationManager _navigationManager;
 
         private HubConnection? _hubConnection;
         private bool _isConnected;

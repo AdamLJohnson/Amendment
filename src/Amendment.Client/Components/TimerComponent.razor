@@ -1,0 +1,44 @@
+﻿@using Amendment.Client.Repository
+@using Amendment.Client.Services
+@using Amendment.Shared.Responses
+@inject ITimerEventService TimerEventService
+@inject ITimerControlHubCommandService TimerControlHubCommandService
+@implements IDisposable
+
+<div class="timer-outer">
+    <svg viewBox="0 0 40 19">
+        <text x="50%" y="57%">@Text</text>
+    </svg>
+</div>
+
+
+@code {
+    
+    public string Text { get; set; } = "00:00";
+
+    protected override async Task OnInitializedAsync()
+    {
+        TimerEventService.SecondsUpdated += TimerEventServiceOnSecondsUpdated;
+        await TimerControlHubCommandService.Connect();
+        var status = await TimerControlHubCommandService.GetCurrentStateAsync();
+        Text = FormatTime(status.Seconds);
+    }
+
+    private void TimerEventServiceOnSecondsUpdated(object? sender, SecondsUpdated e)
+    {
+        Text = FormatTime(e.Seconds);
+        StateHasChanged();
+    }
+
+    private string FormatTime(int seconds)
+    {
+        var time = TimeSpan.FromSeconds(seconds);
+        return seconds > 0 ? $"{time:mm\\:ss}" : "00:00";
+    }
+
+    public void Dispose()
+    {
+        TimerEventService.SecondsUpdated -= TimerEventServiceOnSecondsUpdated;
+        TimerControlHubCommandService.Disconnect();
+    }
+}

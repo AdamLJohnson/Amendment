@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amendment.Model.DataModel;
+using Amendment.Model.Enums;
 using Amendment.Repository.Infrastructure;
 using Amendment.Service;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +51,7 @@ namespace Amendment.Server
                 LastUpdated = DateTime.UtcNow,
                 AmendmentBodies = new List<AmendmentBody>()
                 {
-                    new AmendmentBody(){ AmendBody = "Just look at all this text. It boggles the mind.", LanguageId = 1 }
+                    new AmendmentBody(){ AmendBody = "Just look at all this text. It boggles the mind.", LanguageId = 1, AmendStatus = AmendmentBodyStatus.Ready}
                 }
                 , IsLive = false
             });
@@ -71,25 +72,25 @@ namespace Amendment.Server
                 {
                     new AmendmentBody(){ AmendBody = @$"### Substitute Resolution for G-1
 
-{LoremNET.Lorem.Paragraph(6, 9)}
+{LoremNET.Lorem.Paragraph(10, 10)}
 **NEWSLIDE**
 {LoremNET.Lorem.Paragraph(6, 7)}
 **NEWSLIDE**
-{LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 1, IsLive = true },
+{LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 1, IsLive = true, AmendStatus = AmendmentBodyStatus.Ready },
                     new AmendmentBody(){ AmendBody = @$"### Substitución de la Resolución G-1
 
 {LoremNET.Lorem.Paragraph(6, 9)}
 **NEWSLIDE**
 {LoremNET.Lorem.Paragraph(6, 7)}
 **NEWSLIDE**
-{LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 2, IsLive = true },
+{LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 2, IsLive = true, AmendStatus = AmendmentBodyStatus.Ready },
                     new AmendmentBody(){ AmendBody = @$"### Substitution de la résolution G-1
 
 {LoremNET.Lorem.Paragraph(6, 9)}
 **NEWSLIDE**
 {LoremNET.Lorem.Paragraph(6, 7)}
 **NEWSLIDE**
-{LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 3, IsLive = true }
+{LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 3, IsLive = true, AmendStatus = AmendmentBodyStatus.Ready }
                 },
                 IsLive = true
             });

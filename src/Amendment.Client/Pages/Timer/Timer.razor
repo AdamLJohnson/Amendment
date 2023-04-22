@@ -1,0 +1,42 @@
+﻿@page "/timer"
+@using Amendment.Client.Services
+@inject ITimerControlHubCommandService TimerControlHubCommandService
+@inject IJSRuntime JS
+@implements IDisposable
+<CustomPageTitle>Timer</CustomPageTitle>
+<h3>Timer</h3>
+
+<Button Color="Color.Primary" Clicked="EnterFullScreen">Enter Fullscreen</Button>
+
+<div id="fullscreen" class="timer">
+    <div class="timer-container">
+        <TimerComponent></TimerComponent>
+    </div>
+</div>
+
+@code {
+    IJSObjectReference? _module;
+    protected override async Task OnInitializedAsync()
+    {
+        await TimerControlHubCommandService.Connect();
+    }
+
+    public void Dispose()
+    {
+        TimerControlHubCommandService.Disconnect();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/ViewFullScreen.js");
+    }
+    private async Task EnterFullScreen()
+    {
+        if (_module == null)
+            return;
+
+        await _module.InvokeVoidAsync("EnterFullScreen");
+    }
+}

@@ -1,0 +1,39 @@
+﻿@page "/timer/control"
+@using Microsoft.AspNetCore.Authorization
+@using Amendment.Shared
+@using Amendment.Client.Services
+@using Amendment.Client.Repository
+@using Amendment.Shared.Responses
+@implements IDisposable
+@attribute [Authorize(Roles = RoleGroups.AdminScreenController)]
+@inject ITimerControlHubCommandService TimerControlHubCommandService
+@inject ITimerEventService TimerEventService
+
+<CustomPageTitle>Timer Control</CustomPageTitle>
+<h3>Timer Control</h3>
+
+<div class="row">
+    <div class="col">
+        <TimerControlComponent></TimerControlComponent>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-2 offset-4">
+        <div class="timer-container">
+            <TimerComponent></TimerComponent>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await TimerControlHubCommandService.Connect();
+    }
+
+    public void Dispose()
+    {
+        TimerControlHubCommandService.Disconnect();
+    }
+}

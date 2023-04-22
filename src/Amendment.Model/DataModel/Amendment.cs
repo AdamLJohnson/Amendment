@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using Amendment.Model.Enums;
 using Amendment.Model.Infrastructure;
 
 namespace Amendment.Model.DataModel
@@ -48,9 +49,9 @@ namespace Amendment.Model.DataModel
                 LastUpdated = DateTime.UtcNow,
                 AmendmentBodies = new List<AmendmentBody>()
                 {
-                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 1, IsLive = false},
-                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 2, IsLive = false},
-                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 3, IsLive = false}
+                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 1, IsLive = false, AmendStatus = AmendmentBodyStatus.Ready},
+                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 2, IsLive = false, AmendStatus = AmendmentBodyStatus.Ready},
+                    new AmendmentBody() {AmendBody = LoremNET.Lorem.Paragraph(6, 5), LanguageId = 3, IsLive = false, AmendStatus = AmendmentBodyStatus.Ready}
                 },
                 IsLive = false
             };

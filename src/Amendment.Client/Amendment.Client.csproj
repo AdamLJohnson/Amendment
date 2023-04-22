@@ -43,7 +43,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Components\TimerComponent.razor.less" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Watch Remove="wwwroot\js\ViewFullScreen.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Components\TimerComponent.razor.less" />
 	</ItemGroup>
 
 </Project>

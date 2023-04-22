@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Amendment.Repository\Amendment.Repository.csproj" />
+    <ProjectReference Include="..\Amendment.Shared\Amendment.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

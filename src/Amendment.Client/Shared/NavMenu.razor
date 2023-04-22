@@ -21,6 +21,13 @@
                     <BarDropdownItem>
                         <BarLink To="/View/French" TextColor="TextColor.Dark">French</BarLink>
                     </BarDropdownItem>
+                    <AuthorizeView>
+                        <Authorized>
+                            <BarDropdownItem>
+                                <BarLink To="/Timer" TextColor="TextColor.Dark">Timer</BarLink>
+                            </BarDropdownItem>
+                        </Authorized>
+                    </AuthorizeView>
                 </BarDropdownMenu>
             </BarDropdown>
         </BarItem>
@@ -29,6 +36,15 @@
                 <BarItem>
                     <BarLink To="/Amendment">
                         Amendments
+                    </BarLink>
+                </BarItem>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="@RoleGroups.AdminScreenController">
+            <Authorized>
+                <BarItem>
+                    <BarLink To="/Timer/Control">
+                        Timer Control
                     </BarLink>
                 </BarItem>
             </Authorized>

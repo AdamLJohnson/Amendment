@@ -18,7 +18,10 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Autofac.Core;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Amendment.Repository;
+using Amendment.Server.Services;
+using Amendment.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Amendment
 {
@@ -89,7 +92,7 @@ namespace Amendment
                         // If the request is for our hub...
                         var path = context.HttpContext.Request.Path;
                         if (!string.IsNullOrEmpty(accessToken) &&
-                            (path.StartsWithSegments("/amendmentHub")))
+                            (path.StartsWithSegments("/amendmentHub") || path.StartsWithSegments("/timerHub")))
                         {
                             // Read the token out of the query string
                             context.Token = accessToken;
@@ -121,7 +124,8 @@ namespace Amendment
             builder.Services.RegisterMapsterConfiguration();
             builder.Services.AddSingleton<IClientNotifier, MockClientNotifier>();
             builder.Services.AddScoped<ITokenService, TokenService>();
-
+            builder.Services.AddSingleton<ITimerService, TimerService>();
+            
             var app = builder.Build();
             //app.UseResponseCompression();
 
@@ -170,6 +174,7 @@ namespace Amendment
 
             app.MapHub<AmendmentHub>("/amendmentHub");
             app.MapHub<ScreenHub>("/screenHub");
+            app.MapHub<TimerHub>("/timerHub");
 
             app.MapFallbackToFile("index.html");
 

@@ -45,6 +45,9 @@ namespace Amendment.Client
             builder.Services.AddScoped<IAmendmentHubCommandService, AmendmentHubCommandService>();
             builder.Services.AddScoped<IScreenHubCommandService, ScreenHubCommandService>();
             builder.Services.AddScoped<INotificationServiceWrapper, NotificationServiceWrapper>();
+            builder.Services.AddScoped<ITimerEventService,  TimerEventService>();
+            builder.Services.AddScoped<ITimerHubCommandService, TimerHubCommandService>();
+            builder.Services.AddScoped<ITimerControlHubCommandService, TimerControlHubCommandService>();
 
             builder.Services
                 .AddBlazorise(options =>

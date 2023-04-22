@@ -11,6 +11,7 @@
     {
         <div class="deafSignerBox@(SystemSettingRepository.ShowDeafSignerBox ? " deafSignerBackground" : "")"></div>
     }
+
     <div>@((MarkupString)Markdig.Markdown.ToHtml(BodyText))</div>
 </div>
 

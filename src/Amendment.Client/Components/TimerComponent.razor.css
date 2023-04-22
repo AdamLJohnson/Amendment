@@ -1,0 +1,7 @@
+﻿svg {
+  width: 100%;
+}
+svg text {
+  text-anchor: middle;
+  dominant-baseline: middle;
+}

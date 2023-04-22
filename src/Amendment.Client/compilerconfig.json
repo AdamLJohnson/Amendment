@@ -1,7 +1,17 @@
 ﻿[
   {
-    "options": {"math": "always"},
     "outputFile": "wwwroot/css/screen.css",
-    "inputFile": "wwwroot/css/screen.less"
+    "inputFile": "wwwroot/css/screen.less",
+    "options": {
+      "math": "always"
+    }
+  },
+  {
+    "outputFile": "Components/TimerComponent.razor.css",
+    "inputFile": "Components/TimerComponent.razor.less"
+  },
+  {
+    "outputFile": "Pages/Timer/Timer.razor.css",
+    "inputFile": "Pages/Timer/Timer.razor.less"
   }
 ]

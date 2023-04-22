@@ -1,0 +1,45 @@
+﻿@using Amendment.Client.Services
+@inject ITimerControlHubCommandService TimerControlHubCommandService
+
+<div class="row">
+    <div class="col-md-4">
+        <Button Color="Color.Success" Clicked="() => { TimerControlHubCommandService.Start(); }" Block>Start</Button>
+    </div>
+    <div class ="col-md-4">
+        <Button Color="Color.Danger" Clicked="() => { TimerControlHubCommandService.Pause(); }" Block>Stop</Button>
+    </div>
+    <div class ="col-md-4">
+        <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(); }" Block>Reset</Button>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-3">
+        <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(180); }" Block>3 Minutes</Button>
+    </div>
+    <div class="col-md-3">
+        <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(300); }" Block>5 Minutes</Button>
+    </div>
+    <div class="col-md-3">
+        <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(360); }" Block>6 Minutes</Button>
+    </div>
+    <div class="col-md-3">
+        <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(600); }" Block>10 Minutes</Button>
+    </div>
+</div>
+<div class="row mt-2">
+    <div class="col-md-6">
+        <NumericEdit TValue="decimal?" @bind-Value="@minutes" />
+    </div>
+    <div class="col-md-6">
+        <Button Color="Color.Warning" Clicked="() => { TimerControlHubCommandService.Reset((int)Math.Round((minutes ?? 1) * 60)); }" Block>Custom</Button>
+    </div>
+</div>
+
+@code {
+    decimal? minutes = 1;
+    protected override async Task OnInitializedAsync()
+    {
+        await TimerControlHubCommandService.Connect();
+    }
+}
