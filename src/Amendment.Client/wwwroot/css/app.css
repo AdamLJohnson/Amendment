@@ -123,3 +123,15 @@ label.form-label {
 .well.fill-well {
     width: 100%;
 }
+
+.side-controller {
+    float: right;
+    width: 270px;
+    margin-right: 20px;
+}
+
+@media (min-width: 1920px) {
+    .side-controller {
+        display: block !important;
+    }
+}

@@ -1,4 +1,5 @@
-﻿@using Amendment.Client.Repository
+﻿@using Amendment.Client.Pages.Timer
+@inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
 
 <Layout>
@@ -15,9 +16,22 @@
     </LayoutHeader>
     <LayoutContent style="margin-top: 70px">
         <main>
-            <div class="container">
-                @Body
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        @Body
+                    </div>
+                    <div class="col-lg-2">
+                        @if (NavigationManager.ToBaseRelativePath(NavigationManager.Uri) == "ScreenControl")
+                        {
+                            <TimerControlSmall></TimerControlSmall>
+                        }
+                    </div>
+                </div>
             </div>
+@*            <div class="container">
+                @Body
+            </div>*@
         </main>
     </LayoutContent>
     <LayoutFooter>

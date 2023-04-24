@@ -4,19 +4,19 @@
 
 <h5>
     <Row>
-        <Column>
+        <Column ColumnSize="ColumnSize.Is4" Style="white-space: nowrap;">
             @LanguageName
             <Icon Name="IconName.ArrowUp" Clicked="PrevPage"></Icon>
             <Icon Name="IconName.ArrowDown" Clicked="NextPage"></Icon>
         </Column>
-        <Column TextAlignment="TextAlignment.Center">
+        <Column ColumnSize="ColumnSize.Is4" TextAlignment="TextAlignment.Center">
             @if (PrimaryLanguageId == Body.LanguageId)
             {
                 <Badge Color="Color.Primary">PRIMARY</Badge>
                 <span></span>
             }
         </Column>
-        <Column TextAlignment="TextAlignment.End">
+        <Column ColumnSize="ColumnSize.Is4" TextAlignment="TextAlignment.End">
             <Button Color=@(Body.IsLive ? Color.Danger : Color.Info) Size="Size.Small" Clicked="ToggleIsLive">LIVE</Button>
         </Column>
     </Row>

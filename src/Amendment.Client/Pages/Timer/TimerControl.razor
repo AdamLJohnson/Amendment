@@ -1,5 +1,4 @@
-﻿@page "/timer/control"
-@using Microsoft.AspNetCore.Authorization
+﻿@using Microsoft.AspNetCore.Authorization
 @using Amendment.Shared
 @using Amendment.Client.Services
 @using Amendment.Client.Repository
@@ -8,9 +7,6 @@
 @attribute [Authorize(Roles = RoleGroups.AdminScreenController)]
 @inject ITimerControlHubCommandService TimerControlHubCommandService
 @inject ITimerEventService TimerEventService
-
-<CustomPageTitle>Timer Control</CustomPageTitle>
-<h3>Timer Control</h3>
 
 <div class="row">
     <div class="col">

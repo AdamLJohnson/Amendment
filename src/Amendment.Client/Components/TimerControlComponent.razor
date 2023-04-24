@@ -9,7 +9,7 @@
         <Button Color="Color.Danger" Clicked="() => { TimerControlHubCommandService.Pause(); }" Block>Stop</Button>
     </div>
     <div class ="col-md-4">
-        <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(); }" Block>Reset</Button>
+        <Button Color="Color.Warning" Clicked="() => { TimerControlHubCommandService.Reset(); }" Block>Reset</Button>
     </div>
 </div>
 
@@ -32,7 +32,7 @@
         <NumericEdit TValue="decimal?" @bind-Value="@minutes" />
     </div>
     <div class="col-md-6">
-        <Button Color="Color.Warning" Clicked="() => { TimerControlHubCommandService.Reset((int)Math.Round((minutes ?? 1) * 60)); }" Block>Custom</Button>
+        <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset((int)Math.Round((minutes ?? 1) * 60)); }" Block>Custom</Button>
     </div>
 </div>
 
