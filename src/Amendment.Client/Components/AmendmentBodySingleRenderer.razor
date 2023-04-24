@@ -1,6 +1,7 @@
 ﻿@using Amendment.Client.Repository
 @using System.ComponentModel
 @using Amendment.Client.Services
+@using Markdig
 @inject ISystemSettingRepository SystemSettingRepository
 @implements IDisposable
 
@@ -12,12 +13,14 @@
         <div class="deafSignerBox@(SystemSettingRepository.ShowDeafSignerBox ? " deafSignerBackground" : "")"></div>
     }
 
-    <div>@((MarkupString)Markdig.Markdown.ToHtml(BodyText))</div>
+    <div>@((MarkupString)Markdig.Markdown.ToHtml(BodyText, pipeline))</div>
 </div>
 
 @code {
     [Parameter]
     public string BodyText { get; set; } = "";
+
+    private MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
 
     protected override Task OnInitializedAsync()
     {
