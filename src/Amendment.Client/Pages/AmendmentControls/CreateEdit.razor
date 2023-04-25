@@ -88,7 +88,22 @@
                 {
                     <Field>
                         <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
-                        <Markdown @bind-Value="@_bodyModel.AmendBody" id="amendmentBody" UploadImage="false" SpellChecker="false"></Markdown>
+                        <Markdown @bind-Value="@_bodyModel.AmendBody" id="amendmentBody" UploadImage="false" SpellChecker="false" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}, Link = new []{"<u>", "</u>"}, Table = new []{"<span style=\"color: red;\">", "</span>"}})>
+                            <Toolbar>
+                                <MarkdownToolbarButton Action="MarkdownAction.Bold"/>
+                                <MarkdownToolbarButton Action="MarkdownAction.Italic" />
+                                <MarkdownToolbarButton Action="MarkdownAction.Strikethrough" />
+                                <MarkdownToolbarButton Action="MarkdownAction.Link" Icon="fa fa-underline" />
+                                @*<MarkdownToolbarButton Action="MarkdownAction.Table" Icon="fa fa-tint" />*@
+                                <MarkdownToolbarButton Action="MarkdownAction.Heading" />
+                                <MarkdownToolbarButton Action="MarkdownAction.Quote" Separator />
+                                <MarkdownToolbarButton Action="MarkdownAction.UnorderedList" />
+                                <MarkdownToolbarButton Action="MarkdownAction.OrderedList" />
+                                <MarkdownToolbarButton Action="MarkdownAction.Link" Separator />
+                                <MarkdownToolbarButton Action="MarkdownAction.Image" />
+                                <MarkdownToolbarButton Action="MarkdownAction.HorizontalRule" Icon="fa fa-plus" Separator />
+                            </Toolbar>
+                        </Markdown>
                     </Field>
                 }
                 else

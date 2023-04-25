@@ -56,11 +56,13 @@
                 </Validation>
                 <Field>
                     <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
-                    <Markdown Value="@_model.AmendBody" id="amendmentBody" ValueChanged="MarkdownValueChanged" UploadImage="false" SpellChecker="false" @ref="_markdown" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}})>
+                    <Markdown Value="@_model.AmendBody" id="amendmentBody" ValueChanged="MarkdownValueChanged" UploadImage="false" SpellChecker="false" @ref="_markdown" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}, Link = new []{"<u>", "</u>"}, Table = new []{"<span style=\"color: red;\">", "</span>"}})>
                         <Toolbar>
                             <MarkdownToolbarButton Action="MarkdownAction.Bold"/>
                             <MarkdownToolbarButton Action="MarkdownAction.Italic" />
                             <MarkdownToolbarButton Action="MarkdownAction.Strikethrough" />
+                            <MarkdownToolbarButton Action="MarkdownAction.Link" Icon="fa fa-underline" />
+                            @*<MarkdownToolbarButton Action="MarkdownAction.Table" Icon="fa fa-tint" />*@
                             <MarkdownToolbarButton Action="MarkdownAction.Heading" />
                             <MarkdownToolbarButton Action="MarkdownAction.Quote" Separator />
                             <MarkdownToolbarButton Action="MarkdownAction.UnorderedList" />
