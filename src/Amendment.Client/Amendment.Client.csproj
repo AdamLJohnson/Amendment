@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -19,7 +19,7 @@
     <PackageReference Include="Blazorise.Bootstrap5" Version="1.2.2" />
     <PackageReference Include="Blazorise.Components" Version="1.2.2" />
     <PackageReference Include="Blazorise.FluentValidation" Version="1.2.2" />
-    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.2.2" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.2.3" />
     <PackageReference Include="Blazorise.Markdown" Version="1.2.2" />
     <PackageReference Include="Blazorise.Snackbar" Version="1.2.2" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.2" />
