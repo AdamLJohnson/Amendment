@@ -27,6 +27,7 @@ namespace Amendment.Server.Tests
 
             // Assert
             Assert.NotNull(response);
+            var content = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
             Assert.Equal("application/json; charset=utf-8",
                 response.Content.Headers.ContentType?.ToString());
