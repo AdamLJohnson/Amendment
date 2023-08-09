@@ -1,4 +1,5 @@
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using Amendment.Shared;
 using Amendment.Shared.Requests;
@@ -6,265 +7,265 @@ using Amendment.Shared.Responses;
 using Amendment.Client.Repository;
 using Amendment.Client.Repository.Infrastructure;
 using Microsoft.Extensions.Logging;
-using Moq;
-using Moq.Protected;
+using NSubstitute;
 
 namespace Amendment.Client.Repository.Tests
 {
+    public static class Reflect
+    {
+        public static object Protected(this object target, string name, params object[] args)
+        {
+            var type = target.GetType();
+            var method = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(x => x.Name == name).Single();
+            return method.Invoke(target, args)!;
+        }
+    }
     public class AmendmentRepositoryTests
     {
         //Unit tests for all public methods in AmendmentRepository
-        //The tests will use Moq to mock the parameters in the constructor
-        //The tests should mock the HttpClient and HttpMessageHandler
+        //The tests will use NSubstitute to create substitutions
+        //The tests should stub the HttpClient and HttpMessageHandler
         [Fact]
         public async Task GetAsync_ShouldReturnEmptyList_WhenNoAmendmentsExist()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(JsonSerializer.Serialize(new ApiResult<IEnumerable<AmendmentResponse>>() { Result = Enumerable.Empty<AmendmentResponse>() }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler
+                .Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             IEnumerable<AmendmentResponse> result = await amendmentRepository.GetAsync();
             //Assert
             Assert.Empty(result);
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
         public async Task GetAsync_ShouldReturnListOfAmendments_WhenAmendmentsExist()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(JsonSerializer.Serialize(new ApiResult<IEnumerable<AmendmentResponse>>() { Result = new List<AmendmentResponse>() { new AmendmentResponse() { Id = 1, Title = "Test Amendment" } } }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             IEnumerable<AmendmentResponse> result = await amendmentRepository.GetAsync();
             //Assert
             Assert.Single(result);
             Assert.Equal(1, result.First().Id);
             Assert.Equal("Test Amendment", result.First().Title);
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
         [Fact]
         public async Task GetAsync_ShouldReturnEmptyList_WhenAmendmentsExistButApiReturnsError()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.BadRequest,
-                Content = new StringContent(JsonSerializer.Serialize(new ApiResult<IEnumerable<AmendmentResponse>>() { Result = new List<AmendmentResponse>() { new AmendmentResponse() { Id = 1, Title = "Test Amendment"     }}}))
+                Content = new StringContent(JsonSerializer.Serialize(new ApiResult<IEnumerable<AmendmentResponse>>() { Result = new List<AmendmentResponse>() { new AmendmentResponse() { Id = 1, Title = "Test Amendment" } } }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             IEnumerable<AmendmentResponse> result = await amendmentRepository.GetAsync();
             //Assert
             Assert.Empty(result);
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
         [Fact]
         public async Task GetAsync_ShouldReturnAnAmendment_WhenTheApiReturnsAnAmendment()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(JsonSerializer.Serialize(new ApiResult<AmendmentResponse>() { Result = new AmendmentResponse() { Id = 1, Title = "Test Amendment" } }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             var result = await amendmentRepository.GetAsync(1);
             //Assert
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
             Assert.Equal("Test Amendment", result.Title);
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
         [Fact]
         public async Task GetAsync_ShouldReturnException_WhenTheAmendmentNotFound()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.NotFound,
                 Content = null
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             await amendmentRepository.GetAsync(1);
             //Assert
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
-        public async Task PostAsync_ShouldReturnAmendment_WhenTheAmendmentIsPosted(){
+        public async Task PostAsync_ShouldReturnAmendment_WhenTheAmendmentIsPosted()
+        {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(JsonSerializer.Serialize(new ApiResult<AmendmentResponse>() { Result = new AmendmentResponse() { Id = 1, Title = "Test Amendment" } }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
             Assert.Equal("Test Amendment", result.Title);
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
         [Fact]
-        public async Task PostAsync_ShouldReturnNotNull_WhenTheAmendmentIsPostedButApiReturnsError() 
+        public async Task PostAsync_ShouldReturnNotNull_WhenTheAmendmentIsPostedButApiReturnsError()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.BadRequest,
                 Content = new StringContent(JsonSerializer.Serialize(new ApiResult<AmendmentResponse>() { Result = new AmendmentResponse() { Id = 1, Title = "Test Amendment" } }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
             Assert.NotNull(result);
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
         [Fact]
         public async Task PostAsync_ShouldReturnNull_WhenTheAmendmentIsPostedButApiReturnsNull()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(JsonSerializer.Serialize(new ApiResult<AmendmentResponse>() { Result = null }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
         public async Task PutAsync_ShouldReturnAmendment_WhenTheAmendmentIsPut()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(JsonSerializer.Serialize(new ApiResult<AmendmentResponse>() { Result = new AmendmentResponse() { Id = 1, Title = "Test Amendment" } }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             var result = await amendmentRepository.PutAsync(1, new AmendmentRequest());
             //Assert
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
             Assert.Equal("Test Amendment", result.Title);
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
         public async Task PutAsync_ShouldReturnNotNull_WhenTheAmendmentIsPutButApiReturnsError()
         {
             //Arrange
-            var logger = new Mock<ILogger<AmendmentRepository>>();
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var logger = Substitute.For<ILogger<AmendmentRepository>>();
+            var mockHttpMessageHandler = Substitute.For<HttpMessageHandler>();
             var response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.BadRequest,
                 Content = new StringContent(JsonSerializer.Serialize(new ApiResult<AmendmentResponse>() { Result = new AmendmentResponse() { Id = 1, Title = "Test Amendment" } }))
             };
-            mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
-            var client = new HttpClient(mockHttpMessageHandler.Object);
+            mockHttpMessageHandler.Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(response));
+            var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
-            var notificationServiceWrapper = new Mock<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger.Object, client, notificationServiceWrapper.Object);
+            var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
             //Act
             var result = await amendmentRepository.PutAsync(1, new AmendmentRequest());
             //Assert
             Assert.NotNull(result);
-            mockHttpMessageHandler.Protected().Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Received(1).Protected("SendAsync", Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
         }
     }
 }
