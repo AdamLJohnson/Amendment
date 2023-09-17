@@ -15,7 +15,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="Lorem.Universal.NET" Version="4.0.80" />
-    <PackageReference Include="Markdig" Version="0.32.0" />
+    <PackageReference Include="Markdig" Version="0.33.0" />
   </ItemGroup>
 
 </Project>
