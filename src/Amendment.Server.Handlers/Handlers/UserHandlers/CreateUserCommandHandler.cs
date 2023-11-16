@@ -50,7 +50,7 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
         var createResult = await _userService.CreateAsync(user, request.SavingUserId);
         if (!createResult.Succeeded)
         {
-            _logger.LogError(100, "Create User Failed", createResult);
+            _logger.LogError(100, "Create User Failed {createdResult}", createResult);
             return new ApiFailedResult<UserResponse>(createResult.Errors.Select(e => new ValidationError(){Message = e}), HttpStatusCode.BadRequest);
         }
 

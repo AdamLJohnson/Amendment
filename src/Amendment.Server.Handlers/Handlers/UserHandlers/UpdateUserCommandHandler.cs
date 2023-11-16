@@ -49,7 +49,7 @@ public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand
         var updateResults = await _userService.UpdateAsync(user, request.SavingUserId);
         if (!updateResults.Succeeded)
         {
-            _logger.LogError(110, "Update User Failed", updateResults);
+            _logger.LogError(110, "Update User Failed {updateResults}", updateResults);
             return new ApiFailedResult<UserResponse>(updateResults.Errors.Select(e => new ValidationError() { Message = e }), HttpStatusCode.BadRequest);
         }
 

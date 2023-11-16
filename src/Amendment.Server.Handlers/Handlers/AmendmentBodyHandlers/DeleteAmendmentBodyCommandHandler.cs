@@ -28,7 +28,7 @@ public sealed class DeleteAmendmentBodyCommandHandler : IRequestHandler<DeleteAm
         var result = await _amendmentBodyService.DeleteAsync(amendmentBody, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(220, "Delete AmendmentBody Failed", result);
+            _logger.LogError(220, "Delete AmendmentBody Failed {result}", result);
             return new ApiCommandFailedResult { StatusCode = HttpStatusCode.InternalServerError };
         }
 

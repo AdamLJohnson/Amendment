@@ -148,18 +148,6 @@ namespace Amendment.Client.Services
         public Task Disconnect()
         {
             return Task.CompletedTask;
-            if (!IsConnected)
-                return Task.CompletedTask;
-
-            if (_hubConnection != null)
-            {
-                _hubConnection.Closed -= HubConnectionOnClosed;
-                _hubConnection.Reconnecting -= HubConnectionOnClosed;
-                _hubConnection.Reconnected -= HubConnectionOnReconnected;
-            }
-
-            IsConnected = false;
-            return _hubConnection?.StopAsync() ?? Task.CompletedTask;
         }
 
         //public void Dispose()

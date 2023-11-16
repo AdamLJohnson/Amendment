@@ -80,18 +80,11 @@ namespace Amendment.Server.Tests
         }
     }
 
-    public class MockAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
-    {
-        public MockAuthenticationHandler(
-            IOptionsMonitor<AuthenticationSchemeOptions> options,
+    public class MockAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
-            UrlEncoder encoder,
-            ISystemClock clock
-        )
-            : base(options, logger, encoder, clock)
-        {
-        }
-
+            UrlEncoder encoder)
+        : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+    {
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var claims = new List<Claim>

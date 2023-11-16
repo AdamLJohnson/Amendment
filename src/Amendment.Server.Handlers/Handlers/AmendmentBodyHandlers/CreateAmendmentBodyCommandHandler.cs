@@ -31,7 +31,7 @@ public sealed class CreateAmendmentBodyCommandHandler : IRequestHandler<CreateAm
         var result = await _amendmentBodyService.CreateAsync(amendmentBody, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(300, "Create Amendment Body Failed", result);
+            _logger.LogError(300, "Create Amendment Body Failed {result}", result);
             return new ApiFailedResult<AmendmentBodyResponse>(result.Errors.Select(e => new ValidationError() { Message = e }), HttpStatusCode.BadRequest);
         }
 

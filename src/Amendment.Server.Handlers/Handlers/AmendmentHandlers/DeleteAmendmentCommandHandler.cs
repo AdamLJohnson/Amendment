@@ -28,7 +28,7 @@ public sealed class DeleteAmendmentCommandHandler : IRequestHandler<DeleteAmendm
         var result = await _amendmentService.DeleteAsync(amendment, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(220, "Delete Amendment Failed", result);
+            _logger.LogError(220, "Delete Amendment Failed {result}", result);
             return new ApiCommandFailedResult { StatusCode = HttpStatusCode.InternalServerError };
         }
 

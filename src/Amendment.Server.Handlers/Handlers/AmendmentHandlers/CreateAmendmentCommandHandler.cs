@@ -31,7 +31,7 @@ public sealed class CreateAmendmentCommandHandler : IRequestHandler<CreateAmendm
         var result = await _amendmentService.CreateAsync(amendment, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(200, "Create Amendment Failed", result);
+            _logger.LogError(200, "Create Amendment Failed {result}", result);
             return new ApiFailedResult<AmendmentResponse>(result.Errors.Select(e => new ValidationError() { Message = e }), HttpStatusCode.BadRequest);
         }
         
