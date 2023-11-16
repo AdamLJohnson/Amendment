@@ -3,7 +3,7 @@
 [![Build Status](https://dev.azure.com/columbus0380/amendment/_apis/build/status/AdamLJohnson.Amendment)](https://dev.azure.com/columbus0380/amendment/_build/latest?definitionId=1)
 
 ## Build Prerequisites
-1. [DotNet 7 SDK](https://dotnet.microsoft.com/download)
+1. [DotNet 8 SDK](https://dotnet.microsoft.com/download)
 1. [Web Compiler VS Extension](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebCompiler)
 
 ## Some quick commands
