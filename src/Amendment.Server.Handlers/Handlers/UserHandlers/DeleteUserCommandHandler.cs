@@ -28,7 +28,7 @@ public sealed class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand
         var deleteResults = await _userService.DeleteAsync(user, request.SavingUserId);
         if (!deleteResults.Succeeded)
         {
-            _logger.LogError(120, "Delete User Failed", deleteResults);
+            _logger.LogError(120, "Delete User Failed {deleteResults}", deleteResults);
             return new ApiCommandFailedResult { StatusCode = HttpStatusCode.InternalServerError };
         }
         

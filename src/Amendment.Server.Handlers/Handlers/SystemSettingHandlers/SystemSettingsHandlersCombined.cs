@@ -76,7 +76,7 @@ public sealed class CreateSystemSettingCommandHandler : IRequestHandler<CreateSy
         var result = await _systemSettingService.CreateAsync(systemSetting, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(400, "Create SystemSetting Failed", result);
+            _logger.LogError(400, "Create SystemSetting Failed {result}", result);
             return new ApiFailedResult<SystemSettingResponse>(result.Errors.Select(e => new ValidationError() { Message = e }), HttpStatusCode.BadRequest);
         }
 
@@ -106,7 +106,7 @@ public sealed class UpdateSystemSettingCommandHandler : IRequestHandler<UpdateSy
         var result = await _systemSettingService.UpdateAsync(systemSetting, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(410, "Update SystemSetting Failed", result);
+            _logger.LogError(410, "Update SystemSetting Failed {result}", result);
             return new ApiFailedResult<SystemSettingResponse>(result.Errors.Select(e => new ValidationError() { Message = e }), HttpStatusCode.BadRequest);
         }
 
@@ -134,7 +134,7 @@ public sealed class DeleteSystemSettingCommandHandler : IRequestHandler<DeleteSy
         var result = await _systemSettingService.DeleteAsync(systemSetting, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(420, "Delete SystemSetting Failed", result);
+            _logger.LogError(420, "Delete SystemSetting Failed {result}", result);
             return new ApiCommandFailedResult { StatusCode = HttpStatusCode.InternalServerError };
         }
 

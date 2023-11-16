@@ -31,7 +31,7 @@ public sealed class UpdateAmendmentBodyCommandHandler : IRequestHandler<UpdateAm
         var result = await _amendmentBodyService.UpdateAsync(amendmentBody, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(310, "Update Amendment Body Failed", result);
+            _logger.LogError(310, "Update Amendment Body Failed {result}", result);
             return new ApiFailedResult<AmendmentBodyResponse>(result.Errors.Select(e => new ValidationError() { Message = e }), HttpStatusCode.BadRequest);
         }
 

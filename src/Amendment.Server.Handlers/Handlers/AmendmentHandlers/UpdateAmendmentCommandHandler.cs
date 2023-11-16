@@ -31,7 +31,7 @@ public sealed class UpdateAmendmentCommandHandler : IRequestHandler<UpdateAmendm
         var result = await _amendmentService.UpdateAsync(amendment, request.SavingUserId);
         if (!result.Succeeded)
         {
-            _logger.LogError(210, "Update Amendment Failed", result);
+            _logger.LogError(210, "Update Amendment Failed {result}", result);
             return new ApiFailedResult<AmendmentResponse>(result.Errors.Select(e => new ValidationError() { Message = e }), HttpStatusCode.BadRequest);
         }
 
