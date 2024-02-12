@@ -9,7 +9,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.0" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Lorem.Universal.NET" Version="4.0.80" />
     <PackageReference Include="Markdig" Version="0.34.0" />
   </ItemGroup>
