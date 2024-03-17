@@ -146,8 +146,9 @@ namespace Amendment.Client.Services
                     IsConnected = true;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 Console.WriteLine("Closed, starting delay");
                 await Task.Delay(5000);
                 Console.WriteLine("Restarting");

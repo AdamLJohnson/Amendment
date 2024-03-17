@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace Amendment
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddHttpLogging(o =>
             {
-                o.LoggingFields = HttpLoggingFields.RequestHeaders | HttpLoggingFields.ResponseHeaders | HttpLoggingFields.Duration | HttpLoggingFields.RequestMethod | HttpLoggingFields.RequestPath;
+                o.LoggingFields = HttpLoggingFields.RequestHeaders | HttpLoggingFields.ResponseHeaders | HttpLoggingFields.Duration | HttpLoggingFields.RequestMethod | HttpLoggingFields.RequestPath | HttpLoggingFields.ResponseStatusCode;
                 o.CombineLogs = true;
             });
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -149,6 +150,16 @@ namespace Amendment
             var app = builder.Build();
             //app.UseResponseCompression();
 
+            app.Use(async (context, next) =>
+            {
+                var hostname = Environment.GetEnvironmentVariable("HOSTNAME") ?? Environment.GetEnvironmentVariable("COMPUTERNAME") ?? "";
+                if (!string.IsNullOrEmpty(hostname))
+                {
+                    context.Response.Headers.TryAdd("Pod", hostname);
+                }
+                await next();
+            });
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -185,7 +196,17 @@ namespace Amendment
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
-            app.UseHttpLogging();
+            //app.UseHttpLogging();
+            app.Use(async (context, next) =>
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                if(context.Request.Method == "CONNECT")
+                    logger.LogInformation("{0}: {1}", context.Request.Method, context.Request.Path);
+                var sw = Stopwatch.StartNew();
+                await next();
+                if (context.Request.Method != "CONNECT")
+                    logger.LogInformation("{0}: {1} {2} {3}ms", context.Request.Method, context.Request.Path, context.Response.StatusCode, sw.ElapsedMilliseconds);
+            });
 
             app.UseRouting();
 

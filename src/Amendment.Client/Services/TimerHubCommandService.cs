@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Amendment.Shared;
 using Amendment.Shared.SignalRCommands;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace Amendment.Client.Services
 {
@@ -84,6 +85,8 @@ namespace Amendment.Client.Services
                     .WithAutomaticReconnect(new SignalRRetryPolicy())
                     .WithUrl(_navigationManager.ToAbsoluteUri(_url), options =>
                     {
+                        options.SkipNegotiation = true;
+                        options.Transports = HttpTransportType.WebSockets;
                         if (_needAuth)
                         {
                             options.AccessTokenProvider = () => _refreshTokenService.TryRefreshToken()!;
@@ -136,8 +139,9 @@ namespace Amendment.Client.Services
                     IsConnected = true;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 Console.WriteLine("Closed, starting delay");
                 await Task.Delay(5000);
                 Console.WriteLine("Restarting");
