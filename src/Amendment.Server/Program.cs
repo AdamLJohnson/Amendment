@@ -105,10 +105,24 @@ namespace Amendment
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
-            builder.Services.AddSignalR(options =>
+
+            var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+            if (string.IsNullOrEmpty(redisConnectionString))
             {
-                options.EnableDetailedErrors = true;
-            });
+                builder.Services.AddSignalR(options =>
+                {
+                    options.EnableDetailedErrors = true;
+                });
+            }
+            else
+            {
+                builder.Services.AddSignalR(options =>
+                {
+                    options.EnableDetailedErrors = true;
+                }).AddStackExchangeRedis(redisConnectionString);
+            }
+
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

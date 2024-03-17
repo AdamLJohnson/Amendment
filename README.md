@@ -14,6 +14,10 @@ You can run a temp database in docker. To use docker you need to update the `app
 
 `docker run -p 5432:5432 --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_USER=amendment -d postgres`
 
+### Stand up a Redis Server
+
+`docker run -p 6379:6379 -d redis`
+
 ### Compile a release
 To build a publish release. Run this command from the project's root folder: `dotnet publish --configuration Release`
  - Once the build is done you will find the files to be copied to the server at `\src\Amendment.Web\bin\Release\netcoreapp2.0\publish\`
