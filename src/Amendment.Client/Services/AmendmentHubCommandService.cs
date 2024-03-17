@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Components;
 using Amendment.Client.Helpers;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace Amendment.Client.Services
 {
@@ -75,13 +76,14 @@ namespace Amendment.Client.Services
             }
         }
 
-        #region IAmendmentHubCommandService
         public async Task Connect()
         {
             _hubConnection = new HubConnectionBuilder()
                 .WithAutomaticReconnect(new SignalRRetryPolicy())
                 .WithUrl(_navigationManager.ToAbsoluteUri(_url), options =>
                 {
+                    options.SkipNegotiation = true;
+                    options.Transports = HttpTransportType.WebSockets;
                     if (_needAuth)
                     {
                         options.AccessTokenProvider = () => _refreshTokenService.TryRefreshToken()!;
@@ -121,6 +123,7 @@ namespace Amendment.Client.Services
             await StartAsync();
         }
 
+        #region IAmendmentHubCommandService
         private Task HubConnectionOnReconnected(string? arg)
         {
             IsConnected = true;

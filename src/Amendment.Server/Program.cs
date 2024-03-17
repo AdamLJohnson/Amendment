@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Amendment.Repository;
 using Amendment.Server.Services;
 using Amendment.Shared.Interfaces;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -30,6 +31,11 @@ namespace Amendment
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddHttpLogging(o =>
+            {
+                o.LoggingFields = HttpLoggingFields.RequestHeaders | HttpLoggingFields.ResponseHeaders | HttpLoggingFields.Duration | HttpLoggingFields.RequestMethod | HttpLoggingFields.RequestPath;
+                o.CombineLogs = true;
+            });
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
             builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule(new RegisterDataServices()));
             //builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule<RegisterMapperProfile>());
@@ -178,6 +184,8 @@ namespace Amendment
 
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
+
+            app.UseHttpLogging();
 
             app.UseRouting();
 
