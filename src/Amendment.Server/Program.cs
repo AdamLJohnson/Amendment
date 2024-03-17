@@ -52,7 +52,7 @@ namespace Amendment
             {
                 builder.Services.AddDbContext<Repository.AmendmentContext>(options =>
                 {
-                    // DOCKER COMMAND: docker run -p 5432:5432 --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_USER=amendment -d postgres
+                    // DOCKER COMMAND: docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_USER=amendment -d postgres
                     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
                 });
             }
@@ -151,8 +151,9 @@ namespace Amendment
                 var services = scope.ServiceProvider;
 
                 var context = services.GetRequiredService<Repository.AmendmentContext>();
-                context.Database.EnsureCreated();
-                //context.Database.Migrate();
+                //context.Database.EnsureCreated();
+                if (builder.Configuration["DbType"] == "DB")
+                    await context.Database.MigrateAsync();
                 //DbInitializer.Initialize(context);
                 var seeder = new SeedDatabase(app.Services);
                 await seeder.Seed();
@@ -178,7 +179,7 @@ namespace Amendment
 
             app.MapFallbackToFile("index.html");
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }
