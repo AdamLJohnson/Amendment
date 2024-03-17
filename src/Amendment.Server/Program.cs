@@ -200,11 +200,11 @@ namespace Amendment
             app.Use(async (context, next) =>
             {
                 var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                if(context.Request.Method == "CONNECT")
+                if(context.Request.Path.Value == "/amendmentHub" || context.Request.Path.Value == "/screenHub" || context.Request.Path.Value == "/timerHub")
                     logger.LogInformation("{0}: {1}", context.Request.Method, context.Request.Path);
                 var sw = Stopwatch.StartNew();
                 await next();
-                if (context.Request.Method != "CONNECT")
+                if (context.Request.Path.Value != "/amendmentHub" && context.Request.Path.Value != "/screenHub" && context.Request.Path.Value != "/timerHub")
                     logger.LogInformation("{0}: {1} {2} {3}ms", context.Request.Method, context.Request.Path, context.Response.StatusCode, sw.ElapsedMilliseconds);
             });
 
