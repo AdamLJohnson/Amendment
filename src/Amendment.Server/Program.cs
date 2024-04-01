@@ -182,9 +182,10 @@ namespace Amendment
                 var services = scope.ServiceProvider;
 
                 var context = services.GetRequiredService<Repository.AmendmentContext>();
-                //context.Database.EnsureCreated();
                 if (builder.Configuration["DbType"] == "DB")
                     await context.Database.MigrateAsync();
+                else
+                    await context.Database.EnsureCreatedAsync();
                 //DbInitializer.Initialize(context);
                 var seeder = new SeedDatabase(app.Services);
                 await seeder.Seed();
@@ -222,7 +223,7 @@ namespace Amendment
 
             app.MapFallbackToFile("index.html");
 
-            await app.RunAsync();
+            app.Run();
         }
     }
 }
