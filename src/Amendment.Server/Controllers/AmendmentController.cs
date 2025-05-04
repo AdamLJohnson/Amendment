@@ -1,4 +1,4 @@
-﻿using Amendment.Server.Extensions;
+﻿﻿using Amendment.Server.Extensions;
 using Amendment.Server.Mediator.Commands.AmendmentCommands;
 using Amendment.Server.Mediator.Queries.AmendmentQueries;
 using Amendment.Shared.Requests;

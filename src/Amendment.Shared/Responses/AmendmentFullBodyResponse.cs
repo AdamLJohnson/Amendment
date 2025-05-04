@@ -17,6 +17,7 @@ namespace Amendment.Shared.Responses
         public string Source { get; set; } = "";
         public string LegisId { get; set; } = "";
         public bool IsLive { get; set; }
+        public bool IsArchived { get; set; }
         public List<AmendmentBodyResponse> AmendmentBodies { get; set; } = new ();
 
 
@@ -32,7 +33,8 @@ namespace Amendment.Shared.Responses
                 Source = Source,
                 LegisId = LegisId,
                 PrimaryLanguageId = PrimaryLanguageId,
-                IsLive = IsLive
+                IsLive = IsLive,
+                IsArchived = IsArchived
             };
         }
     }

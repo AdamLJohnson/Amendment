@@ -1,4 +1,4 @@
-﻿using Amendment.Shared;
+﻿﻿using Amendment.Shared;
 using Amendment.Shared.Responses;
 using MediatR;
 

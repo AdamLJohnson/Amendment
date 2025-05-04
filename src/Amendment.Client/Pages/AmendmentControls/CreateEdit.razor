@@ -14,7 +14,13 @@
 
 <CustomPageTitle>@_title</CustomPageTitle>
 
-<h3>@_title</h3>
+<h3>
+    @_title
+    @if (Id != null && _model.IsArchived)
+    {
+        <Badge Margin="Margin.Is2.FromStart" Color="Color.Secondary">ARCHIVED</Badge>
+    }
+</h3>
 
 <EditForm Model="_model" OnValidSubmit="OnSave">
     <Validations @ref="@_fluentValidations" Mode="ValidationMode.Manual" Model="@_model" HandlerType="typeof(FluentValidationHandler)">
@@ -70,6 +76,16 @@
                         </TextEdit>
                     </Field>
                 </Validation>
+                @if (Id != null) // Only show archive checkbox for existing amendments
+                {
+                    <Field>
+                        <FieldLabel>Archive Status</FieldLabel>
+                        <Check TValue="bool" @bind-Checked="_model.IsArchived">
+                            <ChildContent>Archive this amendment</ChildContent>
+                        </Check>
+                        <FieldHelp>Archived amendments are hidden from the main list by default</FieldHelp>
+                    </Field>
+                }
             </Column>
             <Column ColumnSize="ColumnSize.Is6">
                 <Field>

@@ -28,9 +28,6 @@
             </Authorized>
         </AuthorizeView>
     </Column>
-    <Column>
-
-    </Column>
     <Column TextAlignment="TextAlignment.End">
         <AuthorizeView Roles="@RoleGroups.AdminAmendEditor">
             <Button Color="Color.Success" Type="ButtonType.Link" To="/Amendment/Create">Create Amendment</Button>
@@ -61,22 +58,67 @@
     </TableBody>
 </Table>
 
-<h4>Key:</h4>
-<Badge Background="Background.Light" TextColor="TextColor.Black50">Not Created</Badge>
-<Badge Background="Background.Primary">Not Ready</Badge>
-<Badge Background="Background.Success">Is Ready</Badge>
-<Badge Background="Background.Danger">Is Live</Badge>
+<Row>
+    <Column>
+        <h4>Key:</h4>
+        <Badge Background="Background.Light" TextColor="TextColor.Black50">Not Created</Badge>
+        <Badge Background="Background.Primary">Not Ready</Badge>
+        <Badge Background="Background.Success">Is Ready</Badge>
+        <Badge Background="Background.Danger">Is Live</Badge>
+    </Column>
+    <Column TextAlignment="TextAlignment.Center">
+        <AuthorizeView Roles="@RoleGroups.AdminAmendEditor">
+            <Authorized>
+                <Check TValue="bool" @bind-Checked="ShowArchived">
+                    <ChildContent>Show Archived Amendments</ChildContent>
+                </Check>
+            </Authorized>
+        </AuthorizeView>
+    </Column>
+    <Column TextAlignment="TextAlignment.End">
+    </Column>
+</Row>
 
 
 @code {
     List<AmendmentResponse> _amendments = new();
+    List<AmendmentResponse> _allAmendments = new();
+    private bool _showArchived = false;
+
+    // This property is used to handle the checkbox binding and trigger filtering
+    private bool ShowArchived
+    {
+        get => _showArchived;
+        set
+        {
+            if (_showArchived != value)
+            {
+                _showArchived = value;
+                FilterAmendments();
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
         HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
         HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
-        _amendments = (await AmendmentRepository.GetAsync()).ToList();
+        await LoadAmendments();
+    }
+
+    private async Task LoadAmendments()
+    {
+        _allAmendments = (await AmendmentRepository.GetAsync()).ToList();
+        FilterAmendments();
+    }
+
+    private void FilterAmendments()
+    {
+        _amendments = _showArchived
+            ? _allAmendments.ToList()
+            : _allAmendments.Where(a => !a.IsArchived).ToList();
+        StateHasChanged();
     }
 
     private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
@@ -124,27 +166,29 @@
 
     private void AmendmentUpdatedEvent(object? sender, SignalRResponse<AmendmentResponse> e)
     {
+        // Update the full list of amendments first
         switch (e.OperationType)
         {
             case OperationType.Create:
-                _amendments.Add(e.Value);
+                _allAmendments.Add(e.Value);
                 break;
             case OperationType.Update:
-                var i = _amendments.FindIndex(x => x.Id == e.Value.Id);
+                var i = _allAmendments.FindIndex(x => x.Id == e.Value.Id);
                 if(i > -1)
-                    _amendments[i] = e.Value;
+                    _allAmendments[i] = e.Value;
                 break;
             case OperationType.Delete:
-                _amendments.RemoveAll(x => x.Id == e.Value.Id);
+                _allAmendments.RemoveAll(x => x.Id == e.Value.Id);
                 break;
         }
 
-        StateHasChanged();
+        // Then apply the filter
+        FilterAmendments();
     }
 
     private Task RefreshAmendments()
     {
-        return OnInitializedAsync();
+        return LoadAmendments();
     }
 
     public void Dispose()
@@ -159,7 +203,7 @@
         var liveAmendment = _amendments.FirstOrDefault(a => a.IsLive);
         if (liveAmendment == null)
             return;
-            
+
         var amendmentId = liveAmendment.Id;
         var amendmentBodies = await AmendmentBodyRepository.GetAsync(amendmentId);
 

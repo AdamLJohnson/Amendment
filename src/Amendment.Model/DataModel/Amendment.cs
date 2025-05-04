@@ -19,6 +19,7 @@ namespace Amendment.Model.DataModel
         public string Source { get; set; }
         public string LegisId { get; set; }
         public bool IsLive { get; set; }
+        public bool IsArchived { get; set; }
 
         [Required]
         public int PrimaryLanguageId { get; set; }

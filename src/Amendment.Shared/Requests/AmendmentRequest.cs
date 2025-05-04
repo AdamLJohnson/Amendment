@@ -15,5 +15,6 @@ namespace Amendment.Shared.Requests
         public string? LegisId { get; set; }
         public int PrimaryLanguageId { get; set; }
         public bool IsLive { get; set; }
+        public bool IsArchived { get; set; }
     }
 }

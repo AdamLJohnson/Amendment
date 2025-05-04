@@ -9,6 +9,7 @@ namespace Amendment.Repository
     public interface IAmendmentRepository : IRepository<Model.DataModel.Amendment>
     {
         void SetIsLive(bool isLive, Model.DataModel.Amendment amendment);
+        void SetIsArchived(bool isArchived, Model.DataModel.Amendment amendment);
     }
 
     public class AmendmentRepository : BaseRepository<Model.DataModel.Amendment>, IAmendmentRepository
@@ -24,6 +25,12 @@ namespace Amendment.Repository
         {
             amendment.IsLive = isLive;
             Update(amendment, nameof(Model.DataModel.Amendment.IsLive));
+        }
+
+        public void SetIsArchived(bool isArchived, Model.DataModel.Amendment amendment)
+        {
+            amendment.IsArchived = isArchived;
+            Update(amendment, nameof(Model.DataModel.Amendment.IsArchived));
         }
     }
 }

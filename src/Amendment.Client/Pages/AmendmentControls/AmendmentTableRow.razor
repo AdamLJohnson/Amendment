@@ -6,12 +6,16 @@
 <TableRow>
     <TableRowCell>
         @Model.Title
-        @if (Model.IsLive)
-        {
-            <div style="float: right!important">
+        <div style="float: right!important">
+            @if (Model.IsLive)
+            {
                 <Badge Color="Color.Danger">LIVE</Badge>
-            </div>
-        }
+            }
+            @if (Model.IsArchived)
+            {
+                <Badge Color="Color.Secondary">ARCHIVED</Badge>
+            }
+        </div>
     </TableRowCell>
     <TableRowCell>@Model.Author</TableRowCell>
     <TableRowCell>@Model.Motion</TableRowCell>
@@ -30,25 +34,47 @@
                 }
                 @if ((LiveAmendmentId ?? 0) == 0)
                 {
-                    <Button Color="Color.Warning" Clicked="GoLive">Go Live</Button> 
+                    <Button Color="Color.Warning" Clicked="GoLive">Go Live</Button>
                 }
             </Authorized>
         </AuthorizeView>
         <AuthorizeView Roles="@RoleGroups.AdminAmendEditor">
             <Authorized>
                 <span></span>
-                <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
+
                 <span></span>
-                @if (!Model.IsLive)
+                @if (Model.IsLive)
                 {
-                    <Button Color="Color.Danger" Clicked="() => _modalRef!.Show()">Delete</Button>
+                    <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
+                }
+                else
+                {
+                    <Dropdown>
+                        <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
+                        <DropdownToggle Color="Color.Primary" Split />
+                        <DropdownMenu>
+                            @if (Model.IsArchived)
+                            {
+                                <DropdownItem Color="Color.Success" Clicked="() => _unarchiveModalRef!.Show()">Unarchive</DropdownItem>
+                            } else
+                            {
+                                <DropdownItem Color="Color.Warning" Clicked="() => _archiveModalRef!.Show()">Archive</DropdownItem>
+                            }
+                            <AuthorizeView Roles="@RoleGroups.Admin">
+                                <Authorized Context="AdminContext">
+                                    <DropdownDivider/>
+                                    <DropdownItem Color="Color.Danger" Clicked="() => _deleteModalRef!.Show()">Delete</DropdownItem>
+                                </Authorized>
+                            </AuthorizeView>
+                        </DropdownMenu>
+                    </Dropdown>
                 }
             </Authorized>
         </AuthorizeView>
     </TableRowCell>
 </TableRow>
 
-<Modal @ref="@_modalRef">
+<Modal @ref="@_deleteModalRef">
     <ModalContent Centered>
         <ModalHeader>
             <ModalTitle>Delete Amendment</ModalTitle>
@@ -58,8 +84,40 @@
             Are you sure you want to delete this amendment?
         </ModalBody>
         <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => _modalRef!.Hide()">Close</Button>
-            <Button Color="Color.Primary" Clicked="OnDeleteBtn">Save Changes</Button>
+            <Button Color="Color.Secondary" Clicked="() => _deleteModalRef!.Hide()">Close</Button>
+            <Button Color="Color.Primary" Clicked="OnDeleteBtn">Delete</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+<Modal @ref="@_archiveModalRef">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Archive Amendment</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            Are you sure you want to archive this amendment?
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => _archiveModalRef!.Hide()">Close</Button>
+            <Button Color="Color.Primary" Clicked="OnArchiveBtn">Archive</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+<Modal @ref="@_unarchiveModalRef">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Unarchive Amendment</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            Are you sure you want to unarchive this amendment?
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => _unarchiveModalRef!.Hide()">Close</Button>
+            <Button Color="Color.Success" Clicked="OnUnarchiveBtn">Unarchive</Button>
         </ModalFooter>
     </ModalContent>
 </Modal>
@@ -76,7 +134,9 @@
 
     IEnumerable<LanguageResponse> _languages = Enumerable.Empty<LanguageResponse>();
 
-    private Modal? _modalRef;
+    private Modal? _deleteModalRef;
+    private Modal? _archiveModalRef;
+    private Modal? _unarchiveModalRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,7 +146,31 @@
     private async Task OnDeleteBtn()
     {
         await AmendmentRepository.DeleteAsync(Model.Id);
-        await _modalRef!.Hide();
+        await _deleteModalRef!.Hide();
+#pragma warning disable CS4014
+        OnDelete.InvokeAsync();
+#pragma warning restore CS4014
+    }
+
+    private async Task OnArchiveBtn()
+    {
+        var amendmentRequest = Model.ToRequest();
+        // Set the amendment as archived
+        amendmentRequest.IsArchived = true;
+        await AmendmentRepository.PutAsync(Model.Id, amendmentRequest);
+        await _archiveModalRef!.Hide();
+#pragma warning disable CS4014
+        OnDelete.InvokeAsync();
+#pragma warning restore CS4014
+    }
+
+    private async Task OnUnarchiveBtn()
+    {
+        var amendmentRequest = Model.ToRequest();
+        // Set the amendment as not archived
+        amendmentRequest.IsArchived = false;
+        await AmendmentRepository.PutAsync(Model.Id, amendmentRequest);
+        await _unarchiveModalRef!.Hide();
 #pragma warning disable CS4014
         OnDelete.InvokeAsync();
 #pragma warning restore CS4014
