@@ -1,6 +1,7 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -10,22 +11,30 @@ using Amendment.Shared;
 using Amendment.Shared.Requests;
 using Amendment.Shared.Responses;
 using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 
 namespace Amendment.Client.Repository
 {
     public interface IAmendmentRepository : IHttpRepository<AmendmentRequest, AmendmentResponse>
     {
         Task<AmendmentFullBodyResponse?> GetLiveAsync();
+        Task<bool> ExportToExcelAsync(List<int> amendmentIds);
+        Task<bool> ExportToExcelAsync(int amendmentId);
     }
     public class AmendmentRepository : HttpRepository<AmendmentRequest, AmendmentResponse>, IAmendmentRepository
     {
         private readonly ILogger<AmendmentRepository> _logger;
         private readonly INotificationServiceWrapper _notificationServiceWrapper;
+        private readonly IJSRuntime _jsRuntime;
         protected override string BaseUrl { get; set; } = "api/Amendment";
-        public AmendmentRepository(ILogger<AmendmentRepository> logger, HttpClient client, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
+
+        public AmendmentRepository(ILogger<AmendmentRepository> logger, HttpClient client,
+            INotificationServiceWrapper notificationServiceWrapper, IJSRuntime jsRuntime)
+            : base(logger, client, notificationServiceWrapper)
         {
             _logger = logger;
             _notificationServiceWrapper = notificationServiceWrapper;
+            _jsRuntime = jsRuntime;
         }
 
         public async Task<AmendmentFullBodyResponse?> GetLiveAsync()
@@ -46,6 +55,50 @@ namespace Amendment.Client.Repository
                 await _notificationServiceWrapper.Error("An error has occurred. Please try again.", "Server Error");
                 return null;
             }
+        }
+
+        public async Task<bool> ExportToExcelAsync(int amendmentId)
+        {
+            return await ExportToExcelAsync(new List<int> { amendmentId });
+        }
+
+        public async Task<bool> ExportToExcelAsync(List<int> amendmentIds)
+        {
+            var url = $"{BaseUrl}/Export";
+            try
+            {
+                // Create a POST request with the amendment IDs
+                var response = await Client.PostAsJsonAsync(url, amendmentIds);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError(new EventId(1000, "ExportError"), "Failed to export amendments: {ErrorContent}", errorContent);
+                    await _notificationServiceWrapper.Error("Failed to export amendments to Excel.", "Export Error");
+                    return false;
+                }
+
+                // Get the Excel file as a byte array
+                var fileBytes = await response.Content.ReadAsByteArrayAsync();
+
+                // Use JSRuntime to save the file
+                await SaveAsFile("Amendments.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileBytes);
+
+                await _notificationServiceWrapper.Success("Amendments exported successfully.", "Export Complete");
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to export amendments: POST {url}", url);
+                await _notificationServiceWrapper.Error("An error has occurred during export. Please try again.", "Export Error");
+                return false;
+            }
+        }
+
+        private async Task SaveAsFile(string fileName, string contentType, byte[] data)
+        {
+            // Use JSRuntime to trigger a file download
+            await _jsRuntime.InvokeVoidAsync("downloadFileFromBytes", fileName, contentType, Convert.ToBase64String(data));
         }
     }
 }

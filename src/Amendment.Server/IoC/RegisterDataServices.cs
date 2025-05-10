@@ -33,6 +33,9 @@ namespace Amendment.Server.IoC
             builder.RegisterAssemblyTypes(typeof(UserService).GetTypeInfo().Assembly)
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
+
+            // Register ExportService explicitly
+            builder.RegisterType<ExportService>().As<IExportService>().InstancePerLifetimeScope();
         }
     }
 }

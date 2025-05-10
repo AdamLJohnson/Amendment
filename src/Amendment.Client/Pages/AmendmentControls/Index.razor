@@ -76,6 +76,11 @@
         </AuthorizeView>
     </Column>
     <Column TextAlignment="TextAlignment.End">
+        <AuthorizeView>
+            <Authorized>
+                <Button Color="Color.Info" Clicked="ExportAllAmendments">Export All Amendments</Button>
+            </Authorized>
+        </AuthorizeView>
     </Column>
 </Row>
 
@@ -212,6 +217,13 @@
 
         await AmendmentHubCommandService.SetAmendmentBodyLiveAsync(amendmentBodies.Where(x => x.IsLive).Select(x => new SetAmendmentBodyLiveCommand() { AmendId = amendmentId, Id = x.Id, IsLive = false }).ToArray());
         await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
+    }
+
+    private async Task ExportAllAmendments()
+    {
+        // Export all visible amendments (filtered by archived status)
+        var amendmentIds = _amendments.Select(a => a.Id).ToList();
+        await AmendmentRepository.ExportToExcelAsync(amendmentIds);
     }
 
 }

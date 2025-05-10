@@ -60,6 +60,8 @@
                             {
                                 <DropdownItem Color="Color.Warning" Clicked="() => _archiveModalRef!.Show()">Archive</DropdownItem>
                             }
+                            <DropdownDivider/>
+                            <DropdownItem Color="Color.Info" Clicked="ExportAmendment">Export to Excel</DropdownItem>
                             <AuthorizeView Roles="@RoleGroups.Admin">
                                 <Authorized Context="AdminContext">
                                     <DropdownDivider/>
@@ -181,6 +183,11 @@
         var amendmentRequest = Model.ToRequest();
         amendmentRequest.IsLive = true;
         await AmendmentRepository.PutAsync(Model.Id, amendmentRequest);
+    }
+
+    private async Task ExportAmendment()
+    {
+        await AmendmentRepository.ExportToExcelAsync(Model.Id);
     }
 
 }

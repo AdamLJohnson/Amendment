@@ -8,6 +8,7 @@ using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace Amendment.Server.Controllers
 {
@@ -20,6 +21,17 @@ namespace Amendment.Server.Controllers
         public AmendmentController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        protected int SignedInUserId
+        {
+            get
+            {
+                if (int.TryParse(User?.Claims.FirstOrDefault(c => c?.Type == "id")?.Value, out int result))
+                    return result;
+
+                return 0;
+            }
         }
 
         [HttpGet]
@@ -78,6 +90,23 @@ namespace Amendment.Server.Controllers
             var command = new DeleteAmendmentCommand(id, SignedInUserId);
             var results = await _mediator.Send(command);
             return results.ToResult();
+        }
+
+        [HttpPost("Export")]
+        public async Task<IActionResult> ExportToExcel([FromBody] List<int> amendmentIds)
+        {
+            var command = new ExportAmendmentsToExcelCommand { AmendmentIds = amendmentIds ?? new List<int>() };
+            var result = await _mediator.Send(command);
+
+            if (result is ApiSuccessResult<MemoryStream> successResult && successResult.Result != null)
+            {
+                return File(
+                    successResult.Result.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "Amendments.xlsx");
+            }
+
+            return BadRequest(result);
         }
     }
 }
