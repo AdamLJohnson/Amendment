@@ -45,7 +45,19 @@
                 <span></span>
                 @if (Model.IsLive)
                 {
-                    <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
+                    <Dropdown>
+                        <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
+                        <DropdownToggle Color="Color.Primary" Split />
+                        <DropdownMenu>
+                            <DropdownItem Color="Color.Info" Clicked="ExportAmendment">Export to Excel</DropdownItem>
+                            <AuthorizeView Roles="@RoleGroups.Admin">
+                                <Authorized Context="AdminContext">
+                                    <DropdownDivider/>
+                                    <DropdownItem Color="Color.Danger" Clicked="() => _deleteModalRef!.Show()">Delete</DropdownItem>
+                                </Authorized>
+                            </AuthorizeView>
+                        </DropdownMenu>
+                    </Dropdown>
                 }
                 else
                 {
