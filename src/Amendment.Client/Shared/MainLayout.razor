@@ -19,7 +19,27 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-8 offset-lg-2">
-                        @Body
+                        <AuthorizeView>
+                            <Authorized>
+                                @{
+                                    var currentPage = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+                                    if (!currentPage.Equals("change-password", StringComparison.OrdinalIgnoreCase) &&
+                                        !currentPage.Equals("login", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <PasswordChangeRedirect>
+                                            @Body
+                                        </PasswordChangeRedirect>
+                                    }
+                                    else
+                                    {
+                                        @Body
+                                    }
+                                }
+                            </Authorized>
+                            <NotAuthorized>
+                                @Body
+                            </NotAuthorized>
+                        </AuthorizeView>
                     </div>
                     <div class="col-lg-2">
                         @if (NavigationManager.ToBaseRelativePath(NavigationManager.Uri) == "ScreenControl")

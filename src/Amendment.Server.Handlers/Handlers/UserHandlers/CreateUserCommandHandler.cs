@@ -36,7 +36,8 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
             EnteredBy = request.SavingUserId,
             LastUpdatedBy = request.SavingUserId,
             LastUpdated = DateTime.UtcNow,
-            EnteredDate = DateTime.UtcNow
+            EnteredDate = DateTime.UtcNow,
+            RequirePasswordChange = request.RequirePasswordChange
         };
 
         var roles = new List<Role>();

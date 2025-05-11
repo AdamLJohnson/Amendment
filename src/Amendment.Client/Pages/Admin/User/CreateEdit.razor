@@ -69,6 +69,10 @@
                     </TextEdit>
                 </Field>
             </Validation>
+            <Field>
+                <Check TValue="bool" @bind-Checked="model.RequirePasswordChange">Require Password Change</Check>
+                <FieldHelp>If checked, the user will be required to change their password on next login</FieldHelp>
+            </Field>
         </Validations>
     </Column>
     <Column ColumnSize="ColumnSize.Is6">
@@ -94,7 +98,7 @@
     {
         title = Id == null ? "Create User" : "Edit User";
         _roleList = await RoleRepository.GetAsync();
-        var userResponse = Id == null ? new UserResponse() : await UserRepository.GetAsync(Id.Value);
+        var userResponse = Id == null ? new UserResponse() { RequirePasswordChange = true } : await UserRepository.GetAsync(Id.Value);
         model = userResponse.ToRequest();
         model.IsCreate = Id == null;
         StateHasChanged();

@@ -18,5 +18,6 @@ namespace Amendment.Server.Mediator.Commands.UserCommands
         public string? Name { get; set; }
         public int[] Roles { get; set; } = Array.Empty<int>();
         public string? Password { get; set; }
+        public bool RequirePasswordChange { get; set; }
     }
 }

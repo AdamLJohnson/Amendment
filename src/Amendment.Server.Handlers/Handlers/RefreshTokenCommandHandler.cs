@@ -45,7 +45,12 @@ namespace Amendment.Server.Mediator.Handlers
 
             await _userService.UpdateAsync(user, user.Id);
 
-            return new ApiSuccessResult<AccountLoginResponse>(new AccountLoginResponse { Token = token, RefreshToken = user.RefreshToken });
+            return new ApiSuccessResult<AccountLoginResponse>(new AccountLoginResponse
+            {
+                Token = token,
+                RefreshToken = user.RefreshToken,
+                RequirePasswordChange = user.RequirePasswordChange
+            });
         }
     }
 }

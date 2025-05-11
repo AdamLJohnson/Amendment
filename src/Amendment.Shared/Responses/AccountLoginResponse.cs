@@ -10,5 +10,6 @@ namespace Amendment.Shared.Responses
     {
         public string? Token { get; set; }
         public string? RefreshToken { get; set; }
+        public bool RequirePasswordChange { get; set; }
     }
 }

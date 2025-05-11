@@ -40,6 +40,7 @@ namespace Amendment.Repository
                     EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
                     LastUpdated = DateTime.Parse("2018-01-01"),
+                    RequirePasswordChange = false
                 });
             
 
@@ -91,6 +92,7 @@ namespace Amendment.Repository
                     LastUpdated = DateTime.Parse("2018-01-01"),
                 });
 
+            builder.Entity<User>().Property(x => x.RequirePasswordChange).HasDefaultValue(true);
             builder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany()

@@ -13,4 +13,5 @@ public sealed class UpdateUserCommand : IRequest<IApiResult>
     public int[] Roles { get; set; } = Array.Empty<int>();
     public string? Password { get; set; }
     public int Id { get; set; }
+    public bool RequirePasswordChange { get; set; }
 }

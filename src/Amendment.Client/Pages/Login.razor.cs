@@ -43,7 +43,15 @@ namespace Amendment.Client.Pages
             }
             else
             {
-                NavigationManager.NavigateTo("/");
+                // If user needs to change password, redirect to change password page
+                if (result.RequirePasswordChange)
+                {
+                    NavigationManager.NavigateTo("/change-password");
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/");
+                }
             }
         }
     }

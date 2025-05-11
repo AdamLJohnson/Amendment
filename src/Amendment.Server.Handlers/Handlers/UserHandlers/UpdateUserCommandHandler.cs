@@ -35,6 +35,7 @@ public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand
         user.Name = request.Name;
         user.Email = request.Email;
         user.Password = string.IsNullOrEmpty(request.Password) ? user.Password : _passwordHashService.HashPassword(request.Password);
+        user.RequirePasswordChange = request.RequirePasswordChange;
         user.LastUpdatedBy = request.SavingUserId;
         user.LastUpdated = DateTime.UtcNow;
 

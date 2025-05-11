@@ -14,6 +14,7 @@ namespace Amendment.Shared.Responses
         public string? Email { get; set; }
         public string? Name { get; set; }
         public int[] Roles { get; set; } = Array.Empty<int>();
+        public bool RequirePasswordChange { get; set; }
 
         public UserRequest ToRequest()
         {
@@ -22,7 +23,8 @@ namespace Amendment.Shared.Responses
                 Username = Username,
                 Email = Email,
                 Name = Name,
-                Roles = Roles
+                Roles = Roles,
+                RequirePasswordChange = RequirePasswordChange
             };
         }
     }

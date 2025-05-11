@@ -40,5 +40,15 @@ namespace Amendment.Server.Controllers
             return result.ToResult();
         }
 
+        [HttpPost("ChangePassword")]
+        [Authorize]
+        public async Task<IResult> ChangePassword([FromBody] ChangePasswordRequest model)
+        {
+            var userId = User.GetUserId();
+            var command = model.Adapt<ChangePasswordCommand>();
+            command.UserId = userId;
+            var result = await _mediator.Send(command);
+            return result.ToResult();
+        }
     }
 }

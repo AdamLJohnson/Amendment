@@ -16,5 +16,6 @@ namespace Amendment.Shared.Requests
         public string? ConfirmPassword { get; set; }
         public int[] Roles { get; set; } = Array.Empty<int>();
         public bool IsCreate { get; set; } = false;
+        public bool RequirePasswordChange { get; set; } = true;
     }
 }

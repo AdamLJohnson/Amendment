@@ -66,9 +66,13 @@ public class AuthenticationService : IAuthenticationService
         {
             await _localStorage.SetItemAsync("authToken", result.Result.Token);
             await _localStorage.SetItemAsync("refreshToken", result.Result.RefreshToken);
+            await _localStorage.SetItemAsync("authResponse", result.Result);
             ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(result.Result.Token!);
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Result.Token);
-            return new AuthResponseDto { IsAuthSuccessful = true };
+            return new AuthResponseDto {
+                IsAuthSuccessful = true,
+                RequirePasswordChange = result.Result.RequirePasswordChange
+            };
         }
         return new AuthResponseDto { IsAuthSuccessful = false, ErrorMessage = "Login Failed" };
     }
@@ -103,6 +107,7 @@ public class AuthenticationService : IAuthenticationService
 
         await _localStorage.SetItemAsync("authToken", result.Result.Token);
         await _localStorage.SetItemAsync("refreshToken", result.Result.RefreshToken);
+        await _localStorage.SetItemAsync("authResponse", result.Result);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Result.Token);
         return result.Result.Token!;
     }
@@ -112,4 +117,5 @@ public class AuthResponseDto
 {
     public bool IsAuthSuccessful { get; set; }
     public string? ErrorMessage { get; set; }
+    public bool RequirePasswordChange { get; set; }
 }

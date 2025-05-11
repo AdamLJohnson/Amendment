@@ -23,6 +23,7 @@ namespace Amendment.Model.DataModel
         public DateTime LastUpdated { get; set; }
         public string RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
+        public bool RequirePasswordChange { get; set; }
 
 
         public ICollection<Role> Roles { get; set; }

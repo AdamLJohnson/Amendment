@@ -41,6 +41,7 @@ namespace Amendment.Client
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+            builder.Services.AddScoped<IAccountRepository, AccountRepository>();
             builder.Services.AddScoped<IHubEventService, HubEventService>();
             builder.Services.AddScoped<IAmendmentHubCommandService, AmendmentHubCommandService>();
             builder.Services.AddScoped<IScreenHubCommandService, ScreenHubCommandService>();
