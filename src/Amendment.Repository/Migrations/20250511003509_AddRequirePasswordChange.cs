@@ -22,7 +22,7 @@ namespace Amendment.Repository.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 columns: new[] { "RequirePasswordChange" },
-                values: new object[] { 0 });
+                values: new object[] { false });
         }
 
         /// <inheritdoc />
