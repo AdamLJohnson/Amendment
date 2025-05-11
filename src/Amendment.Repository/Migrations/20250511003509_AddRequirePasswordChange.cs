@@ -21,8 +21,8 @@ namespace Amendment.Repository.Migrations
                 table: "User",
                 keyColumn: "Id",
                 keyValue: 1,
-                columns: new string[0],
-                values: new object[0]);
+                columns: new[] { "RequirePasswordChange" },
+                values: new object[] { 0 });
         }
 
         /// <inheritdoc />
