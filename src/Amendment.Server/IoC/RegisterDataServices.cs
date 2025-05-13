@@ -34,7 +34,10 @@ namespace Amendment.Server.IoC
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
 
-            // Register ExportService explicitly
+            // Register export services explicitly
+            builder.RegisterType<MarkdownFormattingService>().As<IMarkdownFormattingService>().InstancePerLifetimeScope();
+            builder.RegisterType<ExcelExportService>().As<IExcelExportService>().InstancePerLifetimeScope();
+            builder.RegisterType<PdfExportService>().As<IPdfExportService>().InstancePerLifetimeScope();
             builder.RegisterType<ExportService>().As<IExportService>().InstancePerLifetimeScope();
         }
     }
