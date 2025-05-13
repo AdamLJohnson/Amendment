@@ -13,6 +13,8 @@
 @inject ISystemSettingRepository SystemSettingRepository
 @inject NavigationManager NavigationManager
 @inject INotificationService NotificationService
+@inject IHubEventService HubEventService
+@implements IDisposable
 <CustomPageTitle>@_title</CustomPageTitle>
 <h3>@_amendment.Title</h3>
 
@@ -74,7 +76,7 @@
                     </Markdown>
                 </Field>
             </Validations>
-            
+
             <Button Color="Color.Primary" Type="ButtonType.Submit">Save</Button>
         </EditForm>
     </Column>
@@ -131,7 +133,10 @@
         var primaryBodyId = _amendment.AmendmentBodies.FirstOrDefault(x => x.LanguageId == _amendment.PrimaryLanguageId)?.Id;
         if (primaryBodyId != null)
             _primaryLanguageBody = await AmendmentBodyRepository.GetAsync(AmendmentId, primaryBodyId.Value);
-            
+
+        // Subscribe to real-time updates for amendment bodies
+        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
+
         if (Id != null)
         {
             var response = await AmendmentBodyRepository.GetAsync(AmendmentId, Id.Value);
@@ -182,6 +187,71 @@
     private void SelectedTabChanged(string tabName)
     {
         _selectedTab = tabName;
+    }
+
+    private async void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
+    {
+        // Check if this update is for the current amendment
+        if (e.Value.AmendId == AmendmentId)
+        {
+            // If this is the primary language body, update the display
+            if (e.Value.LanguageId == _amendment.PrimaryLanguageId)
+            {
+                // Store the previous body text to check if it changed
+                string previousBodyText = _primaryLanguageBody.AmendBody;
+
+                // Update the primary language body with the new content
+                _primaryLanguageBody = e.Value;
+
+                // If the primary language body text has changed and we're editing a non-primary language version
+                if (Id != null && _model.LanguageId != _amendment.PrimaryLanguageId &&
+                    !string.Equals(previousBodyText, e.Value.AmendBody))
+                {
+                    // If the current status is Ready, automatically change it to Draft
+                    if (_model.AmendStatus == AmendmentBodyStatus.Ready)
+                    {
+                        _model.AmendStatus = AmendmentBodyStatus.Draft;
+
+                        try
+                        {
+                            // Get the language name for better messaging
+                            var currentLanguageName = _languages.FirstOrDefault(l => l.Id == _model.LanguageId)?.LanguageName ?? "non-primary language";
+
+                            // Show notification using the NotificationService
+                            await NotificationService.Warning(
+                                $"The {_primaryLanguageName} text has been updated. The status of your {currentLanguageName} translation has been changed to Draft.",
+                                "Primary Text Changed");
+
+                            // Log to console for debugging
+                            Console.WriteLine($"Toast notification sent: Primary Text Changed");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log any errors that occur when showing the notification
+                            Console.WriteLine($"Error showing toast notification: {ex.Message}");
+                        }
+                    }
+                }
+
+                // Force UI refresh
+                StateHasChanged();
+            }
+            // If this is the body we're currently editing, update our model
+            else if (Id != null && e.Value.Id == Id.Value)
+            {
+                // Update our model with the new status (in case it was changed by the server)
+                _model.AmendStatus = e.Value.AmendStatus;
+
+                // Force UI refresh
+                StateHasChanged();
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from events when component is disposed
+        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
     }
 }
 
