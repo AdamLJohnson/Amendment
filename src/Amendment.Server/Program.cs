@@ -165,7 +165,7 @@ namespace Amendment
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                app.UseDeveloperExceptionPage();
+                // app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
                 app.UseWebAssemblyDebugging();
             }

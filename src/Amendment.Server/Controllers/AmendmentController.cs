@@ -92,7 +92,7 @@ namespace Amendment.Server.Controllers
             return results.ToResult();
         }
 
-        [HttpPost("Export")]
+        [HttpPost("ExportExcel")]
         public async Task<IActionResult> ExportToExcel([FromBody] List<int> amendmentIds)
         {
             var command = new ExportAmendmentsToExcelCommand { AmendmentIds = amendmentIds ?? new List<int>() };
@@ -104,6 +104,23 @@ namespace Amendment.Server.Controllers
                     successResult.Result.ToArray(),
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     "Amendments.xlsx");
+            }
+
+            return BadRequest(result);
+        }
+
+        [HttpPost("ExportPdf")]
+        public async Task<IActionResult> ExportToPdf([FromBody] List<int> amendmentIds)
+        {
+            var command = new ExportAmendmentsToPdfCommand { AmendmentIds = amendmentIds ?? new List<int>() };
+            var result = await _mediator.Send(command);
+
+            if (result is ApiSuccessResult<MemoryStream> successResult && successResult.Result != null)
+            {
+                return File(
+                    successResult.Result.ToArray(),
+                    "application/pdf",
+                    "Amendments.pdf");
             }
 
             return BadRequest(result);
