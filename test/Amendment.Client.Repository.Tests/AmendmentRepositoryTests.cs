@@ -7,6 +7,7 @@ using Amendment.Shared.Responses;
 using Amendment.Client.Repository;
 using Amendment.Client.Repository.Infrastructure;
 using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using NSubstitute;
 
 namespace Amendment.Client.Repository.Tests
@@ -43,7 +44,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             IEnumerable<AmendmentResponse> result = await amendmentRepository.GetAsync();
             //Assert
@@ -67,7 +69,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             IEnumerable<AmendmentResponse> result = await amendmentRepository.GetAsync();
             //Assert
@@ -92,7 +95,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             IEnumerable<AmendmentResponse> result = await amendmentRepository.GetAsync();
             //Assert
@@ -115,7 +119,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             var result = await amendmentRepository.GetAsync(1);
             //Assert
@@ -140,7 +145,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             await amendmentRepository.GetAsync(1);
             //Assert
@@ -163,7 +169,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
@@ -188,7 +195,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
@@ -211,7 +219,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             var result = await amendmentRepository.PostAsync(new AmendmentRequest());
             //Assert
@@ -234,7 +243,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             var result = await amendmentRepository.PutAsync(1, new AmendmentRequest());
             //Assert
@@ -260,7 +270,8 @@ namespace Amendment.Client.Repository.Tests
             var client = new HttpClient(mockHttpMessageHandler);
             client.BaseAddress = new Uri("http://localhost/");
             var notificationServiceWrapper = Substitute.For<INotificationServiceWrapper>();
-            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper);
+            var jsRuntime = Substitute.For<IJSRuntime>();
+            var amendmentRepository = new AmendmentRepository(logger, client, notificationServiceWrapper, jsRuntime);
             //Act
             var result = await amendmentRepository.PutAsync(1, new AmendmentRequest());
             //Assert
