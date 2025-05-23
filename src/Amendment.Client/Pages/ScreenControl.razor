@@ -61,7 +61,7 @@
         </Column>
     </Row>
     <Row Style="margin-top:10px;">
-        <Repeater Items="@_amendment.AmendmentBodies.OrderBy(x => x.Id)">
+        <Repeater Items="@_amendment.AmendmentBodies.OrderBy(x => x.LanguageId)">
             <Column ColumnSize="ColumnSize.Is4.OnDesktop">
                 <ScreenControlItem 
                     Body="@context" 
