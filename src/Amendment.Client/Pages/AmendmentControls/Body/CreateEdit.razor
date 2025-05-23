@@ -58,22 +58,25 @@
                 </Validation>
                 <Field>
                     <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
-                    <Markdown Value="@_model.AmendBody" id="amendmentBody" ValueChanged="MarkdownValueChanged" UploadImage="false" SpellChecker="false" @ref="_markdown" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}, Link = new []{"<u>", "</u>"}, Table = new []{"<span style=\"color: red;\">", "</span>"}})>
-                        <Toolbar>
-                            <MarkdownToolbarButton Action="MarkdownAction.Bold"/>
-                            <MarkdownToolbarButton Action="MarkdownAction.Italic" />
-                            <MarkdownToolbarButton Action="MarkdownAction.Strikethrough" />
-                            <MarkdownToolbarButton Action="MarkdownAction.Link" Icon="fa fa-underline" />
-                            @*<MarkdownToolbarButton Action="MarkdownAction.Table" Icon="fa fa-tint" />*@
-                            <MarkdownToolbarButton Action="MarkdownAction.Heading" />
-                            <MarkdownToolbarButton Action="MarkdownAction.Quote" Separator />
-                            <MarkdownToolbarButton Action="MarkdownAction.UnorderedList" />
-                            <MarkdownToolbarButton Action="MarkdownAction.OrderedList" />
-                            <MarkdownToolbarButton Action="MarkdownAction.Link" Separator />
-                            <MarkdownToolbarButton Action="MarkdownAction.Image" />
-                            <MarkdownToolbarButton Action="MarkdownAction.HorizontalRule" Icon="fa fa-plus" Separator />
-                        </Toolbar>
-                    </Markdown>
+                    @if (_initialized)
+                    {
+                        <Markdown Value="@_model.AmendBody" id="amendmentBody" ValueChanged="MarkdownValueChanged" UploadImage="false" SpellChecker="false" @ref="_markdown" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}, Link = new []{"<u>", "</u>"}, Table = new []{"<span style=\"color: red;\">", "</span>"}})>
+                            <Toolbar>
+                                <MarkdownToolbarButton Action="MarkdownAction.Bold"/>
+                                <MarkdownToolbarButton Action="MarkdownAction.Italic" />
+                                <MarkdownToolbarButton Action="MarkdownAction.Strikethrough" />
+                                <MarkdownToolbarButton Action="MarkdownAction.Link" Icon="fa fa-underline" />
+                                @*<MarkdownToolbarButton Action="MarkdownAction.Table" Icon="fa fa-tint" />*@
+                                <MarkdownToolbarButton Action="MarkdownAction.Heading" />
+                                <MarkdownToolbarButton Action="MarkdownAction.Quote" Separator />
+                                <MarkdownToolbarButton Action="MarkdownAction.UnorderedList" />
+                                <MarkdownToolbarButton Action="MarkdownAction.OrderedList" />
+                                <MarkdownToolbarButton Action="MarkdownAction.Link" Separator />
+                                <MarkdownToolbarButton Action="MarkdownAction.Image" />
+                                <MarkdownToolbarButton Action="MarkdownAction.HorizontalRule" Icon="fa fa-plus" Separator />
+                            </Toolbar>
+                        </Markdown>
+                    }
                 </Field>
             </Validations>
 
@@ -120,6 +123,16 @@
     Markdown _markdown = null!;
     IEnumerable<AmendmentBodyStatus> _statusEnumerable = Enum.GetValues(typeof(AmendmentBodyStatus)).Cast<AmendmentBodyStatus>();
     List<LanguageResponse> _languages = new();
+    private bool _initialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _initialized = true;
+            StateHasChanged(); // Trigger render of Markdown now that DOM is ready
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
