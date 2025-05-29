@@ -78,7 +78,10 @@
     <Column TextAlignment="TextAlignment.End">
         <AuthorizeView>
             <Authorized>
-                <Button Color="Color.Info" Clicked="ExportAllAmendments">Export All Amendments</Button>
+                <ButtonGroup>
+                    <Button Color="Color.Info" Clicked="ExportAllAmendmentsToExcel">Export to Excel</Button>
+                    <Button Color="Color.Info" Clicked="ExportAllAmendmentsToPdf">Export to PDF</Button>
+                </ButtonGroup>
             </Authorized>
         </AuthorizeView>
     </Column>
@@ -219,11 +222,18 @@
         await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
     }
 
-    private async Task ExportAllAmendments()
+    private async Task ExportAllAmendmentsToExcel()
     {
-        // Export all visible amendments (filtered by archived status)
+        // Export all visible amendments (filtered by archived status) to Excel
         var amendmentIds = _amendments.Select(a => a.Id).ToList();
         await AmendmentRepository.ExportToExcelAsync(amendmentIds);
+    }
+
+    private async Task ExportAllAmendmentsToPdf()
+    {
+        // Export all visible amendments (filtered by archived status) to PDF
+        var amendmentIds = _amendments.Select(a => a.Id).ToList();
+        await AmendmentRepository.ExportToPdfAsync(amendmentIds);
     }
 
 }

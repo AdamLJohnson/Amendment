@@ -70,13 +70,6 @@ namespace Amendment.Server
                 LastUpdated = DateTime.UtcNow,
                 AmendmentBodies = new List<AmendmentBody>()
                 {
-                    new AmendmentBody(){ AmendBody = @$"### Substitute Resolution for G-1
-
-{LoremNET.Lorem.Paragraph(10, 10)}
-**NEWSLIDE**
-{LoremNET.Lorem.Paragraph(6, 7)}
-**NEWSLIDE**
-{LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 1, IsLive = true, AmendStatus = AmendmentBodyStatus.Ready },
                     new AmendmentBody(){ AmendBody = @$"### Substitución de la Resolución G-1
 
 {LoremNET.Lorem.Paragraph(6, 9)}
@@ -84,6 +77,13 @@ namespace Amendment.Server
 {LoremNET.Lorem.Paragraph(6, 7)}
 **NEWSLIDE**
 {LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 2, IsLive = true, AmendStatus = AmendmentBodyStatus.Ready },
+                    new AmendmentBody(){ AmendBody = @$"### Substitute Resolution for G-1
+
+{LoremNET.Lorem.Paragraph(6, 9)}
+**NEWSLIDE**
+{LoremNET.Lorem.Paragraph(6, 7)}
+**NEWSLIDE**
+{LoremNET.Lorem.Paragraph(6, 8)}", LanguageId = 1, IsLive = true, AmendStatus = AmendmentBodyStatus.Ready },
                     new AmendmentBody(){ AmendBody = @$"### Substitution de la résolution G-1
 
 {LoremNET.Lorem.Paragraph(6, 9)}

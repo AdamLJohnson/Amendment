@@ -1,9 +1,9 @@
 # Amendment.Web
 
-[![Build Status](https://dev.azure.com/columbus0380/amendment/_apis/build/status/AdamLJohnson.Amendment)](https://dev.azure.com/columbus0380/amendment/_build/latest?definitionId=1)
+[![Docker](https://github.com/AdamLJohnson/Amendment/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/AdamLJohnson/Amendment/actions/workflows/docker-publish.yml)
 
 ## Build Prerequisites
-1. [DotNet 8 SDK](https://dotnet.microsoft.com/download)
+1. [DotNet 9 SDK](https://dotnet.microsoft.com/download)
 1. [Web Compiler VS Extension](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebCompiler)
 
 ## Some quick commands

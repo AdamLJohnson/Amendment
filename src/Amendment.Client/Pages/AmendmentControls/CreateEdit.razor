@@ -104,22 +104,25 @@
                 {
                     <Field>
                         <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
-                        <Markdown @bind-Value="@_bodyModel.AmendBody" id="amendmentBody" UploadImage="false" SpellChecker="false" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}, Link = new []{"<u>", "</u>"}, Table = new []{"<span style=\"color: red;\">", "</span>"}})>
-                            <Toolbar>
-                                <MarkdownToolbarButton Action="MarkdownAction.Bold"/>
-                                <MarkdownToolbarButton Action="MarkdownAction.Italic" />
-                                <MarkdownToolbarButton Action="MarkdownAction.Strikethrough" />
-                                <MarkdownToolbarButton Action="MarkdownAction.Link" Icon="fa fa-underline" />
-                                @*<MarkdownToolbarButton Action="MarkdownAction.Table" Icon="fa fa-tint" />*@
-                                <MarkdownToolbarButton Action="MarkdownAction.Heading" />
-                                <MarkdownToolbarButton Action="MarkdownAction.Quote" Separator />
-                                <MarkdownToolbarButton Action="MarkdownAction.UnorderedList" />
-                                <MarkdownToolbarButton Action="MarkdownAction.OrderedList" />
-                                <MarkdownToolbarButton Action="MarkdownAction.Link" Separator />
-                                <MarkdownToolbarButton Action="MarkdownAction.Image" />
-                                <MarkdownToolbarButton Action="MarkdownAction.HorizontalRule" Icon="fa fa-plus" Separator />
-                            </Toolbar>
-                        </Markdown>
+                        @if (_initialized)
+                        {
+                            <Markdown @bind-Value="@_bodyModel.AmendBody" id="amendmentBody" UploadImage="false" SpellChecker="false" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}, Link = new []{"<u>", "</u>"}, Table = new []{"<span style=\"color: red;\">", "</span>"}})>
+                                <Toolbar>
+                                    <MarkdownToolbarButton Action="MarkdownAction.Bold"/>
+                                    <MarkdownToolbarButton Action="MarkdownAction.Italic" />
+                                    <MarkdownToolbarButton Action="MarkdownAction.Strikethrough" />
+                                    <MarkdownToolbarButton Action="MarkdownAction.Link" Icon="fa fa-underline" />
+                                    @*<MarkdownToolbarButton Action="MarkdownAction.Table" Icon="fa fa-tint" />*@
+                                    <MarkdownToolbarButton Action="MarkdownAction.Heading" />
+                                    <MarkdownToolbarButton Action="MarkdownAction.Quote" Separator />
+                                    <MarkdownToolbarButton Action="MarkdownAction.UnorderedList" />
+                                    <MarkdownToolbarButton Action="MarkdownAction.OrderedList" />
+                                    <MarkdownToolbarButton Action="MarkdownAction.Link" Separator />
+                                    <MarkdownToolbarButton Action="MarkdownAction.Image" />
+                                    <MarkdownToolbarButton Action="MarkdownAction.HorizontalRule" Icon="fa fa-plus" Separator />
+                                </Toolbar>
+                            </Markdown>
+                        }
                     </Field>
                 }
                 else
@@ -140,6 +143,7 @@
     Validations _fluentValidations = null!;
     IEnumerable<LanguageResponse> _language = Enumerable.Empty<LanguageResponse>();
     IEnumerable<AmendmentBodySummary> _amendmentBodySummaries = Enumerable.Empty<AmendmentBodySummary>();
+    private bool _initialized;
 
     AmendmentRequest _model = new () { PrimaryLanguageId = 1 };
     readonly AmendmentBodyRequest _bodyModel = new (){ AmendBody = "" };
@@ -153,6 +157,15 @@
             var response = await AmendmentRepository.GetAsync(Id.Value);
             _model = response.ToRequest();
             _amendmentBodySummaries = response.AmendmentBodies;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _initialized = true;
+            StateHasChanged(); // Trigger render of Markdown now that DOM is ready
         }
     }
 

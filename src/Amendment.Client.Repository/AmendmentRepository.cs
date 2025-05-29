@@ -20,6 +20,8 @@ namespace Amendment.Client.Repository
         Task<AmendmentFullBodyResponse?> GetLiveAsync();
         Task<bool> ExportToExcelAsync(List<int> amendmentIds);
         Task<bool> ExportToExcelAsync(int amendmentId);
+        Task<bool> ExportToPdfAsync(List<int> amendmentIds);
+        Task<bool> ExportToPdfAsync(int amendmentId);
     }
     public class AmendmentRepository : HttpRepository<AmendmentRequest, AmendmentResponse>, IAmendmentRepository
     {
@@ -64,33 +66,48 @@ namespace Amendment.Client.Repository
 
         public async Task<bool> ExportToExcelAsync(List<int> amendmentIds)
         {
-            var url = $"{BaseUrl}/Export";
+            return await ExportFileAsync(amendmentIds, "ExportExcel", "Excel", "Amendments.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        }
+
+        public async Task<bool> ExportToPdfAsync(int amendmentId)
+        {
+            return await ExportToPdfAsync(new List<int> { amendmentId });
+        }
+
+        public async Task<bool> ExportToPdfAsync(List<int> amendmentIds)
+        {
+            return await ExportFileAsync(amendmentIds, "ExportPdf", "PDF", "Amendments.pdf", "application/pdf");
+        }
+
+        private async Task<bool> ExportFileAsync(List<int> ids, string endpoint, string fileType, string fileName, string contentType)
+        {
+            var url = $"{BaseUrl}/{endpoint}";
             try
             {
                 // Create a POST request with the amendment IDs
-                var response = await Client.PostAsJsonAsync(url, amendmentIds);
+                var response = await Client.PostAsJsonAsync(url, ids);
 
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError(new EventId(1000, "ExportError"), "Failed to export amendments: {ErrorContent}", errorContent);
-                    await _notificationServiceWrapper.Error("Failed to export amendments to Excel.", "Export Error");
+                    _logger.LogError(new EventId(1000, "ExportError"), $"Failed to export amendments to {fileType}: {{ErrorContent}}", errorContent);
+                    await _notificationServiceWrapper.Error($"Failed to export amendments to {fileType}.", "Export Error");
                     return false;
                 }
 
-                // Get the Excel file as a byte array
+                // Get the file as a byte array
                 var fileBytes = await response.Content.ReadAsByteArrayAsync();
 
                 // Use JSRuntime to save the file
-                await SaveAsFile("Amendments.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileBytes);
+                await SaveAsFile(fileName, contentType, fileBytes);
 
-                await _notificationServiceWrapper.Success("Amendments exported successfully.", "Export Complete");
+                await _notificationServiceWrapper.Success($"Amendments exported to {fileType} successfully.", "Export Complete");
                 return true;
             }
             catch (Exception e)
             {
                 _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to export amendments: POST {url}", url);
-                await _notificationServiceWrapper.Error("An error has occurred during export. Please try again.", "Export Error");
+                await _notificationServiceWrapper.Error($"An error has occurred during {fileType} export. Please try again.", "Export Error");
                 return false;
             }
         }
