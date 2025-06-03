@@ -183,10 +183,27 @@
         if (isValid)
         {
             if (Id == null)
-                await AmendmentBodyRepository.PostAsync(AmendmentId, _model);
+            {
+                // Handle creation with specific error handling for duplicate language
+                var (response, errorMessage) = await AmendmentBodyRepository.PostAsync(AmendmentId, _model);
+                if (response != null)
+                {
+                    // Success - navigate away
+                    NavigationManager.NavigateTo("/Amendment");
+                }
+                else if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    // Show the specific error message while preserving user input
+                    await NotificationService.Error(errorMessage, "Validation Error");
+                    // Don't navigate away - keep the form with user's input intact
+                }
+            }
             else
+            {
+                // Handle update (existing logic)
                 await AmendmentBodyRepository.PutAsync(AmendmentId, Id ?? 0, _model);
-            NavigationManager.NavigateTo("/Amendment");
+                NavigationManager.NavigateTo("/Amendment");
+            }
         }
         StateHasChanged();
     }

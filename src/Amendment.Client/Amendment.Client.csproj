@@ -18,6 +18,7 @@
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.7.6" />
     <PackageReference Include="Blazorise.Markdown" Version="1.7.6" />
     <PackageReference Include="Blazorise.Snackbar" Version="1.7.6" />
+    <PackageReference Include="BuildWebCompiler2022" Version="1.14.15" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="Markdig" Version="0.41.1" />
     <PackageReference Include="Toolbelt.Blazor.HttpClientInterceptor" Version="10.2.0" />

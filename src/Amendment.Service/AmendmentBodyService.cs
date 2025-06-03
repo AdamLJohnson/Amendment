@@ -41,6 +41,9 @@ namespace Amendment.Service
 
         public override async Task<IOperationResult> CreateAsync(Model.DataModel.AmendmentBody item, int userId)
         {
+            var test = (await GetByAmentmentId(item.AmendId))?.SingleOrDefault(x => x.LanguageId == item.LanguageId);
+            if (test != null)
+                return new OperationResult(OperationType.Create, false, $"A body already exists for this amendment in the selected language");
             var results = await base.CreateAsync(item, userId);
             var amendment = await _amendmentRepository.GetByIdAsync(item.AmendId);
             var user = await _userService.GetForToastAsync(userId);

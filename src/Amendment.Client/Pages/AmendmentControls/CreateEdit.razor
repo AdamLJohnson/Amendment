@@ -184,7 +184,12 @@
                 var amendModel = await AmendmentRepository.PostAsync(_model);
                 _bodyModel.LanguageId = amendModel.PrimaryLanguageId;
                 _bodyModel.AmendStatus = Amendment.Shared.Enums.AmendmentBodyStatus.Ready;
-                await AmendmentBodyRepository.PostAsync(amendModel.Id, _bodyModel);
+                var (bodyResponse, bodyErrorMessage) = await AmendmentBodyRepository.PostAsync(amendModel.Id, _bodyModel);
+                if (bodyResponse == null && !string.IsNullOrEmpty(bodyErrorMessage))
+                {
+                    // Show error but still navigate since amendment was created
+                    await NotificationService.Error(bodyErrorMessage, "Amendment Body Error");
+                }
             }
             else
                 await AmendmentRepository.PutAsync(Id ?? 0, _model);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -17,15 +18,20 @@ namespace Amendment.Client.Repository
     {
         Task<IEnumerable<AmendmentBodyResponse>> GetAsync(int amendmentId);
         Task<AmendmentBodyResponse> GetAsync(int amendmentId, int id);
-        Task<AmendmentBodyResponse> PostAsync(int amendmentId, AmendmentBodyRequest request);
+        Task<(AmendmentBodyResponse? response, string? errorMessage)> PostAsync(int amendmentId, AmendmentBodyRequest request);
         Task<AmendmentBodyResponse> PutAsync(int amendmentId, int id, AmendmentBodyRequest request);
         Task DeleteAsync(int amendmentId, int id);
     }
     public class AmendmentBodyRepository : HttpRepository<AmendmentBodyRequest, AmendmentBodyResponse>, IAmendmentBodyRepository
     {
         protected override string BaseUrl { get; set; } = "api/AmendmentBody";
+        private readonly ILogger<AmendmentBodyRepository> _logger;
+        private readonly INotificationServiceWrapper _notificationServiceWrapper;
+
         public AmendmentBodyRepository(ILogger<AmendmentBodyRepository> logger, HttpClient client, INotificationServiceWrapper notificationServiceWrapper) : base(logger, client, notificationServiceWrapper)
         {
+            _logger = logger;
+            _notificationServiceWrapper = notificationServiceWrapper;
         }
 
         Task<IEnumerable<AmendmentBodyResponse>> IAmendmentBodyRepository.GetAsync(int amendmentId)
@@ -40,10 +46,42 @@ namespace Amendment.Client.Repository
             return base.GetAsync(id);
         }
 
-        public Task<AmendmentBodyResponse> PostAsync(int amendmentId, AmendmentBodyRequest request)
+        public async Task<(AmendmentBodyResponse? response, string? errorMessage)> PostAsync(int amendmentId, AmendmentBodyRequest request)
         {
             BaseUrl = $"api/Amendment/{amendmentId}/Body";
-            return base.PostAsync(request);
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request);
+                var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var httpResponse = await Client.PostAsync(BaseUrl, bodyContent);
+                var content = await httpResponse.Content.ReadAsStringAsync();
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    var result = JsonSerializer.Deserialize<ApiResult<AmendmentBodyResponse>>(content, Options);
+                    return (result?.Result ?? new AmendmentBodyResponse(), null);
+                }
+                else if (httpResponse.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    // Parse validation errors from BadRequest response
+                    var errorResult = JsonSerializer.Deserialize<ApiFailedResult<AmendmentBodyResponse>>(content, Options);
+                    var errorMessage = errorResult?.Errors?.FirstOrDefault().Message ?? "Validation error occurred";
+                    return (null, errorMessage);
+                }
+                else
+                {
+                    // For other error status codes, fall back to generic error handling
+                    httpResponse.EnsureSuccessStatusCode();
+                    return (new AmendmentBodyResponse(), null);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to access this url: POST {url}", BaseUrl);
+                await _notificationServiceWrapper.Error("An error has occurred. Please try again.", "Server Error");
+                return (null, "An error has occurred. Please try again.");
+            }
         }
 
         public Task<AmendmentBodyResponse> PutAsync(int amendmentId, int id, AmendmentBodyRequest request)
