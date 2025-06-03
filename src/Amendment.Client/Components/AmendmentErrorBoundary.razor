@@ -1,0 +1,65 @@
+@using Amendment.Client.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject IClientErrorService ClientErrorService
+@inject ILogger<AmendmentErrorBoundary> Logger
+
+<Microsoft.AspNetCore.Components.Web.ErrorBoundary @ref="errorBoundary">
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+    <ErrorContent Context="exception">
+        @{
+            _ = LogErrorAsync(exception);
+        }
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">An error occurred</h4>
+            <p>Something went wrong while processing your request. The error has been logged and will be investigated.</p>
+            <hr>
+            <p class="mb-0">
+                <button class="btn btn-outline-danger" @onclick="Recover">
+                    Try Again
+                </button>
+                <button class="btn btn-outline-secondary ms-2" @onclick="@(() => NavigationManager.NavigateTo("/"))">
+                    Go to Home
+                </button>
+            </p>
+        </div>
+    </ErrorContent>
+</Microsoft.AspNetCore.Components.Web.ErrorBoundary>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? ComponentName { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+
+    private Microsoft.AspNetCore.Components.Web.ErrorBoundary? errorBoundary;
+
+    private async Task LogErrorAsync(Exception exception)
+    {
+        try
+        {
+            var errorMessage = exception.Message;
+            var stackTrace = exception.StackTrace;
+            var componentName = ComponentName ?? GetType().Name;
+
+            await ClientErrorService.LogErrorAsync(
+                errorMessage: errorMessage,
+                stackTrace: stackTrace,
+                componentName: componentName,
+                userAction: "Component Render",
+                additionalContext: $"Exception Type: {exception.GetType().Name}"
+            );
+
+            Logger.LogError(exception, "Blazor component error in {ComponentName}", componentName);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to log component error");
+        }
+    }
+
+    private void Recover()
+    {
+        errorBoundary?.Recover();
+    }
+}

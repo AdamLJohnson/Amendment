@@ -1,0 +1,126 @@
+@page "/error-test"
+@using Amendment.Client.Services
+@inject IClientErrorService ClientErrorService
+@inject IJSRuntime JS
+
+<PageTitle>Error Logging Test</PageTitle>
+
+<div class="container mt-4">
+    <h2>Error Logging Test Page</h2>
+    <p>This page is for testing the client-side error logging functionality.</p>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Blazor Error Tests</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-danger mb-2" @onclick="ThrowBlazorException">
+                        Throw Blazor Exception
+                    </button>
+                    <br />
+                    <button class="btn btn-warning mb-2" @onclick="LogManualError">
+                        Log Manual Error
+                    </button>
+                    <br />
+                    <button class="btn btn-info mb-2" @onclick="LogUserAction">
+                        Log User Action
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>JavaScript Error Tests</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-danger mb-2" @onclick="TriggerJavaScriptError">
+                        Trigger JavaScript Error
+                    </button>
+                    <br />
+                    <button class="btn btn-warning mb-2" @onclick="TriggerPromiseRejection">
+                        Trigger Promise Rejection
+                    </button>
+                    <br />
+                    <button class="btn btn-info mb-2" @onclick="LogJavaScriptManually">
+                        Log JS Error Manually
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <div class="alert alert-info">
+            <strong>Note:</strong> Check the browser console and server logs to see the error logging in action.
+            Errors are rate-limited to prevent spam.
+        </div>
+    </div>
+</div>
+
+@code {
+    private async Task ThrowBlazorException()
+    {
+        throw new InvalidOperationException("This is a test Blazor exception for error logging");
+    }
+
+    private async Task LogManualError()
+    {
+        await ClientErrorService.LogErrorAsync(
+            errorMessage: "Manual test error from Blazor",
+            stackTrace: "Test stack trace",
+            componentName: "ErrorTest",
+            userAction: "Manual Error Button Click",
+            additionalContext: "This is a test of manual error logging"
+        );
+    }
+
+    private async Task LogUserAction()
+    {
+        await ClientErrorService.LogErrorAsync(
+            errorMessage: "User action logged",
+            componentName: "ErrorTest",
+            userAction: "User Action Button Click",
+            additionalContext: "Testing user action logging"
+        );
+    }
+
+    private async Task TriggerJavaScriptError()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", "throw new Error('Test JavaScript error from Blazor');");
+        }
+        catch
+        {
+            // Expected to fail
+        }
+    }
+
+    private async Task TriggerPromiseRejection()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", "Promise.reject('Test promise rejection from Blazor');");
+        }
+        catch
+        {
+            // Expected to fail
+        }
+    }
+
+    private async Task LogJavaScriptManually()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("amendmentErrorLogger.logError", "Manual JavaScript error test", "Additional context from Blazor");
+        }
+        catch (Exception ex)
+        {
+            await ClientErrorService.LogErrorAsync($"Failed to call JS error logger: {ex.Message}");
+        }
+    }
+}

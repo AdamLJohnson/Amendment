@@ -26,18 +26,24 @@
                                     if (!currentPage.Equals("change-password", StringComparison.OrdinalIgnoreCase) &&
                                         !currentPage.Equals("login", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        <PasswordChangeRedirect>
-                                            @Body
-                                        </PasswordChangeRedirect>
+                                        <AmendmentErrorBoundary ComponentName="MainLayout-Authorized">
+                                            <PasswordChangeRedirect>
+                                                @Body
+                                            </PasswordChangeRedirect>
+                                        </AmendmentErrorBoundary>
                                     }
                                     else
                                     {
-                                        @Body
+                                        <AmendmentErrorBoundary ComponentName="MainLayout-Auth">
+                                            @Body
+                                        </AmendmentErrorBoundary>
                                     }
                                 }
                             </Authorized>
                             <NotAuthorized>
-                                @Body
+                                <AmendmentErrorBoundary ComponentName="MainLayout-NotAuthorized">
+                                    @Body
+                                </AmendmentErrorBoundary>
                             </NotAuthorized>
                         </AuthorizeView>
                     </div>

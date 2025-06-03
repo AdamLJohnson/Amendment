@@ -49,6 +49,7 @@ namespace Amendment.Client
             builder.Services.AddScoped<ITimerEventService,  TimerEventService>();
             builder.Services.AddScoped<ITimerHubCommandService, TimerHubCommandService>();
             builder.Services.AddScoped<ITimerControlHubCommandService, TimerControlHubCommandService>();
+            builder.Services.AddScoped<IClientErrorService, ClientErrorService>();
 
             builder.Services
                 .AddBlazorise(options =>

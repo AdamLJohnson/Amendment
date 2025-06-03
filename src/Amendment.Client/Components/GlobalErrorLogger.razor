@@ -1,0 +1,96 @@
+@using Amendment.Client.Services
+@using Amendment.Shared.Requests
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@inject IClientErrorService ClientErrorService
+@inject ILogger<GlobalErrorLogger> Logger
+@implements IAsyncDisposable
+
+@code {
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<GlobalErrorLogger>? _dotNetReference;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/errorLogger.js");
+                _dotNetReference = DotNetObjectReference.Create(this);
+                await _module.InvokeVoidAsync("initializeErrorLogging", _dotNetReference);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to initialize error logging");
+            }
+        }
+    }
+
+    [JSInvokable]
+    public async Task LogJavaScriptError(object errorData)
+    {
+        try
+        {
+            // Parse the error data from JavaScript
+            var json = System.Text.Json.JsonSerializer.Serialize(errorData);
+            var errorInfo = System.Text.Json.JsonSerializer.Deserialize<JavaScriptErrorInfo>(json);
+
+            if (errorInfo != null)
+            {
+                await ClientErrorService.LogJavaScriptErrorAsync(
+                    errorMessage: errorInfo.ErrorMessage ?? "Unknown JavaScript error",
+                    stackTrace: errorInfo.StackTrace,
+                    url: errorInfo.Url,
+                    additionalContext: errorInfo.AdditionalContext
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to process JavaScript error");
+        }
+    }
+
+    [JSInvokable]
+    public async Task LogUserAction(string action, string? context)
+    {
+        try
+        {
+            // This could be used for user action tracking if needed
+            Logger.LogInformation("User action: {Action} - {Context}", action, context);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to log user action");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module != null)
+            {
+                await _module.InvokeVoidAsync("disposeErrorLogging");
+                await _module.DisposeAsync();
+            }
+            _dotNetReference?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error disposing GlobalErrorLogger");
+        }
+    }
+
+    private class JavaScriptErrorInfo
+    {
+        public string? ErrorMessage { get; set; }
+        public string? StackTrace { get; set; }
+        public string? Url { get; set; }
+        public string? UserAgent { get; set; }
+        public string? Timestamp { get; set; }
+        public string? ErrorType { get; set; }
+        public string? AdditionalContext { get; set; }
+    }
+}
