@@ -1,6 +1,7 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -22,6 +23,8 @@ namespace Amendment.Client.Repository
         Task<bool> ExportToExcelAsync(int amendmentId);
         Task<bool> ExportToPdfAsync(List<int> amendmentIds);
         Task<bool> ExportToPdfAsync(int amendmentId);
+        Task<(AmendmentResponse? response, string? errorMessage)> PostWithErrorHandlingAsync(AmendmentRequest request);
+        Task<(AmendmentResponse? response, string? errorMessage)> PutWithErrorHandlingAsync(int id, AmendmentRequest request);
     }
     public class AmendmentRepository : HttpRepository<AmendmentRequest, AmendmentResponse>, IAmendmentRepository
     {
@@ -116,6 +119,73 @@ namespace Amendment.Client.Repository
         {
             // Use JSRuntime to trigger a file download
             await _jsRuntime.InvokeVoidAsync("downloadFileFromBytes", fileName, contentType, Convert.ToBase64String(data));
+        }
+
+        public async Task<(AmendmentResponse? response, string? errorMessage)> PostWithErrorHandlingAsync(AmendmentRequest request)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(request);
+                var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var httpResponse = await Client.PostAsync(BaseUrl, bodyContent);
+                var content = await httpResponse.Content.ReadAsStringAsync();
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    var result = JsonSerializer.Deserialize<ApiResult<AmendmentResponse>>(content, Options);
+                    return (result?.Result, null);
+                }
+                else if (httpResponse.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    // Parse validation errors from BadRequest response
+                    var errorResult = JsonSerializer.Deserialize<ApiFailedResult<AmendmentResponse>>(content, Options);
+                    var errorMessage = errorResult?.Errors?.FirstOrDefault().Message ?? "Validation failed";
+                    return (null, errorMessage);
+                }
+                else
+                {
+                    return (null, "An error occurred while saving the amendment.");
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to access this url: POST {url}", BaseUrl);
+                return (null, "An error has occurred. Please try again.");
+            }
+        }
+
+        public async Task<(AmendmentResponse? response, string? errorMessage)> PutWithErrorHandlingAsync(int id, AmendmentRequest request)
+        {
+            var url = $"{BaseUrl}/{id}";
+            try
+            {
+                var json = JsonSerializer.Serialize(request);
+                var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var httpResponse = await Client.PutAsync(url, bodyContent);
+                var content = await httpResponse.Content.ReadAsStringAsync();
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    var result = JsonSerializer.Deserialize<ApiResult<AmendmentResponse>>(content, Options);
+                    return (result?.Result, null);
+                }
+                else if (httpResponse.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    // Parse validation errors from BadRequest response
+                    var errorResult = JsonSerializer.Deserialize<ApiFailedResult<AmendmentResponse>>(content, Options);
+                    var errorMessage = errorResult?.Errors?.FirstOrDefault().Message ?? "Validation failed";
+                    return (null, errorMessage);
+                }
+                else
+                {
+                    return (null, "An error occurred while updating the amendment.");
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to access this url: PUT {url}", url);
+                return (null, "An error has occurred. Please try again.");
+            }
         }
     }
 }

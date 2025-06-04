@@ -5,6 +5,7 @@ using Amendment.Shared.Requests;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Net;
 
 namespace Amendment.Client.Repository.Infrastructure;
 
@@ -71,15 +72,42 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
             var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await Client.PostAsync(BaseUrl, bodyContent);
             var content = await response.Content.ReadAsStringAsync();
-            response.EnsureSuccessStatusCode();
-        
 
-            var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, Options);
-            return result?.Result ?? new TResponse();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, Options);
+                return result?.Result ?? new TResponse();
+            }
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // Handle validation errors - let derived classes handle this
+                var errorResult = JsonSerializer.Deserialize<ApiFailedResult<TResponse>>(content, Options);
+                if (errorResult?.Errors?.Any() == true)
+                {
+                    var errorMessage = string.Join("; ", errorResult.Errors.Select(e => e.Message));
+                    await _notificationServiceWrapper.Error(errorMessage, "Validation Error");
+                }
+                else
+                {
+                    await _notificationServiceWrapper.Error("Validation failed. Please check your input.", "Validation Error");
+                }
+                return new TResponse();
+            }
+            else
+            {
+                response.EnsureSuccessStatusCode(); // This will throw for other error codes
+                return new TResponse();
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError(new EventId(1000, "RepositoryError"), e, "An HTTP error has occurred while trying to access this url: POST {url}", BaseUrl);
+            await _notificationServiceWrapper.Error("An error has occurred. Please try again.", "Server Error");
+            return new TResponse();
         }
         catch (Exception e)
         {
-            _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to trying to access this url: POST {url}", BaseUrl);
+            _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to access this url: POST {url}", BaseUrl);
             await _notificationServiceWrapper.Error("An error has occurred. Please try again.", "Server Error");
             return new TResponse();
         }
@@ -94,14 +122,42 @@ public abstract class HttpRepository<TRequest, TResponse> : IHttpRepository<TReq
             var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await Client.PutAsync(url, bodyContent);
             var content = await response.Content.ReadAsStringAsync();
-            response.EnsureSuccessStatusCode();
 
-            var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, Options);
-            return result?.Result ?? new TResponse();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<ApiResult<TResponse>>(content, Options);
+                return result?.Result ?? new TResponse();
+            }
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // Handle validation errors - let derived classes handle this
+                var errorResult = JsonSerializer.Deserialize<ApiFailedResult<TResponse>>(content, Options);
+                if (errorResult?.Errors?.Any() == true)
+                {
+                    var errorMessage = string.Join("; ", errorResult.Errors.Select(e => e.Message));
+                    await _notificationServiceWrapper.Error(errorMessage, "Validation Error");
+                }
+                else
+                {
+                    await _notificationServiceWrapper.Error("Validation failed. Please check your input.", "Validation Error");
+                }
+                return new TResponse();
+            }
+            else
+            {
+                response.EnsureSuccessStatusCode(); // This will throw for other error codes
+                return new TResponse();
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError(new EventId(1000, "RepositoryError"), e, "An HTTP error has occurred while trying to access this url: PUT {url}", url);
+            await _notificationServiceWrapper.Error("An error has occurred. Please try again.", "Server Error");
+            return new TResponse();
         }
         catch (Exception e)
         {
-            _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to trying to access this url: PUT {url}", url);
+            _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to access this url: PUT {url}", url);
             await _notificationServiceWrapper.Error("An error has occurred. Please try again.", "Server Error");
             return new TResponse();
         }

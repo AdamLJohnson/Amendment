@@ -20,6 +20,7 @@ namespace Amendment.Client.Repository
         Task<AmendmentBodyResponse> GetAsync(int amendmentId, int id);
         Task<(AmendmentBodyResponse? response, string? errorMessage)> PostAsync(int amendmentId, AmendmentBodyRequest request);
         Task<AmendmentBodyResponse> PutAsync(int amendmentId, int id, AmendmentBodyRequest request);
+        Task<(AmendmentBodyResponse? response, string? errorMessage)> PutWithErrorHandlingAsync(int amendmentId, int id, AmendmentBodyRequest request);
         Task DeleteAsync(int amendmentId, int id);
     }
     public class AmendmentBodyRepository : HttpRepository<AmendmentBodyRequest, AmendmentBodyResponse>, IAmendmentBodyRepository
@@ -88,6 +89,41 @@ namespace Amendment.Client.Repository
         {
             BaseUrl = $"api/Amendment/{amendmentId}/Body";
             return base.PutAsync(id, request);
+        }
+
+        public async Task<(AmendmentBodyResponse? response, string? errorMessage)> PutWithErrorHandlingAsync(int amendmentId, int id, AmendmentBodyRequest request)
+        {
+            BaseUrl = $"api/Amendment/{amendmentId}/Body";
+            var url = $"{BaseUrl}/{id}";
+            try
+            {
+                var json = JsonSerializer.Serialize(request);
+                var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var httpResponse = await Client.PutAsync(url, bodyContent);
+                var content = await httpResponse.Content.ReadAsStringAsync();
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    var result = JsonSerializer.Deserialize<ApiResult<AmendmentBodyResponse>>(content, Options);
+                    return (result?.Result, null);
+                }
+                else if (httpResponse.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    // Parse validation errors from BadRequest response
+                    var errorResult = JsonSerializer.Deserialize<ApiFailedResult<AmendmentBodyResponse>>(content, Options);
+                    var errorMessage = errorResult?.Errors?.FirstOrDefault().Message ?? "Validation failed";
+                    return (null, errorMessage);
+                }
+                else
+                {
+                    return (null, "An error occurred while updating the amendment body.");
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to access this url: PUT {url}", url);
+                return (null, "An error has occurred. Please try again.");
+            }
         }
 
         public Task DeleteAsync(int amendmentId, int id)

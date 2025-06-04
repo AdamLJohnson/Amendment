@@ -59,6 +59,11 @@ namespace Amendment.Server.Controllers
         [HttpPost]
         public async Task<IResult> Post([FromBody] AmendmentRequest model)
         {
+            if (model.Title == "server not allowed")
+                return Results.BadRequest("Title is not allowed");
+            if (model.Title == "server error")
+                throw new Exception("Server error");
+
             var command = model.Adapt<CreateAmendmentCommand>();
             command.SavingUserId = SignedInUserId;
             var results = await _mediator.Send(command);

@@ -181,19 +181,46 @@
         {
             if (Id == null)
             {
-                var amendModel = await AmendmentRepository.PostAsync(_model);
-                _bodyModel.LanguageId = amendModel.PrimaryLanguageId;
-                _bodyModel.AmendStatus = Amendment.Shared.Enums.AmendmentBodyStatus.Ready;
-                var (bodyResponse, bodyErrorMessage) = await AmendmentBodyRepository.PostAsync(amendModel.Id, _bodyModel);
-                if (bodyResponse == null && !string.IsNullOrEmpty(bodyErrorMessage))
+                // Create new amendment
+                var (amendModel, amendmentErrorMessage) = await AmendmentRepository.PostWithErrorHandlingAsync(_model);
+                if (amendModel != null)
                 {
-                    // Show error but still navigate since amendment was created
-                    await NotificationService.Error(bodyErrorMessage, "Amendment Body Error");
+                    // Amendment created successfully, now create the body
+                    _bodyModel.LanguageId = amendModel.PrimaryLanguageId;
+                    _bodyModel.AmendStatus = Amendment.Shared.Enums.AmendmentBodyStatus.Ready;
+                    var (bodyResponse, bodyErrorMessage) = await AmendmentBodyRepository.PostAsync(amendModel.Id, _bodyModel);
+                    if (bodyResponse != null)
+                    {
+                        // Both amendment and body created successfully
+                        NavigationManager.NavigateTo("/Amendment");
+                    }
+                    else if (!string.IsNullOrEmpty(bodyErrorMessage))
+                    {
+                        // Amendment created but body failed - show error and stay on page
+                        await NotificationService.Error(bodyErrorMessage, "Amendment Body Error");
+                    }
+                }
+                else if (!string.IsNullOrEmpty(amendmentErrorMessage))
+                {
+                    // Amendment creation failed - show error and stay on page
+                    await NotificationService.Error(amendmentErrorMessage, "Amendment Error");
                 }
             }
             else
-                await AmendmentRepository.PutAsync(Id ?? 0, _model);
-            NavigationManager.NavigateTo("/Amendment");
+            {
+                // Update existing amendment
+                var (updatedAmendment, errorMessage) = await AmendmentRepository.PutWithErrorHandlingAsync(Id ?? 0, _model);
+                if (updatedAmendment != null)
+                {
+                    // Update successful
+                    NavigationManager.NavigateTo("/Amendment");
+                }
+                else if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    // Update failed - show error and stay on page
+                    await NotificationService.Error(errorMessage, "Amendment Error");
+                }
+            }
         }
         StateHasChanged();
     }
