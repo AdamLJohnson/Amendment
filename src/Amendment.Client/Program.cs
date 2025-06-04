@@ -1,4 +1,3 @@
-using Amendment.Client;
 using Amendment.Client.AuthProviders;
 using Amendment.Client.Helpers;
 using Amendment.Client.Repository;
