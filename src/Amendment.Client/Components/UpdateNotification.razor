@@ -49,9 +49,9 @@
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <Icon Name="IconName.Download" class="me-2" />
-                <strong>Update Available</strong> - New version @_newVersion?.Version is ready
+                <strong>Update Available</strong> - New version @_newVersion?.Version is ready 
             </div>
-            <div>
+            <div class="ms-2">
                 <Button Color="Color.Light" Size="Size.Small" Clicked="@ShowUpdateModal" class="me-2">
                     Details
                 </Button>
@@ -124,8 +124,15 @@
             _isUpdating = true;
             StateHasChanged();
 
-            Logger.LogInformation("User initiated application update from version {CurrentVersion} to {NewVersion}", 
+            Logger.LogInformation("User initiated application update from version {CurrentVersion} to {NewVersion}",
                 _currentVersion?.Version, _newVersion?.Version);
+
+            // Update the stored current version to the new version BEFORE reloading
+            // This prevents the update notification from showing again after reload
+            if (_newVersion != null)
+            {
+                await VersionCheckService.UpdateCurrentVersionAsync(_newVersion);
+            }
 
             // Hide notifications
             await updateModal.Hide();
@@ -133,13 +140,13 @@
 
             // Clear cache and reload
             var jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/versionChecker.js");
-            
+
             // Try to clear service worker cache first
             await jsModule.InvokeVoidAsync("clearServiceWorkerCache");
-            
+
             // Small delay to ensure cache clearing completes
             await Task.Delay(500);
-            
+
             // Reload the application
             await jsModule.InvokeVoidAsync("reloadApplication");
         }

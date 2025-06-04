@@ -25,7 +25,7 @@ public class VersionController : ControllerBase
         // Try to get version from assembly metadata first (injected during build)
         var version = GetAssemblyMetadata(assembly, "Version") ??
                      assembly.GetName().Version?.ToString() ??
-                     "1.0.0.0";
+                     "1.10.0.0";
 
         // Get build date from assembly metadata
         var buildDate = GetBuildDate(assembly);

@@ -12,6 +12,7 @@ public interface IVersionCheckService
     Task StartVersionCheckingAsync();
     Task StopVersionCheckingAsync();
     Task<bool> CheckForUpdatesAsync();
+    Task UpdateCurrentVersionAsync(VersionResponse newVersion);
     event EventHandler<VersionUpdateAvailableEventArgs>? UpdateAvailable;
 }
 
@@ -148,6 +149,20 @@ public class VersionCheckService : IVersionCheckService, IAsyncDisposable
         {
             _logger.LogError(ex, "Error checking for updates");
             return false;
+        }
+    }
+
+    public async Task UpdateCurrentVersionAsync(VersionResponse newVersion)
+    {
+        try
+        {
+            _currentVersion = newVersion;
+            await SaveCurrentVersionAsync(newVersion);
+            _logger.LogInformation("Current version updated to: {Version}", newVersion.Version);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update current version");
         }
     }
 
