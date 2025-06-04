@@ -40,7 +40,9 @@ namespace Amendment.Repository
                     EnteredDate = DateTime.Parse("2018-01-01"),
                     LastUpdatedBy = -1,
                     LastUpdated = DateTime.Parse("2018-01-01"),
-                    RequirePasswordChange = false
+                    RequirePasswordChange = false,
+                    RefreshToken = "test",
+                    RefreshTokenExpiryTime = DateTime.Parse("2018-01-01")
                 });
             
 

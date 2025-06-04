@@ -13,7 +13,8 @@ namespace Amendment.Client.AuthProviders
             "/api/account/refreshtoken",
             "/api/language",
             "/api/Amendment/Live",
-            "/api/SystemSetting"
+            "/api/SystemSetting",
+            "/api/version"
         };
 
         public HttpInterceptorService(HttpClientInterceptor interceptor, IRefreshTokenService refreshTokenService)

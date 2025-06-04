@@ -1,0 +1,57 @@
+<Project>
+  <PropertyGroup>
+    <!-- Default version information - can be overridden by build arguments -->
+    <VersionPrefix Condition="'$(VERSION)' != ''">$(VERSION)</VersionPrefix>
+    <VersionPrefix Condition="'$(VERSION)' == ''">1.0.0</VersionPrefix>
+    
+    <!-- Build number from CI/CD pipeline or default -->
+    <BuildNumber Condition="'$(BUILD_NUMBER)' != ''">$(BUILD_NUMBER)</BuildNumber>
+    <BuildNumber Condition="'$(BUILD_NUMBER)' == ''">0</BuildNumber>
+    
+    <!-- Full version with build number -->
+    <Version Condition="'$(FULL_VERSION)' != ''">$(FULL_VERSION)</Version>
+    <Version Condition="'$(FULL_VERSION)' == ''">$(VersionPrefix).$(BuildNumber)</Version>
+    
+    <!-- Assembly version (first three parts only for compatibility) -->
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    
+    <!-- File version (includes build number) -->
+    <FileVersion>$(Version)</FileVersion>
+    
+    <!-- Informational version (includes build metadata) -->
+    <InformationalVersion>$(Version)</InformationalVersion>
+    
+    <!-- Build date from CI/CD pipeline or current time -->
+    <BuildDate Condition="'$(BUILD_DATE)' != ''">$(BUILD_DATE)</BuildDate>
+    <BuildDate Condition="'$(BUILD_DATE)' == ''">$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))</BuildDate>
+  </PropertyGroup>
+
+  <!-- Assembly metadata attributes -->
+  <ItemGroup>
+    <AssemblyMetadata Include="BuildDate" Value="$(BuildDate)" />
+    <AssemblyMetadata Include="BuildNumber" Value="$(BuildNumber)" />
+    <AssemblyMetadata Include="Version" Value="$(Version)" />
+    <AssemblyMetadata Include="VersionPrefix" Value="$(VersionPrefix)" />
+  </ItemGroup>
+
+  <!-- Common properties for all projects -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- Debug information for better debugging -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <!-- Release optimizations -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+</Project>

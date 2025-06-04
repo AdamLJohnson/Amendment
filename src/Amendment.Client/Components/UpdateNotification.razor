@@ -1,0 +1,174 @@
+@using Amendment.Client.Services
+@using Amendment.Shared.Responses
+@using Microsoft.JSInterop
+@inject IVersionCheckService VersionCheckService
+@inject IJSRuntime JS
+@inject ILogger<UpdateNotification> Logger
+@implements IDisposable
+
+<Modal @ref="updateModal" Closing="@OnModalClosing">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>
+                <Icon Name="IconName.Download" class="me-2" />
+                Application Update Available
+            </ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+            <Alert Color="Color.Info" Visible>
+                <AlertMessage>
+                    A new version of the Amendment application is available.
+                </AlertMessage>
+                <AlertDescription>
+                    <div class="mb-3">
+                        <strong>Current Version:</strong> @_currentVersion?.Version<br />
+                        <strong>New Version:</strong> @_newVersion?.Version<br />
+                        <strong>Released:</strong> @_newVersion?.BuildDate.ToString("MMM dd, yyyy HH:mm") UTC
+                    </div>
+                    <p class="mb-0">
+                        To get the latest features and improvements, please update the application.
+                        Your work will be saved automatically.
+                    </p>
+                </AlertDescription>
+            </Alert>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@DismissUpdate">
+                <Icon Name="IconName.Times" class="me-1" />
+                Later
+            </Button>
+            <Button Color="Color.Primary" Clicked="@UpdateNow" Loading="@_isUpdating">
+                <Icon Name="IconName.ArrowUp" class="me-1" />
+                Update Now
+            </Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+<Snackbar @ref="updateSnackbar" Color="SnackbarColor.Info">
+    <SnackbarBody>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <Icon Name="IconName.Download" class="me-2" />
+                <strong>Update Available</strong> - New version @_newVersion?.Version is ready
+            </div>
+            <div>
+                <Button Color="Color.Light" Size="Size.Small" Clicked="@ShowUpdateModal" class="me-2">
+                    Details
+                </Button>
+                <Button Color="Color.Primary" Size="Size.Small" Clicked="@UpdateNow" Loading="@_isUpdating">
+                    Update
+                </Button>
+            </div>
+        </div>
+    </SnackbarBody>
+</Snackbar>
+
+@code {
+    private Modal updateModal = null!;
+    private Snackbar updateSnackbar = null!;
+    
+    private VersionResponse? _currentVersion;
+    private VersionResponse? _newVersion;
+    private bool _isUpdating = false;
+    private bool _updateDismissed = false;
+
+    [Parameter] public bool ShowAsModal { get; set; } = false;
+    [Parameter] public bool ShowAsSnackbar { get; set; } = true;
+
+    protected override Task OnInitializedAsync()
+    {
+        VersionCheckService.UpdateAvailable += OnUpdateAvailable;
+        return base.OnInitializedAsync();
+    }
+
+    private async void OnUpdateAvailable(object? sender, VersionUpdateAvailableEventArgs e)
+    {
+        _currentVersion = e.CurrentVersion;
+        _newVersion = e.NewVersion;
+        _updateDismissed = false;
+
+        await InvokeAsync(async () =>
+        {
+            StateHasChanged();
+            
+            if (ShowAsModal)
+            {
+                await ShowUpdateModal();
+            }
+            else if (ShowAsSnackbar && !_updateDismissed)
+            {
+                await updateSnackbar.Show();
+            }
+        });
+    }
+
+    private async Task ShowUpdateModal()
+    {
+        try
+        {
+            await updateModal.Show();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to show update modal");
+        }
+    }
+
+    private async Task UpdateNow()
+    {
+        if (_isUpdating)
+            return;
+
+        try
+        {
+            _isUpdating = true;
+            StateHasChanged();
+
+            Logger.LogInformation("User initiated application update from version {CurrentVersion} to {NewVersion}", 
+                _currentVersion?.Version, _newVersion?.Version);
+
+            // Hide notifications
+            await updateModal.Hide();
+            await updateSnackbar.Hide();
+
+            // Clear cache and reload
+            var jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/versionChecker.js");
+            
+            // Try to clear service worker cache first
+            await jsModule.InvokeVoidAsync("clearServiceWorkerCache");
+            
+            // Small delay to ensure cache clearing completes
+            await Task.Delay(500);
+            
+            // Reload the application
+            await jsModule.InvokeVoidAsync("reloadApplication");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to update application");
+            _isUpdating = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DismissUpdate()
+    {
+        _updateDismissed = true;
+        await updateModal.Hide();
+        await updateSnackbar.Hide();
+        
+        Logger.LogInformation("User dismissed update notification for version {NewVersion}", _newVersion?.Version);
+    }
+
+    private Task OnModalClosing(ModalClosingEventArgs e)
+    {
+        // Allow modal to close normally
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        VersionCheckService.UpdateAvailable -= OnUpdateAvailable;
+    }
+}

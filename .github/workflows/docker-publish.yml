@@ -31,6 +31,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Extract version information from Git tag and GitHub context
+      - name: Extract version information
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+          # Use GitHub run number as build number
+          BUILD_NUMBER=${{ github.run_number }}
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+
+          # Set build date to current UTC time
+          BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
+
+          # Create full version with build number (e.g., 1.2.3.456)
+          FULL_VERSION="${VERSION}.${BUILD_NUMBER}"
+          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_OUTPUT
+
+          echo "Extracted version info:"
+          echo "  Version: $VERSION"
+          echo "  Build Number: $BUILD_NUMBER"
+          echo "  Build Date: $BUILD_DATE"
+          echo "  Full Version: $FULL_VERSION"
+
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
@@ -76,6 +102,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.version.outputs.VERSION }}
+            BUILD_NUMBER=${{ steps.version.outputs.BUILD_NUMBER }}
+            BUILD_DATE=${{ steps.version.outputs.BUILD_DATE }}
+            FULL_VERSION=${{ steps.version.outputs.FULL_VERSION }}
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker

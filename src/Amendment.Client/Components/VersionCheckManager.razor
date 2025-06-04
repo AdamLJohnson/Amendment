@@ -1,0 +1,34 @@
+@using Amendment.Client.Services
+@inject IVersionCheckService VersionCheckService
+@inject ILogger<VersionCheckManager> Logger
+@implements IAsyncDisposable
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await VersionCheckService.StartVersionCheckingAsync();
+                Logger.LogInformation("Version checking manager initialized");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to start version checking");
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await VersionCheckService.StopVersionCheckingAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error stopping version checking");
+        }
+    }
+}
