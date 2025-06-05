@@ -1,11 +1,11 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Amendment.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class AddParentAmendmentId : Migration
+    public partial class GrabbingPendingChanges : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,7 +26,8 @@ namespace Amendment.Repository.Migrations
                 table: "Amendment",
                 column: "ParentAmendmentId",
                 principalTable: "Amendment",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
