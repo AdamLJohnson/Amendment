@@ -17,6 +17,7 @@ namespace Amendment.Repository
         public AmendmentRepository(IDbFactory dbFactory) : base(dbFactory)
         {
             Query = DbSet.Include(e => e.PrimaryLanguage)
+                .Include(e => e.ParentAmendment)
                 .Include(e => e.AmendmentBodies)
                 .ThenInclude(e => e.Language);
         }

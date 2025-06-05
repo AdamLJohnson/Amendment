@@ -17,6 +17,8 @@ public sealed class UpdateAmendmentCommand : IRequest<IApiResult>
     public int PrimaryLanguageId { get; set; }
     public bool IsLive { get; set; }
     public bool IsArchived { get; set; }
+    public bool IsApproved { get; set; }
+    public int? ParentAmendmentId { get; set; }
 }
 
 public sealed class UpdateAmendmentCommandValidator : AbstractValidator<UpdateAmendmentCommand>

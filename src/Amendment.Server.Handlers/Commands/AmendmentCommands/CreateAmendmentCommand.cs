@@ -20,6 +20,7 @@ namespace Amendment.Server.Mediator.Commands.AmendmentCommands
         public string? Source { get; set; }
         public string? LegisId { get; set; }
         public int PrimaryLanguageId { get; set; }
+        public int? ParentAmendmentId { get; set; }
     }
 
     public sealed class CreateAmendmentCommandValidator : AbstractValidator<CreateAmendmentCommand>

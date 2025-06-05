@@ -107,7 +107,12 @@ namespace Amendment.Repository
 
             //builder.Entity("UserRoles").HasData(new { RolesId = 1, UsersId = 1 });
 
-            builder.Entity<Model.DataModel.Amendment>();
+            builder.Entity<Model.DataModel.Amendment>()
+                .HasOne(a => a.ParentAmendment)
+                .WithMany()
+                .HasForeignKey(a => a.ParentAmendmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             builder.Entity<AmendmentBody>()
                 .HasIndex(x => new {x.AmendId, x.LanguageId}).IsUnique();
             builder.Entity<AmendmentBody>()

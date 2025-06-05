@@ -97,6 +97,33 @@ namespace Amendment.Server.Controllers
             return results.ToResult();
         }
 
+        [HttpPost("{id}/Clone")]
+        [Authorize(Roles = RoleGroups.AdminAmendEditor)]
+        public async Task<IResult> Clone(int id, [FromBody] CloneAmendmentRequest model)
+        {
+            var command = new CloneAmendmentCommand
+            {
+                SavingUserId = SignedInUserId,
+                SourceAmendmentId = id,
+                Title = model.Title,
+                Author = model.Author,
+                Motion = model.Motion,
+                Source = model.Source,
+                LegisId = model.LegisId
+            };
+
+            var results = await _mediator.Send(command);
+            if (!results.IsSuccess)
+                return results.ToResult();
+
+            if (results is ApiSuccessResult<AmendmentResponse> typedResults)
+            {
+                var url = Url.Action(nameof(Get), new { id = typedResults.Result?.Id }) ?? "";
+                return results.ToResult(url);
+            }
+            return results.ToResult();
+        }
+
         [HttpPost("ExportExcel")]
         public async Task<IActionResult> ExportToExcel([FromBody] List<int> amendmentIds)
         {

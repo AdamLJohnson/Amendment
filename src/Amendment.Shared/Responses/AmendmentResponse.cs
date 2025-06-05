@@ -18,6 +18,8 @@ namespace Amendment.Shared.Responses
         public string LegisId { get; set; } = "";
         public bool IsLive { get; set; }
         public bool IsArchived { get; set; }
+        public bool IsApproved { get; set; }
+        public int? ParentAmendmentId { get; set; }
         public List<AmendmentBodySummary> AmendmentBodies { get; set; } = new ();
 
 
@@ -34,7 +36,9 @@ namespace Amendment.Shared.Responses
                 LegisId = LegisId,
                 PrimaryLanguageId = PrimaryLanguageId,
                 IsLive = IsLive,
-                IsArchived = IsArchived
+                IsArchived = IsArchived,
+                IsApproved = IsApproved,
+                ParentAmendmentId = ParentAmendmentId
             };
         }
     }

@@ -143,7 +143,7 @@ namespace Amendment
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ClientNotificationBehavior<,>));
             builder.Services.AddValidatorsFromAssembly(typeof(AccountLoginCommand).Assembly);
             builder.Services.RegisterMapsterConfiguration();
-            builder.Services.AddSingleton<IClientNotifier, MockClientNotifier>();
+            builder.Services.AddScoped<IClientNotifier, Amendment.Server.Services.ClientNotifier>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddSingleton<ITimerService, TimerService>();
             

@@ -1,8 +1,10 @@
 ﻿@using Amendment.Shared.Responses
+@using Amendment.Shared.Requests
 @using Amendment.Client.Repository
 @using Amendment.Shared
 @inject IAmendmentRepository AmendmentRepository
 @inject ILanguageRepository LanguageRepository
+@inject INotificationService NotificationService
 <TableRow>
     <TableRowCell>
         @Model.Title
@@ -14,6 +16,10 @@
             @if (Model.IsArchived)
             {
                 <Badge Color="Color.Secondary">ARCHIVED</Badge>
+            }
+            @if (Model.ParentAmendmentId.HasValue)
+            {
+                <Badge Color="Color.Info">CLONE</Badge>
             }
         </div>
     </TableRowCell>
@@ -49,6 +55,19 @@
                         <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
                         <DropdownToggle Color="Color.Primary" Split />
                         <DropdownMenu>
+                            @if (!Model.IsApproved && !Model.IsArchived)
+                            {
+                                <DropdownItem Color="Color.Success" Clicked="() => _approveModalRef!.Show()">
+                                    <Icon Name="IconName.Check" />
+                                    Approve & Clean Up
+                                </DropdownItem>
+                                <DropdownDivider/>
+                            }
+                            <DropdownItem Color="Color.Info" Clicked="() => _cloneModalRef!.Show()">
+                                <Icon Name="IconName.Copy"/>
+                                Clone Amendment
+                            </DropdownItem>
+                            <DropdownDivider/>
                             <DropdownItem Color="Color.Info" Clicked="ExportAmendmentToExcel">Export to Excel</DropdownItem>
                             <DropdownItem Color="Color.Info" Clicked="ExportAmendmentToPdf">Export to PDF</DropdownItem>
                             <AuthorizeView Roles="@RoleGroups.Admin">
@@ -66,6 +85,19 @@
                         <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
                         <DropdownToggle Color="Color.Primary" Split />
                         <DropdownMenu>
+                            @if (!Model.IsApproved && !Model.IsArchived)
+                            {
+                                <DropdownItem Color="Color.Success" Clicked="() => _approveModalRef!.Show()">
+                                    <Icon Name="IconName.Check" />
+                                    Approve & Clean Up
+                                </DropdownItem>
+                                <DropdownDivider/>
+                            }
+                            <DropdownItem Color="Color.Info" Clicked="() => _cloneModalRef!.Show()">
+                                <Icon Name="IconName.Copy" />
+                                Clone Amendment
+                            </DropdownItem>
+                            <DropdownDivider/>
                             @if (Model.IsArchived)
                             {
                                 <DropdownItem Color="Color.Success" Clicked="() => _unarchiveModalRef!.Show()">Unarchive</DropdownItem>
@@ -138,6 +170,78 @@
     </ModalContent>
 </Modal>
 
+<Modal @ref="@_approveModalRef">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Approve Amendment</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <p>Are you sure you want to approve this amendment?</p>
+            <p><strong>This will:</strong></p>
+            <ul>
+                <li>Mark the amendment as approved</li>
+                <li>Remove all strikethrough text (deleted content)</li>
+                <li>Remove underline formatting but keep the text (inserted content)</li>
+                <li>Clean up all language versions</li>
+            </ul>
+            <p class="text-warning"><strong>This action cannot be undone.</strong></p>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => _approveModalRef!.Hide()">Cancel</Button>
+            <Button Color="Color.Success" Clicked="OnApproveBtn">
+                <Icon Name="IconName.Check" />
+                Approve & Clean Up
+            </Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+<Modal @ref="@_cloneModalRef">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Clone Amendment</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <EditForm Model="_cloneRequest" OnValidSubmit="OnCloneBtn">
+                <Field>
+                    <FieldLabel For="cloneTitle">Title</FieldLabel>
+                    <TextEdit id="cloneTitle" @bind-Text="_cloneRequest.Title" Placeholder="@($"{Model.Title} (Clone)")">
+                    </TextEdit>
+                </Field>
+                <Field>
+                    <FieldLabel For="cloneAuthor">Author</FieldLabel>
+                    <TextEdit id="cloneAuthor" @bind-Text="_cloneRequest.Author" Placeholder="@Model.Author">
+                    </TextEdit>
+                </Field>
+                <Field>
+                    <FieldLabel For="cloneMotion">Motion</FieldLabel>
+                    <TextEdit id="cloneMotion" @bind-Text="_cloneRequest.Motion" Placeholder="@Model.Motion">
+                    </TextEdit>
+                </Field>
+                <Field>
+                    <FieldLabel For="cloneSource">Source</FieldLabel>
+                    <TextEdit id="cloneSource" @bind-Text="_cloneRequest.Source" Placeholder="@Model.Source">
+                    </TextEdit>
+                </Field>
+                <Field>
+                    <FieldLabel For="cloneLegisId">Legislative ID</FieldLabel>
+                    <TextEdit id="cloneLegisId" @bind-Text="_cloneRequest.LegisId" Placeholder="@Model.LegisId">
+                    </TextEdit>
+                </Field>
+            </EditForm>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => _cloneModalRef!.Hide()">Cancel</Button>
+            <Button Color="Color.Info" Clicked="OnCloneBtn">
+                <Icon Name="IconName.Copy" />
+                Clone Amendment
+            </Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
 @code {
     [Parameter]
     public AmendmentResponse Model { get; set; } = null!;
@@ -153,6 +257,9 @@
     private Modal? _deleteModalRef;
     private Modal? _archiveModalRef;
     private Modal? _unarchiveModalRef;
+    private Modal? _approveModalRef;
+    private Modal? _cloneModalRef;
+    private CloneAmendmentRequest _cloneRequest = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -207,6 +314,48 @@
     private async Task ExportAmendmentToPdf()
     {
         await AmendmentRepository.ExportToPdfAsync(Model.Id);
+    }
+
+    private async Task OnApproveBtn()
+    {
+        var amendmentRequest = Model.ToRequest();
+        // Set the amendment as approved
+        amendmentRequest.IsApproved = true;
+
+        try
+        {
+            await AmendmentRepository.PutAsync(Model.Id, amendmentRequest);
+            await _approveModalRef!.Hide();
+            await NotificationService.Success("Amendment approved and cleaned up successfully!", "Amendment Approved");
+#pragma warning disable CS4014
+            OnDelete.InvokeAsync(); // Refresh the list
+#pragma warning restore CS4014
+        }
+        catch (Exception ex)
+        {
+            await NotificationService.Error($"Failed to approve amendment: {ex.Message}", "Approval Error");
+        }
+    }
+
+    private async Task OnCloneBtn()
+    {
+        try
+        {
+            var clonedAmendment = await AmendmentRepository.CloneAsync(Model.Id, _cloneRequest);
+            if (clonedAmendment != null)
+            {
+                await _cloneModalRef!.Hide();
+                // Reset the clone request for next use
+                _cloneRequest = new CloneAmendmentRequest();
+#pragma warning disable CS4014
+                OnDelete.InvokeAsync(); // Refresh the list
+#pragma warning restore CS4014
+            }
+        }
+        catch (Exception ex)
+        {
+            await NotificationService.Error($"Failed to clone amendment: {ex.Message}", "Clone Error");
+        }
     }
 
 }

@@ -25,6 +25,7 @@ namespace Amendment.Client.Repository
         Task<bool> ExportToPdfAsync(int amendmentId);
         Task<(AmendmentResponse? response, string? errorMessage)> PostWithErrorHandlingAsync(AmendmentRequest request);
         Task<(AmendmentResponse? response, string? errorMessage)> PutWithErrorHandlingAsync(int id, AmendmentRequest request);
+        Task<AmendmentResponse?> CloneAsync(int sourceAmendmentId, CloneAmendmentRequest request);
     }
     public class AmendmentRepository : HttpRepository<AmendmentRequest, AmendmentResponse>, IAmendmentRepository
     {
@@ -185,6 +186,38 @@ namespace Amendment.Client.Repository
             {
                 _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to access this url: PUT {url}", url);
                 return (null, "An error has occurred. Please try again.");
+            }
+        }
+
+        public async Task<AmendmentResponse?> CloneAsync(int sourceAmendmentId, CloneAmendmentRequest request)
+        {
+            var url = $"{BaseUrl}/{sourceAmendmentId}/Clone";
+            try
+            {
+                var json = JsonSerializer.Serialize(request);
+                var bodyContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var httpResponse = await Client.PostAsync(url, bodyContent);
+                var content = await httpResponse.Content.ReadAsStringAsync();
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    var result = JsonSerializer.Deserialize<ApiResult<AmendmentResponse>>(content, Options);
+                    await _notificationServiceWrapper.Success("Amendment cloned successfully.", "Clone Complete");
+                    return result?.Result;
+                }
+                else
+                {
+                    var errorResult = JsonSerializer.Deserialize<ApiFailedResult<AmendmentResponse>>(content, Options);
+                    var errorMessage = errorResult?.Errors?.FirstOrDefault().Message ?? "Failed to clone amendment";
+                    await _notificationServiceWrapper.Error(errorMessage, "Clone Error");
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(new EventId(1000, "RepositoryError"), e, "An error has occurred while trying to clone amendment: POST {url}", url);
+                await _notificationServiceWrapper.Error("An error has occurred while cloning the amendment. Please try again.", "Clone Error");
+                return null;
             }
         }
     }

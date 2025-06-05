@@ -20,11 +20,14 @@ namespace Amendment.Model.DataModel
         public string? LegisId { get; set; }
         public bool IsLive { get; set; }
         public bool IsArchived { get; set; }
+        public bool IsApproved { get; set; }
+        public int? ParentAmendmentId { get; set; }
 
         [Required]
         public int PrimaryLanguageId { get; set; }
         [Required]
         public Language PrimaryLanguage { get; set; }
+        public Amendment? ParentAmendment { get; set; }
         [ForeignKey("AmendId")]
         public List<AmendmentBody> AmendmentBodies { get; set; } = new List<AmendmentBody>();
 

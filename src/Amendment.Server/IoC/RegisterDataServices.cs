@@ -39,6 +39,7 @@ namespace Amendment.Server.IoC
             builder.RegisterType<ExcelExportService>().As<IExcelExportService>().InstancePerLifetimeScope();
             builder.RegisterType<PdfExportService>().As<IPdfExportService>().InstancePerLifetimeScope();
             builder.RegisterType<ExportService>().As<IExportService>().InstancePerLifetimeScope();
+            builder.RegisterType<AmendmentCleanupService>().As<IAmendmentCleanupService>().InstancePerLifetimeScope();
         }
     }
 }
