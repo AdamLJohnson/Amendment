@@ -5,7 +5,7 @@
 namespace Amendment.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class GrabbingPendingChanges : Migration
+    public partial class AddParentAmendmentId : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
