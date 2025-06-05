@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Amendment.Repository.Migrations
 {
     [DbContext(typeof(AmendmentContext))]
-    [Migration("20250605215454_GrabbingPendingChanges")]
-    partial class GrabbingPendingChanges
+    [Migration("20250605215454_AddParentAmendmentId")]
+    partial class AddParentAmendmentId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
