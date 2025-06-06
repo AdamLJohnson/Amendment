@@ -38,7 +38,8 @@ namespace Amendment.Shared.Responses
                 IsLive = IsLive,
                 IsArchived = IsArchived,
                 IsApproved = IsApproved,
-                ParentAmendmentId = ParentAmendmentId
+                ParentAmendmentId = ParentAmendmentId,
+                UpdateCurrentAmendmentBodies = true // Default to true for existing behavior
             };
         }
     }

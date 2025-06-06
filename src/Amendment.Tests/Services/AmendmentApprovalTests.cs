@@ -85,7 +85,8 @@ public class AmendmentApprovalTests
             SavingUserId = 1,
             IsApproved = true,
             Title = "Child Amendment",
-            ParentAmendmentId = 1
+            ParentAmendmentId = 1,
+            UpdateCurrentAmendmentBodies = true
         };
 
         _mockAmendmentService.Setup(x => x.GetAsync(2))
@@ -166,7 +167,8 @@ public class AmendmentApprovalTests
             Id = 1,
             SavingUserId = 1,
             IsApproved = true,
-            Title = "Standalone Amendment"
+            Title = "Standalone Amendment",
+            UpdateCurrentAmendmentBodies = true
         };
 
         _mockAmendmentService.Setup(x => x.GetAsync(1))
@@ -251,7 +253,8 @@ public class AmendmentApprovalTests
             SavingUserId = 1,
             IsApproved = true,
             Title = "Child Amendment",
-            ParentAmendmentId = 1
+            ParentAmendmentId = 1,
+            UpdateCurrentAmendmentBodies = true
         };
 
         _mockAmendmentService.Setup(x => x.GetAsync(2))
@@ -289,5 +292,108 @@ public class AmendmentApprovalTests
 
         // Verify screen control service was NOT called since parent amendment is not live
         _mockScreenControlService.Verify(x => x.UpdateBodyAsync(It.IsAny<AmendmentBody>(), true), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ApproveAmendmentWithParent_UpdateCurrentAmendmentBodiesFalse_DoesNotUpdateCurrentBodies()
+    {
+        // Arrange
+        var parentAmendment = new Model.DataModel.Amendment
+        {
+            Id = 1,
+            Title = "Parent Amendment",
+            IsApproved = true,
+            IsLive = true
+        };
+
+        var childAmendment = new Model.DataModel.Amendment
+        {
+            Id = 2,
+            Title = "Child Amendment",
+            ParentAmendmentId = 1,
+            IsApproved = false
+        };
+
+        var childAmendmentBodies = new List<AmendmentBody>
+        {
+            new AmendmentBody
+            {
+                Id = 3,
+                AmendId = 2,
+                LanguageId = 1,
+                AmendBody = "Text with ~~deleted~~ and <u>inserted</u> content",
+                AmendStatus = AmendmentBodyStatus.Ready
+            }
+        };
+
+        var parentAmendmentBodies = new List<AmendmentBody>
+        {
+            new AmendmentBody
+            {
+                Id = 1,
+                AmendId = 1,
+                LanguageId = 1,
+                AmendBody = "Original parent text",
+                AmendStatus = AmendmentBodyStatus.Ready
+            }
+        };
+
+        var command = new UpdateAmendmentCommand
+        {
+            Id = 2,
+            SavingUserId = 1,
+            IsApproved = true,
+            Title = "Child Amendment",
+            ParentAmendmentId = 1,
+            UpdateCurrentAmendmentBodies = false // Don't update current amendment bodies
+        };
+
+        _mockAmendmentService.Setup(x => x.GetAsync(2))
+            .ReturnsAsync(childAmendment);
+
+        _mockAmendmentService.Setup(x => x.GetAsync(1))
+            .ReturnsAsync(parentAmendment);
+
+        _mockAmendmentBodyService.Setup(x => x.GetByAmentmentId(2))
+            .ReturnsAsync(childAmendmentBodies);
+
+        _mockAmendmentBodyService.Setup(x => x.GetByAmentmentId(1))
+            .ReturnsAsync(parentAmendmentBodies);
+
+        _mockCleanupService.Setup(x => x.CleanupAmendmentText("Text with ~~deleted~~ and <u>inserted</u> content"))
+            .Returns("Text with inserted content");
+
+        _mockAmendmentBodyService.Setup(x => x.UpdateAsync(It.IsAny<AmendmentBody>(), It.IsAny<int>()))
+            .ReturnsAsync(new OperationResult(OperationType.Update, true));
+
+        _mockAmendmentService.Setup(x => x.UpdateAsync(It.IsAny<Model.DataModel.Amendment>(), It.IsAny<int>()))
+            .ReturnsAsync(new OperationResult(OperationType.Update, true));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        // Verify that the child amendment body was NOT cleaned up (should keep original formatting)
+        _mockAmendmentBodyService.Verify(x => x.UpdateAsync(
+            It.Is<AmendmentBody>(b =>
+                b.Id == 3 &&
+                b.AmendBody == "Text with ~~deleted~~ and <u>inserted</u> content"),
+            1), Times.Never);
+
+        // Verify that the parent amendment body was still updated with cleaned text
+        _mockAmendmentBodyService.Verify(x => x.UpdateAsync(
+            It.Is<AmendmentBody>(b =>
+                b.AmendBody == "Text with inserted content"),
+            1), Times.Once);
+
+        // Verify cleanup service was called for parent update
+        _mockCleanupService.Verify(x => x.CleanupAmendmentText("Text with ~~deleted~~ and <u>inserted</u> content"), Times.Once);
+
+        // Verify screen control service was called to force screen update since parent amendment is live
+        _mockScreenControlService.Verify(x => x.UpdateBodyAsync(
+            It.IsAny<AmendmentBody>(),
+            true), Times.Once);
     }
 }

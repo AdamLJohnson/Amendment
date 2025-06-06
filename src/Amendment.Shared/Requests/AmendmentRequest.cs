@@ -18,5 +18,6 @@ namespace Amendment.Shared.Requests
         public bool IsArchived { get; set; }
         public bool IsApproved { get; set; }
         public int? ParentAmendmentId { get; set; }
+        public bool UpdateCurrentAmendmentBodies { get; set; } = true;
     }
 }

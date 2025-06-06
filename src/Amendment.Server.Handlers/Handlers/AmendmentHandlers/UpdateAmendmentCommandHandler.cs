@@ -55,24 +55,28 @@ public sealed class UpdateAmendmentCommandHandler : IRequestHandler<UpdateAmendm
             {
                 var bodiesToUpdate = new List<Model.DataModel.AmendmentBody>();
 
-                foreach (var body in amendmentBodies)
+                // Only update current amendment bodies if requested
+                if (request.UpdateCurrentAmendmentBodies)
                 {
-                    var originalText = body.AmendBody;
-                    var cleanedText = _amendmentCleanupService.CleanupAmendmentText(originalText);
-
-                    if (!string.Equals(originalText, cleanedText))
+                    foreach (var body in amendmentBodies)
                     {
-                        body.AmendBody = cleanedText;
-                        body.LastUpdatedBy = request.SavingUserId;
-                        body.LastUpdated = DateTime.UtcNow;
-                        bodiesToUpdate.Add(body);
-                    }
-                }
+                        var originalText = body.AmendBody;
+                        var cleanedText = _amendmentCleanupService.CleanupAmendmentText(originalText);
 
-                // Update all bodies that need cleanup to trigger SignalR notifications
-                foreach (var body in bodiesToUpdate)
-                {
-                    await _amendmentBodyService.UpdateAsync(body, request.SavingUserId);
+                        if (!string.Equals(originalText, cleanedText))
+                        {
+                            body.AmendBody = cleanedText;
+                            body.LastUpdatedBy = request.SavingUserId;
+                            body.LastUpdated = DateTime.UtcNow;
+                            bodiesToUpdate.Add(body);
+                        }
+                    }
+
+                    // Update all bodies that need cleanup to trigger SignalR notifications
+                    foreach (var body in bodiesToUpdate)
+                    {
+                        await _amendmentBodyService.UpdateAsync(body, request.SavingUserId);
+                    }
                 }
 
                 // If this amendment has a parent, update the parent's bodies with cleaned text

@@ -185,6 +185,18 @@
                 <li>Remove underline formatting but keep the text (inserted content)</li>
                 <li>Clean up all language versions</li>
             </ul>
+            @if (Model.ParentAmendmentId.HasValue)
+            {
+                <div class="mt-3">
+                    <Check @bind-Checked="_updateCurrentAmendmentBodies">
+                        Update this amendment's text (remove formatting)
+                    </Check>
+                    <small class="form-text text-muted">
+                        If unchecked, this amendment's text will keep its formatting for historical purposes.
+                        The parent amendment will still be updated with the cleaned text.
+                    </small>
+                </div>
+            }
             <p class="text-warning"><strong>This action cannot be undone.</strong></p>
         </ModalBody>
         <ModalFooter>
@@ -260,6 +272,7 @@
     private Modal? _approveModalRef;
     private Modal? _cloneModalRef;
     private CloneAmendmentRequest _cloneRequest = new();
+    private bool _updateCurrentAmendmentBodies = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -321,6 +334,8 @@
         var amendmentRequest = Model.ToRequest();
         // Set the amendment as approved
         amendmentRequest.IsApproved = true;
+        // Set whether to update current amendment bodies based on checkbox
+        amendmentRequest.UpdateCurrentAmendmentBodies = _updateCurrentAmendmentBodies;
 
         try
         {
