@@ -43,6 +43,7 @@
     <Watch Remove="wwwroot\js\ViewFullScreen.js" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.8" />
     <Content Include="Components\TimerComponent.razor.less" />
   </ItemGroup>
 </Project>
