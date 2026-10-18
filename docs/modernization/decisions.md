@@ -6,6 +6,12 @@
 |---|---|---|
 | D1 | Target `net10.0` for all maintained C# projects (Blazor WASM, libraries, tests, Lambdas, C# CDK). Retargeting is executed in **Phase 1A**, not Phase 0. | User instruction |
 | D2 | Phase 0 adds only documentation and characterization tests; no AWS infrastructure, no legacy code deletion, no production code changes. | Plan §Phase 0 |
+| D3 | Exactly one presented amendment, in a single `PRESENTATION#MAIN` state (resolves Q1). | User, Checkpoint 0 review |
+| D4 | Server-side role matrix matches the legacy UI gates. Admin can do everything. Amendment Editor: amendment create/update/archive/clone/approve. Translator: body edits only. Screen Controller: screen and timer. Delete amendment: Admin only. Details in `contracts.md` §4 (resolves Q8; approval role part of Q4). | User, Checkpoint 0 review |
+| D5 | Conference approval is all-or-nothing by default: parent-update failures fail the approval with nothing written. Admins can choose `BEST_EFFORT`, which keeps the legacy behavior of succeeding with warnings (resolves the rollback part of Q4 and R2). | User, Checkpoint 0 review |
+| D6 | The public presentation returns markdown only for currently visible languages (resolves Q11 and R5). | User, Checkpoint 0 review |
+| D7 | Phase 1 domain code lives in the new `src/Amendment.Domain` project (net10.0, no packages), tested by `test/Amendment.Domain.Tests`. Both are in `Amendment.sln`. Legacy projects do not reference it yet. | Phase 1 |
+| D8 | Deliberate changes from legacy behavior are marked **[Δ]** in `contracts.md`. Each one is covered by a domain test. | Phase 1 |
 
 ## 1. Legacy test baseline (2026-10-18, SDK 10.0.202, Windows)
 
@@ -24,31 +30,34 @@
 
 | ID | Question | Evidence |
 |---|---|---|
-| Q1 | Exactly one live amendment? The server doesn't enforce it. `GetLiveAsync` returns the first `IsLive` row, and the UI hides Go Live while one is live. | `AmendmentService.GetLiveAsync`, `AmendmentTableRow` |
-| Q2 | Is paging per language or global? Both exist (per-body hub calls and All Prev/Next). | `ScreenControl.razor` |
+| Q1 | **Resolved (D3).** ~~Exactly one live amendment?~~ | — |
+| Q2 | Is paging per language or global? Both exist (per-body hub calls and All Prev/Next). *Phase 1 supports both: per-language state with batch changes.* | `ScreenControl.razor` |
 | Q3 | Should live updates go out on save (current behavior) or per keystroke? | REST save → notification |
-| Q4 | Approval: expected result when several approved siblings share a parent (currently last write wins)? Rollback expectations? Should approval require a role? (Currently any authenticated user can approve via PUT.) | `UpdateAmendmentCommandHandler` |
+| Q4 | Roles and rollback are **resolved (D4, D5)**. Still open: is a `CONFLICT` (re-plan) the right outcome when approved siblings race on one parent? The domain detects it through body versions. | `UpdateAmendmentCommandHandler` |
 | Q5 | Was the parent projector refresh after approval ever observed on anonymous screens? Source says it is not delivered (`AmendmentBodyChange` has no listener). | §3 of `current-state.md` |
-| Q6 | What should happen when a projected amendment is archived or deleted? There is no server guard today. | — |
+| Q6 | What should happen when a projected amendment is archived or deleted? There is no server guard today. *Phase 1 proposal: block both while presented, matching the UI gate for archive.* | `AmendmentRules` |
 | Q7 | Search/sort/filter needs for the amendment list? Today the full list loads client-side. | `GetAllAmendmentsHandler` |
-| Q8 | Are the server role boundaries intentional (e.g., Translators can delete amendments and change settings via the API)? Which roles must be enforced server-side? | Role matrix |
+| Q8 | **Resolved (D4).** Remaining [VERIFY]: should body delete use the body-edit roles? | `RoleOperationMatrix` |
 | Q9 | Is the exact Excel/PDF layout a contract? Are templates or audit requirements needed? | `ExcelExportService`, `PdfExportService` |
 | Q10 | What are the production `DbType`, data size, backup state, Redis use, and hosting (Docker/Azure)? | `Program.cs`, pipelines |
-| Q11 | Should the anonymous `GET api/Amendment/Live` exposing non-live language bodies be kept? | `GetLiveAmendmentHandler` |
+| Q11 | **Resolved (D6).** | — |
 | Q12 | Is it acceptable that timer state lives in one process (lost on restart, not shared)? | `TimerService` singleton |
 | Q13 | Languages are hard-coded in `NavMenu` (English/Spanish/French). Should they be data-driven? | `NavMenu.razor` |
 | Q14 | AWS region, DNS, environments, budget, live-update latency SLO. | Plan §12 |
+| Q15 | When an amendment is presented, should languages start hidden on page 0 (Phase 1 proposal) or reuse each body's last page and visibility (legacy stored them on the body)? | `PresentationState.Present` |
+| Q16 | Is a 100,000-character markdown limit acceptable? | `BodyRules.MaxMarkdownLength` |
+| Q17 | Should the legacy title rule that rejects exactly `"not allowed"` be kept? It looks like a leftover test value. | `AmendmentRequestValidator` |
 
 ## 3. Migration risk register
 
 | ID | Risk | Likelihood / Impact | Mitigation (phase) |
 |---|---|---|---|
 | R1 | Approval semantics regress (parent replacement, false→true only, spacing) | M / **High** | Goldens added in Phase 0; port as domain service with the same fixtures (P1/P4) |
-| R2 | Partial approval and swallowed parent errors are carried into the new design | H / High | Transactional writes and detectable failure, subject to approval (P4) |
-| R3 | Projector refresh after approval is already broken; parity is ambiguous | M / High | Confirm Q5; target authorized live-body event (A20) |
-| R4 | Server authorization is weaker than the UI; a "parity" port could keep the gaps, or tightening could break workflows | H / High | Decide Q8; add role tests; Cognito groups enforced server-side |
-| R5 | Anonymous live endpoint leaks non-live translations | M / M | Decide Q11; public projection returns only live bodies |
-| R6 | Multiple live amendments possible; `FirstOrDefault` is nondeterministic | M / M | Decide Q1; single presentation-session record |
+| R2 | Partial approval and swallowed parent errors are carried into the new design | H / High | D5: `ApprovalPlan.AtomicBodyWrites` defines the transaction; Phase 4 must implement it with `TransactWriteItems` (watch the 100-item limit) |
+| R3 | Projector refresh after approval is already broken; parity is ambiguous | M / High | Confirm Q5. Phase 1: parent writes produce a normal `liveBody.updated` event (A20) |
+| R4 | Server authorization is weaker than the UI; a "parity" port could keep the gaps, or tightening could break workflows | H / High | D4 matrix with tests; users who relied on API-only access lose it, so communicate before cutover |
+| R5 | Anonymous live endpoint leaks non-live translations | M / M | D6: `PublicProjection` tested |
+| R6 | Multiple live amendments possible; `FirstOrDefault` is nondeterministic | M / M | D3: `PresentationState` |
 | R7 | Duplicate and mislabeled notifications (`OperationType.Update` sent for create/delete) hide client bugs | M / M | Single event pipeline with typed operations |
 | R8 | Raw HTML in Markdown with no sanitizer → XSS on projector/editor | M / High | Sanitize rendered HTML; keep the `<u>` allow-list |
 | R9 | .NET 9 → 10 upgrade (Blazorise, Markdig, ClosedXML, QuestPDF, Mapster pre-release, Moq 4.20, old `Microsoft.AspNetCore.SignalR.Core 1.1.0` in tests) | M / M | Phase 1A per-package compatibility check; `global.json` pin |
@@ -56,10 +65,12 @@
 | R11 | Timer is in-memory and single-instance | M / M | Persist timer state (target design) |
 | R12 | Export output differences (fonts, layout, file names) | M / M | Capture golden files from the legacy app before porting (Q9) |
 | R13 | Data migration from PostgreSQL (IDs, audit fields, `ParentAmendmentId` links, users and password hashes) | M / High | Migration tool plus row-count and hash verification; user migration plan (Q10) |
-| R14 | Pre-existing failing test masks regressions | L / L | Fix the fixture in Phase 1 (separate, approved change) |
+| R14 | Pre-existing failing test masks regressions | L / L | Fix the fixture as a separate change once approved (not yet approved; still failing) |
+| R16 | ~~`azure-pipelines.yml` runs `dotnet publish` at the repository root, which picks up `Amendment.sln` and now includes net10.0 projects.~~ **Closed:** the Azure pipeline was unused and `azure-pipelines.yml` has been deleted (user decision). The Docker build (`Amendment.Server` only) is the remaining CI. | — | Phase 1A still pins the SDK in `global.json` and updates the Dockerfile / GitHub workflow SDK |
+| R15 | Domain contracts drift from what the legacy migration needs (int ids → string ids, `LanguageId` → codes) | M / M | Phase 3 migration maps `ENG/SPA/FRA` through `LanguageCode` and keeps an id map |
 
 ## 4. Assumptions (not yet verified)
 
 - A1: Production uses PostgreSQL (`DbType=DB`). The InMemory database is for development and tests.
-- A2: There is one conference venue and one presentation session.
+- A2: There is one conference venue and one presentation session. *(Confirmed by D3.)*
 - A3: Projector machines are anonymous (not logged in), so they use screenHub only.

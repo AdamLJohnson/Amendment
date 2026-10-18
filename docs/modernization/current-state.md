@@ -20,7 +20,7 @@ Branch: `modernization/phase-0-baseline`. Tags: **[V]** = verified from source a
 - [V] Host: Autofac DI, MediatR pipeline `ValidationBehavior` → `ClientNotificationBehavior`, plus a service-level `IClientNotifier` (`ClientNotifier`).
 - [V] DB: `DbType=DB` → PostgreSQL + `MigrateAsync`; otherwise EF InMemory + `EnsureCreatedAsync`. `SeedDatabase` always runs at startup.
 - [V] SignalR scale-out: Redis backplane if `ConnectionStrings:Redis` is set.
-- [V] Deploy/CI: `src/Amendment.Server/Dockerfile`, `.github/workflows/docker-publish.yml`, `azure-pipelines.yml`, `.github/dependabot.yml`.
+- [V] Deploy/CI: `src/Amendment.Server/Dockerfile`, `.github/workflows/docker-publish.yml`, `.github/dependabot.yml`. (`azure-pipelines.yml` was unused and has been removed.)
 
 ## 2. Data model and access patterns [V]
 

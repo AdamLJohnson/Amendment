@@ -1,0 +1,128 @@
+# Amendment GraphQL schema - Phase 1 DRAFT (not deployed; AppSync directives are indicative).
+# Default auth: Cognito user pools. Only fields marked @aws_api_key (or the chosen public mode) are anonymous.
+# Versions are AWSBigInt (64-bit); never Int or AWSTimestamp. Role rules: docs/modernization/contracts.md section 4.
+
+scalar AWSBigInt
+scalar AWSDateTime
+
+enum BodyStatus { NEW DRAFT UNDER_REVIEW READY }
+enum ApprovalFailureMode { ALL_OR_NOTHING BEST_EFFORT }
+
+type Audit { by: ID! at: AWSDateTime! }
+
+type Amendment {
+  id: ID!
+  title: String!
+  author: String!
+  motion: String
+  source: String
+  legisId: String
+  primaryLanguage: String!      # normalized BCP-47, e.g. "en"
+  isArchived: Boolean!
+  isApproved: Boolean!
+  parentAmendmentId: ID
+  version: AWSBigInt!
+  created: Audit!
+  updated: Audit!
+  bodies: [AmendmentBody!]!
+}
+
+type AmendmentBody {
+  amendmentId: ID!
+  language: String!
+  markdown: String!
+  status: BodyStatus!
+  pageCount: Int!
+  version: AWSBigInt!
+  created: Audit!
+  updated: Audit!
+}
+
+type AmendmentConnection { items: [Amendment!]! nextToken: String }
+
+type PresentationLanguage { language: String! visible: Boolean! page: Int! }
+type Presentation {            # private operator view
+  activeAmendmentId: ID
+  languages: [PresentationLanguage!]!
+  version: AWSBigInt!
+  updated: Audit
+}
+
+# Public projection: markdown only for visible languages (decision D6).
+type PublicLanguage @aws_api_key {
+  language: String!
+  visible: Boolean!
+  page: Int!
+  pageCount: Int!
+  markdown: String
+  bodyVersion: AWSBigInt
+}
+type PublicPresentation @aws_api_key {
+  version: AWSBigInt!
+  activeAmendmentId: ID
+  languages: [PublicLanguage!]!
+}
+type PublicTimer @aws_api_key {
+  version: AWSBigInt!
+  remainingAtLastChangeSeconds: Int!
+  startedAt: AWSDateTime
+  running: Boolean!
+  visible: Boolean!
+  serverTime: AWSDateTime!     # for client clock-offset correction
+}
+
+type ApprovalResult {
+  amendment: Amendment!
+  approvalApplied: Boolean!    # false when it was already approved (idempotent retry)
+  updatedChildLanguages: [String!]!
+  updatedParentLanguages: [String!]!
+  warnings: [String!]!         # BEST_EFFORT only
+}
+
+type ExportRequest { downloadUrl: String! expiresAt: AWSDateTime! }
+
+input AmendmentInput {
+  title: String!
+  author: String!
+  primaryLanguage: String!
+  motion: String
+  source: String
+  legisId: String
+  parentAmendmentId: ID
+}
+input LanguageChangeInput { language: String! visible: Boolean page: Int }
+
+type Query {
+  amendments(archived: Boolean, limit: Int, nextToken: String): AmendmentConnection!
+  amendment(id: ID!): Amendment
+  presentation: Presentation!
+  publicPresentation: PublicPresentation! @aws_api_key
+  publicTimer: PublicTimer! @aws_api_key
+}
+
+type Mutation {
+  createAmendment(input: AmendmentInput!): Amendment!
+  updateAmendment(id: ID!, expectedVersion: AWSBigInt!, input: AmendmentInput!, isApproved: Boolean!): Amendment!
+  archiveAmendment(id: ID!, expectedVersion: AWSBigInt!, archived: Boolean!): Amendment!
+  cloneAmendment(sourceId: ID!, overrides: AmendmentInput): Amendment!
+  approveAmendment(id: ID!, expectedVersion: AWSBigInt!, cleanChildBodies: Boolean = true,
+                   failureMode: ApprovalFailureMode = ALL_OR_NOTHING): ApprovalResult!
+  deleteAmendment(id: ID!, expectedVersion: AWSBigInt!): ID!
+
+  createAmendmentBody(amendmentId: ID!, language: String!, markdown: String!, status: BodyStatus = NEW): AmendmentBody!
+  updateAmendmentBody(amendmentId: ID!, language: String!, expectedVersion: AWSBigInt!, markdown: String!, status: BodyStatus!): AmendmentBody!
+  deleteAmendmentBody(amendmentId: ID!, language: String!, expectedVersion: AWSBigInt!): String!
+
+  presentAmendment(id: ID!, expectedVersion: AWSBigInt!): Presentation!
+  clearPresentation(expectedVersion: AWSBigInt!): Presentation!
+  setLanguages(changes: [LanguageChangeInput!]!, expectedVersion: AWSBigInt!): Presentation!
+
+  timerStart: PublicTimer!
+  timerPause: PublicTimer!
+  timerReset(seconds: Int = 0): PublicTimer!
+  timerSet(seconds: Int!): PublicTimer!
+  timerShow(visible: Boolean!): PublicTimer!
+
+  requestPdfExport(amendmentIds: [ID!]!): ExportRequest!
+  requestExcelExport(amendmentIds: [ID!]!): ExportRequest!
+}

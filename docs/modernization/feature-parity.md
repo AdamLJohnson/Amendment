@@ -43,7 +43,7 @@ Status column: **[V]** verified in source/tests, **[VERIFY]** needs runtime or m
 | T1 | Control | Reset, ResetWithTime, Set, Pause, Start, Show (AdminScreenController) | [V] | — |
 | T2 | Display | `CurrentState` + `SecondsChanged`/`StateChanged`/`ShowChanged`; small control on `/ScreenControl` | [V] | — |
 | T3 | State | In-memory singleton; lost on restart; not shared across instances | [V] | — |
-| T4 | End-of-timer behavior | Not traced | [VERIFY] | — |
+| T4 | End-of-timer behavior | Counts down 1/s; at 0 sets `IsRunning=false`. `Start` ignored at 0 or while running; `Set` keeps running state (`TimerService`) | [V] | `TimerStateTests` (target model) |
 
 ## Identity and administration
 

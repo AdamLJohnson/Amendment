@@ -552,13 +552,13 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 **Objective:** Understand and protect current behavior before rewriting.
 
-- [ ] Check out the latest main branch and produce a current-state architecture/feature and data-flow map.
-- [ ] Identify all clients, SignalR hubs/events, controllers, roles, validation rules, exports and data access paths.
-- [ ] Capture representative test fixtures: multiple amendments, multilingual content, archived state, markdown with varying slide counts, live presentation, timer states.
-- [ ] Establish reproducible local build/tests; document missing prerequisites and baseline failures.
-- [ ] Add characterization tests around legacy behavior that must not regress.
-- [ ] **Critical:** Trace the source-verified `isBeingApproved` false→true transition, optional approved-child cleanup, unconditional matching-parent-body replacement using accepted changes, live parent notifications, and failure behavior; capture golden before/after fixtures and edge cases.
-- [ ] Record assumptions and unresolved questions (including import/export exact expectations).
+- [x] Check out the latest main branch and produce a current-state architecture/feature and data-flow map.
+- [x] Identify all clients, SignalR hubs/events, controllers, roles, validation rules, exports and data access paths.
+- [x] Capture representative test fixtures: multiple amendments, multilingual content, archived state, markdown with varying slide counts, live presentation, timer states. *(Phase 0: multi-language approval and `**NEWSLIDE**` cleanup fixtures. Completed in Phase 1: `test/Amendment.Domain.Tests/Fixtures.cs`.)*
+- [x] Establish reproducible local build/tests; document missing prerequisites and baseline failures.
+- [x] Add characterization tests around legacy behavior that must not regress.
+- [x] **Critical:** Trace the source-verified `isBeingApproved` false→true transition, optional approved-child cleanup, unconditional matching-parent-body replacement using accepted changes, live parent notifications, and failure behavior; capture golden before/after fixtures and edge cases.
+- [x] Record assumptions and unresolved questions (including import/export exact expectations).
 
 **Checkpoint 0:** Current code can be built/tested reproducibly; baseline parity matrix and migration risk register reviewed. **No production changes.**
 
@@ -566,13 +566,13 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 **Objective:** Lock critical semantics and validation without AWS deployment.
 
-- [ ] Define domain entities/DTOs, versioning, valid states and language normalization (design against **.NET 10** APIs; production project retargeting occurs in Phase 1A).
-- [ ] Preserve `**NEWSLIDE**` and test slide parsing, empty-body rejection, pages after edits, edge cases.
-- [ ] Define create vs update semantics and duplicate-body handling.
-- [ ] Define GraphQL schema draft, public presentation DTO, private/public event schema, version behavior.
-- [ ] Define role-to-operation matrix, including translator live edits and anonymous read-only projector.
-- [ ] Create `Amendment.Domain.Tests` with unit/property-style edge tests.
-- [ ] Extract/specify conference approval as a business-critical domain workflow with deterministic cleanup/parent-update golden tests; distinguish it from live translator updates.
+- [x] Define domain entities/DTOs, versioning, valid states and language normalization (design against **.NET 10** APIs; production project retargeting occurs in Phase 1A).
+- [x] Preserve `**NEWSLIDE**` and test slide parsing, empty-body rejection, pages after edits, edge cases.
+- [x] Define create vs update semantics and duplicate-body handling.
+- [x] Define GraphQL schema draft, public presentation DTO, private/public event schema, version behavior.
+- [x] Define role-to-operation matrix, including translator live edits and anonymous read-only projector.
+- [x] Create `Amendment.Domain.Tests` with unit/property-style edge tests.
+- [x] Extract/specify conference approval as a business-critical domain workflow with deterministic cleanup/parent-update golden tests; distinguish it from live translator updates.
 
 **Checkpoint 1:** Unit tests demonstrate all agreed invariants and desired live-edit behavior; schema/auth decisions reviewed. **No cloud dependency required.**
 
