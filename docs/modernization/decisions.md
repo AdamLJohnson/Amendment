@@ -12,6 +12,7 @@
 | D6 | The public presentation returns markdown only for currently visible languages (resolves Q11 and R5). | User, Checkpoint 0 review |
 | D7 | Phase 1 domain code lives in the new `src/Amendment.Domain` project (net10.0, no packages), tested by `test/Amendment.Domain.Tests`. Both are in `Amendment.sln`. Legacy projects do not reference it yet. | Phase 1 |
 | D8 | Deliberate changes from legacy behavior are marked **[Δ]** in `contracts.md`. Each one is covered by a domain test. | Phase 1 |
+| D9 | `global.json` pins SDK `10.0.200` with `rollForward: latestFeature`, so any 10.0 SDK in the 2xx band or newer is accepted. All 13 C# projects target `net10.0` and there are **no legacy exceptions**. Details in §1A. | Phase 1A |
 
 ## 1. Legacy test baseline (2026-10-18, SDK 10.0.202, Windows)
 
@@ -25,6 +26,33 @@
 - The test host (`CustomWebApplicationFactory`) always authenticates as `System Administrator`, so role boundaries are not covered by tests.
 - Phase 0 tests added: 8 in `AmendmentApprovalTests` (`Characterization_*`), 1 in `ClientNotifierTests`, and 9 theory cases in `AmendmentCleanupServiceTests`. All pass.
 - Not available: browser/E2E tests, PostgreSQL integration tests, export layout tests, timer tests.
+
+## 1A. .NET 10 upgrade record (Phase 1A, 2026-10-18, SDK 10.0.202)
+
+**Inventory:** `Amendment.Client` (BlazorWebAssembly), `Amendment.Client.Repository`, `Amendment.Server` (Web), `Amendment.Server.Mediator`, `Amendment.Service`, `Amendment.Repository`, `Amendment.Model`, `Amendment.Shared`, `Amendment.Domain`, plus the tests `Amendment.Tests`, `Amendment.Server.Tests`, `Amendment.Client.Repository.Tests` and `Amendment.Domain.Tests`. All are `net10.0`. The shared build file is `Directory.Build.props` (unchanged). There is no `Directory.Packages.props`.
+
+| Change | Reason |
+|---|---|
+| Microsoft.AspNetCore.\*, Microsoft.EntityFrameworkCore.\*, Microsoft.Extensions.\*, Microsoft.JSInterop: `9.0.5` → `10.0.13` | Framework alignment |
+| `Npgsql.EntityFrameworkCore.PostgreSQL` `9.0.4` → `10.0.3` | Required by EF Core 10 |
+| `IRepository.ExecuteUpdate` now takes `Action<UpdateSettersBuilder<T>>` instead of `Expression<Func<SetPropertyCalls<T>,…>>` | EF Core 10 breaking change; callers did not need changes |
+| Removed `Microsoft.AspNetCore.OpenApi` from `Amendment.Server` | Unused. Its 10.x version pulls in Microsoft.OpenApi 2.x, which breaks Swashbuckle 8.1.1 (`TypeLoadException` at startup) |
+| Removed `Microsoft.Extensions.Logging.Configuration` from `Amendment.Server` | NU1510: now part of the shared framework |
+| `src/Amendment.Tests` added to `Amendment.sln` | Closes R10 |
+| Dockerfile `aspnet:10.0` / `sdk:10.0`; copies `global.json` and `Directory.Build.props` before restore | SDK pin applies inside Docker |
+| New `.github/workflows/ci.yml` using `setup-dotnet` with `global-json-file`: Release build, tests, publish, WASM publish smoke check | Reproducible pipeline. Excludes only the R14 test |
+
+Third-party packages are **unchanged**: Blazorise 1.7.6, Markdig 0.41.1, ClosedXML 0.105.0, QuestPDF 2025.5.0, Mapster 7.4.1-pre01, Moq 4.20.69, Swashbuckle 8.1.1, Autofac, MediatR, FluentValidation and AutoMapper. All of them build and pass tests on `net10.0`.
+
+**Results:**
+- Release build: 0 errors.
+- Debug build: 61 warnings, all nullable warnings plus NU1903. The count is the same as the Phase 0 baseline.
+- Tests: 130/130 Domain, 14/14 Client.Repository, 19/19 `Amendment.Tests`, and 45/46 Server. The one failure is the pre-existing R14 test.
+- Docker image builds; size 669 MB.
+- Container smoke test with Postgres 17: all 9 migrations applied with EF 10.0.13 and no pending model changes; seed data loaded.
+- Container smoke test in Development (in-memory database): `/`, `/api/version`, `/swagger/v1/swagger.json`, `blazor.webassembly.js`, `dotnet.js` and the fingerprinted `Amendment.Client.*.wasm` / `Amendment.Shared.*.wasm` return 200, with Brotli served. No `fail`/`crit` log lines.
+- **WASM size baseline:** `_framework` has 303 files, 14.23 MB uncompressed and 4.27 MB Brotli. The full server publish is 216 MB.
+- **Not yet verified:** the browser console, the network tab and interactive UI routes (login, editor Markdown preview, screen control, projector) need a manual browser check.
 
 ## 2. Open questions (plan §12 plus Phase 0 findings)
 
@@ -60,14 +88,16 @@
 | R6 | Multiple live amendments possible; `FirstOrDefault` is nondeterministic | M / M | D3: `PresentationState` |
 | R7 | Duplicate and mislabeled notifications (`OperationType.Update` sent for create/delete) hide client bugs | M / M | Single event pipeline with typed operations |
 | R8 | Raw HTML in Markdown with no sanitizer → XSS on projector/editor | M / High | Sanitize rendered HTML; keep the `<u>` allow-list |
-| R9 | .NET 9 → 10 upgrade (Blazorise, Markdig, ClosedXML, QuestPDF, Mapster pre-release, Moq 4.20, old `Microsoft.AspNetCore.SignalR.Core 1.1.0` in tests) | M / M | Phase 1A per-package compatibility check; `global.json` pin |
-| R10 | `src/Amendment.Tests` is outside the solution, so CI may skip it | H / M | Add it to the solution or the CI command in Phase 1A [VERIFY CI] |
+| R9 | ~~.NET 9 → 10 upgrade~~ **Mitigated (Phase 1A):** third-party packages are unchanged and work on `net10.0`. The remaining risk is UI-level regressions not covered by tests (manual browser check pending) | L / M | §1A |
+| R10 | ~~`src/Amendment.Tests` is outside the solution~~ **Closed:** added to `Amendment.sln` and run by `ci.yml` | — | — |
 | R11 | Timer is in-memory and single-instance | M / M | Persist timer state (target design) |
 | R12 | Export output differences (fonts, layout, file names) | M / M | Capture golden files from the legacy app before porting (Q9) |
 | R13 | Data migration from PostgreSQL (IDs, audit fields, `ParentAmendmentId` links, users and password hashes) | M / High | Migration tool plus row-count and hash verification; user migration plan (Q10) |
 | R14 | Pre-existing failing test masks regressions | L / L | Fix the fixture as a separate change once approved (not yet approved; still failing) |
 | R16 | ~~`azure-pipelines.yml` runs `dotnet publish` at the repository root, which picks up `Amendment.sln` and now includes net10.0 projects.~~ **Closed:** the Azure pipeline was unused and `azure-pipelines.yml` has been deleted (user decision). The Docker build (`Amendment.Server` only) is the remaining CI. | — | Phase 1A still pins the SDK in `global.json` and updates the Dockerfile / GitHub workflow SDK |
 | R15 | Domain contracts drift from what the legacy migration needs (int ids → string ids, `LanguageId` → codes) | M / M | Phase 3 migration maps `ENG/SPA/FRA` through `LanguageCode` and keeps an id map |
+| R17 | NU1903 known-vulnerability warnings: `AutoMapper` 14.0.0 (referenced by `Amendment.Model`) and `Microsoft.AspNetCore.SignalR.Core` 1.1.0 (test-only, `Amendment.Tests`). These existed before Phase 1A | M / M | Upgrading needs a third-party version change, so approval is required. Not changed in Phase 1A |
+| R18 | On Windows, `BuildWebCompiler2022` reports `screen.less: --math=always is deprecated` as a build **error**. It happens only on full rebuilds (`--no-incremental`) and also on the pre-upgrade commit. Linux, CI and Docker builds are unaffected because the package is `Windows_NT` only | M / L | Adjust `compilerconfig.json` LESS options or replace the tool (separate change, needs approval) |
 
 ## 4. Assumptions (not yet verified)
 

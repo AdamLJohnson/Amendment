@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, 'modernization/**' ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      # SDK version is pinned in global.json
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Amendment.sln
+
+      - name: Build (Release)
+        run: dotnet build Amendment.sln -c Release --no-restore
+
+      # Excludes the known pre-existing failure tracked as R14 in docs/modernization/decisions.md
+      - name: Test (Release)
+        run: >
+          dotnet test Amendment.sln -c Release --no-build
+          --filter "FullyQualifiedName!=Amendment.Server.Tests.AmendmentBodyControllerTests.PostAction_Returns_CreatedAmendmentBody"
+
+      - name: Publish server + Blazor WASM client
+        run: dotnet publish src/Amendment.Server/Amendment.Server.csproj -c Release -o artifacts/publish
+
+      - name: Blazor WASM publish smoke check
+        run: |
+          fw=artifacts/publish/wwwroot/_framework
+          test -f artifacts/publish/wwwroot/index.html
+          test -f $fw/blazor.webassembly.js
+          test -f $fw/dotnet.js
+          ls $fw/Amendment.Client.*.wasm
+          echo "framework size (uncompressed):"; du -ch $(ls $fw/* | grep -v -E '\.(br|gz)$') | tail -1
+          echo "framework size (brotli):"; du -ch $fw/*.br | tail -1

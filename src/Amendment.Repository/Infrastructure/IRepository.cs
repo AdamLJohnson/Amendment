@@ -19,7 +19,7 @@ namespace Amendment.Repository.Infrastructure
         void Delete(params Expression<Func<T, bool>>[] where);
 
         Task<int> ExecuteUpdate(Expression<Func<T, bool>> where,
-            Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> setPropertyCalls);
+            Action<UpdateSettersBuilder<T>> setPropertyCalls);
 
         Task<int> ExecuteDelete(Expression<Func<T, bool>> where);
     }

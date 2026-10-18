@@ -580,13 +580,13 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 **Objective:** Establish .NET 10 as the single target for the modernized application before provisioning new AWS infrastructure.
 
-- [ ] Install and pin an approved .NET 10 SDK in `global.json`; update local setup instructions and GitHub Actions `setup-dotnet` usage.
-- [ ] Inventory every C# project and shared build file; record current framework, incompatible dependencies, and any deliberately temporary legacy-host exception.
-- [ ] Upgrade the existing **Blazor WebAssembly client** and the C# projects that are being retained to `net10.0`; align `Microsoft.AspNetCore.Components.WebAssembly*` and other framework-dependent packages to compatible .NET 10 versions.
-- [ ] Create or retarget **domain, contracts, infrastructure and test** projects to `net10.0`; preserve feature behavior and maintain backwards-compatible interop with the legacy backend during migration.
+- [x] Install and pin an approved .NET 10 SDK in `global.json`; update local setup instructions and GitHub Actions `setup-dotnet` usage.
+- [x] Inventory every C# project and shared build file; record current framework, incompatible dependencies, and any deliberately temporary legacy-host exception.
+- [x] Upgrade the existing **Blazor WebAssembly client** and the C# projects that are being retained to `net10.0`; align `Microsoft.AspNetCore.Components.WebAssembly*` and other framework-dependent packages to compatible .NET 10 versions.
+- [x] Create or retarget **domain, contracts, infrastructure and test** projects to `net10.0`; preserve feature behavior and maintain backwards-compatible interop with the legacy backend during migration.
 - [ ] Update obsolete APIs, serializers, dependency injection registration, analyzers, code generators and test SDKs only where required. Validate Markdown rendering, localized strings, authentication and all existing major UI routes.
 - [ ] Establish a reproducible **Release** build/test pipeline and a Blazor WASM publish smoke test; verify browser console/network behavior and capture size/performance baseline.
-- [ ] Document any legacy projects excluded from the upgrade, why, who owns removal, and the sunset checkpoint (Phase 11).
+- [x] Document any legacy projects excluded from the upgrade, why, who owns removal, and the sunset checkpoint (Phase 11).
 
 **Checkpoint 1A:** All retained C# projects build/test/publish as `net10.0` with the pinned SDK; Blazor smoke and parity tests pass; any temporary legacy exception is documented. **Stop for approval before Phase 2.**
 

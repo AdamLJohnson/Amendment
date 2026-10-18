@@ -3,7 +3,7 @@
 [![Docker](https://github.com/AdamLJohnson/Amendment/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/AdamLJohnson/Amendment/actions/workflows/docker-publish.yml)
 
 ## Build Prerequisites
-1. [DotNet 9 SDK](https://dotnet.microsoft.com/download)
+1. [DotNet 10 SDK](https://dotnet.microsoft.com/download) (10.0.200 or later, pinned in `global.json`)
 1. [Web Compiler VS Extension](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebCompiler)
 
 ## Some quick commands

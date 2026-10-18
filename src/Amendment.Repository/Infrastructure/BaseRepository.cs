@@ -50,7 +50,7 @@ namespace Amendment.Repository.Infrastructure
                 Delete(obj);
         }
 
-        public virtual Task<int> ExecuteUpdate(Expression<Func<T, bool>> where, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> setPropertyCalls)
+        public virtual Task<int> ExecuteUpdate(Expression<Func<T, bool>> where, Action<UpdateSettersBuilder<T>> setPropertyCalls)
         {
             return DbSet.Where(where).ExecuteUpdateAsync(setPropertyCalls);
         }
