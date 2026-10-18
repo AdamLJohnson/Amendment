@@ -280,5 +280,21 @@ THEREFORE BE IT RESOLVED that  Policy 456 be adopted  effective January 1, 2025.
             // Assert
             Assert.Equal(expected, result);
         }
+
+        // Phase 0 characterization goldens: legacy output captured as-is (including spacing).
+        [Theory]
+        [InlineData("We ~~shall~~ <u>will</u> proceed.", "We  will proceed.")]
+        [InlineData("Slide one ~~drop\n**NEWSLIDE**\nthis~~ end\n**NEWSLIDE**\nSlide <u>two</u>", "Slide one  end\n**NEWSLIDE**\nSlide two")]
+        [InlineData("Keep ~~unclosed", "Keep ~~unclosed")]
+        [InlineData("Keep <u>unclosed", "Keep <u>unclosed")]
+        [InlineData("a ~~b~~ c ~~d", "a  c ~~d")]
+        [InlineData("x <u class=\"y\">t</u> z", "x <u class=\"y\">t</u> z")]
+        [InlineData("x ~~<u>y</u>~~ z", "x  z")]
+        [InlineData("x <u>a ~~b~~ c</u> z", "x a  c z")]
+        [InlineData("<U>Up</U> and <u>low\nline</u>", "Up and low\nline")]
+        public void Characterization_CleanupAmendmentText_Golden(string input, string expected)
+        {
+            Assert.Equal(expected, _cleanupService.CleanupAmendmentText(input));
+        }
     }
 }

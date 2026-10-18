@@ -147,5 +147,22 @@ namespace Amendment.Tests.Services
                 x => x.SendCoreAsync("ClearScreens", It.IsAny<object[]>(), default),
                 Times.Once);
         }
+
+        [Fact]
+        public async Task Characterization_SendToLanguageScreenAsync_SendsRawAmendmentBodyChangeMethodToScreenHub()
+        {
+            // Phase 0: legacy force-send path (ScreenControlService.UpdateBodyAsync) emits "AmendmentBodyChange",
+            // a method name the Blazor client does not subscribe to.
+            var body = new AmendmentBody { Id = 1, AmendId = 1, LanguageId = 1, AmendBody = "x" };
+
+            await _clientNotifier.SendToLanguageScreenAsync(1, ClientNotifierMethods.AmendmentBodyChange, body);
+
+            _mockScreenClientProxy.Verify(
+                x => x.SendCoreAsync("AmendmentBodyChange", It.Is<object[]>(args => args.Length == 1 && ReferenceEquals(args[0], body)), default),
+                Times.Once);
+            _mockScreenClientProxy.Verify(x => x.SendCoreAsync("AmendmentBodyUpdate", It.IsAny<object[]>(), default), Times.Never);
+            _mockAmendmentClientProxy.Verify(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), default), Times.Never);
+        }
+
     }
 }
