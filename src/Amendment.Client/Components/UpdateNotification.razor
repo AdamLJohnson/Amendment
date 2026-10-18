@@ -6,8 +6,8 @@
 @inject ILogger<UpdateNotification> Logger
 @implements IDisposable
 
-<Modal @ref="updateModal" Closing="@OnModalClosing">
-    <ModalContent Centered>
+<Modal @ref="updateModal" Closing="@OnModalClosing" Centered>
+    <ModalContent>
         <ModalHeader>
             <ModalTitle>
                 <Icon Name="IconName.Download" class="me-2" />

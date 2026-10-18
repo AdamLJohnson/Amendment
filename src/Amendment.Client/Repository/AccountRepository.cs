@@ -2,7 +2,7 @@ using Amendment.Client.AuthProviders;
 using Amendment.Shared;
 using Amendment.Shared.Requests;
 using Amendment.Shared.Responses;
-using Blazored.LocalStorage;
+using Amendment.Client.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;

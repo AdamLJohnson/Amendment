@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Amendment.Repository;
 using Amendment.Shared.Requests;
-using Newtonsoft.Json;
 using Blazorise.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Amendment.Shared;

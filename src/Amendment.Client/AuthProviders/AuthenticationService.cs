@@ -1,5 +1,5 @@
 ﻿using Amendment.Shared.Requests;
-using Blazored.LocalStorage;
+using Amendment.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
 using System.Text;

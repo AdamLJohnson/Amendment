@@ -6,7 +6,7 @@
 <TableRow>
     <TableRowCell>@Context.Key</TableRowCell>
     <TableRowCell>
-        <TextEdit id="username" @bind-Text="Context.Value" />
+        <TextInput id="username" @bind-Value="Context.Value" />
     </TableRowCell>
     <TableRowCell TextAlignment="TextAlignment.End">
         <Button Color="Color.Primary" Clicked="OnSaveClick">Save</Button>

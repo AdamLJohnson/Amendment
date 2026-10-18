@@ -9,12 +9,13 @@ Read first: `AMENDMENT_MODERNIZATION_PLAN.md` (checkboxes track progress), then 
 | 0 Baseline | Approved (Checkpoint 0) | committed on `main` as "Phase 0" |
 | 1 Domain contracts | Approved (Checkpoint 1) | committed on `modernization/phase-1-domain` as "Phase 1" |
 | 1A .NET 10 retarget | Done, **awaiting Checkpoint 1A approval** | `modernization/phase-1a-net10` |
+| 1A follow-up: packages to latest, R14/R17 fixed | Done (decisions.md §1B) | same branch, uncommitted |
 
 ## Rules the user set
 
 - One phase at a time. Stop at each checkpoint for approval. Tick plan checkboxes as items complete.
 - Target is `net10.0` everywhere. Every project is now `net10.0`; SDK pinned by `global.json` (D9).
-- Ask before changing third-party package versions (e.g. R17).
+- Ask before changing third-party package versions. MediatR stays at `12.5.0`.
 - No AWS resources before Phase 2. Do not delete legacy code before cutover.
 - Decisions D3–D6 (single presentation, role matrix, all-or-nothing approval with an Admin best-effort override, public shows only visible bodies) are fixed. Do not change them silently.
 
@@ -39,13 +40,13 @@ Read first: `AMENDMENT_MODERNIZATION_PLAN.md` (checkboxes track progress), then 
 
 ## Known baseline issues
 
-- `AmendmentBodyControllerTests.PostAction_Returns_CreatedAmendmentBody` fails before any of our changes, most likely because of a duplicate-language seed (R14). It stays unfixed until approved.
-- 61 legacy build warnings (nullable plus NU1903, see R17).
+- 60 legacy build warnings (nullable only). R14 and R17 are closed.
 - Windows full rebuilds hit the WebCompiler LESS error R18. Use an incremental build.
 
 ## Gotchas
 
 - In test code, a static field named `Single` collides with `System.Single`. That is why the fixture is called `OneSlide`.
 - Legacy approval cleans the child first, then cleans that result again for the parent. The domain keeps this behavior; see the `LegacyParity_*` test.
-- Do not re-add `Microsoft.AspNetCore.OpenApi` while Swashbuckle is 8.x. It breaks server startup.
+- Object mapping uses Mapster (`.Adapt<T>()`); AutoMapper was removed. Keep the Mapster version identical across projects.
+- Blazorise is 2.x; 1.x component names/parameters no longer compile. Blazorise is now commercially licensed; replacement is deferred to a later phase (risk R19).
 - The Docker container defaults to `Production` (`DbType=DB`) and needs `ConnectionStrings__DefaultConnection`.

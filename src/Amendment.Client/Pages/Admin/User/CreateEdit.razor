@@ -18,59 +18,59 @@
             <Validation>
                 <Field>
                     <FieldLabel For="username">Username</FieldLabel>
-                    <TextEdit id="username" @bind-Text="model.Username" Placeholder="Enter Username">
+                    <TextInput id="username" @bind-Value="model.Username" Placeholder="Enter Username">
                         <Feedback>
                             <ValidationError/>
                             <FieldHelp>Username for the user</FieldHelp>
                         </Feedback>
-                    </TextEdit>
+                    </TextInput>
                 </Field>
             </Validation>
             <Validation>
                 <Field>
                     <FieldLabel For="email">Email</FieldLabel>
-                    <TextEdit id="email" @bind-Text="model.Email" Placeholder="Enter Email">
+                    <TextInput id="email" @bind-Value="model.Email" Placeholder="Enter Email">
                         <Feedback>
                             <ValidationError/>
                             <FieldHelp>Email address for the user</FieldHelp>
                         </Feedback>
-                    </TextEdit>
+                    </TextInput>
                 </Field>
             </Validation>
             <Validation>
                 <Field>
                     <FieldLabel For="name">Name</FieldLabel>
-                    <TextEdit id="name" @bind-Text="model.Name" Placeholder="Enter Name">
+                    <TextInput id="name" @bind-Value="model.Name" Placeholder="Enter Name">
                         <Feedback>
                             <ValidationError/>
                             <FieldHelp>Name for the user</FieldHelp>
                         </Feedback>
-                    </TextEdit>
+                    </TextInput>
                 </Field>
             </Validation>
             <Validation>
                 <Field>
                     <FieldLabel For="password">Password</FieldLabel>
-                    <TextEdit id="password" @bind-Text="model.Password" Role="TextRole.Password" Placeholder="Enter Password">
+                    <TextInput id="password" @bind-Value="model.Password" Role="TextRole.Password" Placeholder="Enter Password">
                         <Feedback>
                             <ValidationError/>
                             <FieldHelp>Password for the user</FieldHelp>
                         </Feedback>
-                    </TextEdit>
+                    </TextInput>
                 </Field>
             </Validation>
             <Validation>
                 <Field>
                     <FieldLabel For="confirmPassword">Confirm Password</FieldLabel>
-                    <TextEdit id="confirmPassword" @bind-Text="model.ConfirmPassword" Role="TextRole.Password" Placeholder="Enter Password">
+                    <TextInput id="confirmPassword" @bind-Value="model.ConfirmPassword" Role="TextRole.Password" Placeholder="Enter Password">
                         <Feedback>
                             <ValidationError/>
                         </Feedback>
-                    </TextEdit>
+                    </TextInput>
                 </Field>
             </Validation>
             <Field>
-                <Check TValue="bool" @bind-Checked="model.RequirePasswordChange">Require Password Change</Check>
+                <Check TValue="bool" @bind-Value="model.RequirePasswordChange">Require Password Change</Check>
                 <FieldHelp>If checked, the user will be required to change their password on next login</FieldHelp>
             </Field>
         </Validations>
@@ -78,7 +78,7 @@
     <Column ColumnSize="ColumnSize.Is6">
         <h3>Roles</h3>
         <Repeater Items="@_roleList">
-            <Check TValue="bool" Checked="model.Roles.Contains(context.Id)" CheckedChanged="(value) => OnChanged(value, context.Id)">@context.Name</Check>
+            <Check TValue="bool" Value="model.Roles.Contains(context.Id)" ValueChanged="(value) => OnChanged(value, context.Id)">@context.Name</Check>
         </Repeater>
     </Column>
 </Row>

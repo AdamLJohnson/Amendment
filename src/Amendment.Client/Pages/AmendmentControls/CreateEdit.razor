@@ -29,58 +29,58 @@
                 <Validation>
                     <Field>
                         <FieldLabel For="amendmentTitle">Amendment Title</FieldLabel>
-                        <TextEdit id="amendmentTitle" @bind-Text="_model.Title" Placeholder="Amendment Title">
+                        <TextInput id="amendmentTitle" @bind-Value="_model.Title" Placeholder="Amendment Title">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
-                        </TextEdit>
+                        </TextInput>
                     </Field>
                 </Validation>
                 <Validation>
                     <Field>
                         <FieldLabel For="author">Author</FieldLabel>
-                        <TextEdit id="author" @bind-Text="_model.Author" Placeholder="Author">
+                        <TextInput id="author" @bind-Value="_model.Author" Placeholder="Author">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
-                        </TextEdit>
+                        </TextInput>
                     </Field>
                 </Validation>
                 <Validation>
                     <Field>
                         <FieldLabel For="motion">Motion</FieldLabel>
-                        <TextEdit id="motion" @bind-Text="_model.Motion" Placeholder="Motion">
+                        <TextInput id="motion" @bind-Value="_model.Motion" Placeholder="Motion">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
-                        </TextEdit>
+                        </TextInput>
                     </Field>
                 </Validation>
                 <Validation>
                     <Field>
                         <FieldLabel For="source">Source</FieldLabel>
-                        <TextEdit id="source" @bind-Text="_model.Source" Placeholder="Source">
+                        <TextInput id="source" @bind-Value="_model.Source" Placeholder="Source">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
-                        </TextEdit>
+                        </TextInput>
                     </Field>
                 </Validation>
                 <Validation>
                     <Field>
                         <FieldLabel For="legisId">Legislative ID</FieldLabel>
-                        <TextEdit id="legisId" @bind-Text="_model.LegisId" Placeholder="Legislative ID">
+                        <TextInput id="legisId" @bind-Value="_model.LegisId" Placeholder="Legislative ID">
                             <Feedback>
                                 <ValidationError/>
                             </Feedback>
-                        </TextEdit>
+                        </TextInput>
                     </Field>
                 </Validation>
                 @if (Id != null) // Only show archive checkbox for existing amendments
                 {
                     <Field>
                         <FieldLabel>Archive Status</FieldLabel>
-                        <Check TValue="bool" @bind-Checked="_model.IsArchived">
+                        <Check TValue="bool" @bind-Value="_model.IsArchived">
                             <ChildContent>Archive this amendment</ChildContent>
                         </Check>
                         <FieldHelp>Archived amendments are hidden from the main list by default</FieldHelp>
@@ -90,7 +90,7 @@
             <Column ColumnSize="ColumnSize.Is6">
                 <Field>
                     <FieldLabel For="primaryLanguage">Primary Language</FieldLabel>
-                    <Select id="primaryLanguage" @bind-SelectedValue="@_model.PrimaryLanguageId" TValue="int">
+                    <Select id="primaryLanguage" @bind-Value="@_model.PrimaryLanguageId" TValue="int">
                         <ChildContent>
                             <Repeater Items="_language">
                                 <ChildContent Context="languageItem">

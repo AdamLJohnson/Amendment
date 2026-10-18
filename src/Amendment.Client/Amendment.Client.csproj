@@ -11,16 +11,15 @@
     <None Include="compilerconfig.json" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-    <PackageReference Include="Blazorise.Bootstrap5" Version="1.7.6" />
-    <PackageReference Include="Blazorise.Components" Version="1.7.6" />
-    <PackageReference Include="Blazorise.FluentValidation" Version="1.7.6" />
-    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.7.6" />
-    <PackageReference Include="Blazorise.Markdown" Version="1.7.6" />
-    <PackageReference Include="Blazorise.Snackbar" Version="1.7.6" />
+    <PackageReference Include="Blazorise.Bootstrap5" Version="2.4.0" />
+    <PackageReference Include="Blazorise.Components" Version="2.4.0" />
+    <PackageReference Include="Blazorise.FluentValidation" Version="2.4.0" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="2.4.0" />
+    <PackageReference Include="Blazorise.Markdown" Version="2.4.0" />
+    <PackageReference Include="Blazorise.Snackbar" Version="2.4.0" />
     <PackageReference Include="BuildWebCompiler2022" Version="1.14.15" Condition="'$(OS)' == 'Windows_NT'" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
-    <PackageReference Include="Markdig" Version="0.41.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
+    <PackageReference Include="Markdig" Version="1.4.1" />
     <PackageReference Include="Toolbelt.Blazor.HttpClientInterceptor" Version="10.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.13" />

@@ -69,7 +69,7 @@
     <Column TextAlignment="TextAlignment.Center">
         <AuthorizeView Roles="@RoleGroups.AdminAmendEditor">
             <Authorized>
-                <Check TValue="bool" @bind-Checked="ShowArchived">
+                <Check TValue="bool" @bind-Value="ShowArchived">
                     <ChildContent>Show Archived Amendments</ChildContent>
                 </Check>
             </Authorized>

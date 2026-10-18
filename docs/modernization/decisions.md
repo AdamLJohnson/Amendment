@@ -40,9 +40,9 @@
 | Removed `Microsoft.Extensions.Logging.Configuration` from `Amendment.Server` | NU1510: now part of the shared framework |
 | `src/Amendment.Tests` added to `Amendment.sln` | Closes R10 |
 | Dockerfile `aspnet:10.0` / `sdk:10.0`; copies `global.json` and `Directory.Build.props` before restore | SDK pin applies inside Docker |
-| New `.github/workflows/ci.yml` using `setup-dotnet` with `global-json-file`: Release build, tests, publish, WASM publish smoke check | Reproducible pipeline. Excludes only the R14 test |
+| New `.github/workflows/ci.yml` using `setup-dotnet` with `global-json-file`: Release build, tests, publish, WASM publish smoke check | Reproducible pipeline. Runs all tests (R14 fixed in §1B) |
 
-Third-party packages are **unchanged**: Blazorise 1.7.6, Markdig 0.41.1, ClosedXML 0.105.0, QuestPDF 2025.5.0, Mapster 7.4.1-pre01, Moq 4.20.69, Swashbuckle 8.1.1, Autofac, MediatR, FluentValidation and AutoMapper. All of them build and pass tests on `net10.0`.
+Third-party packages were **unchanged** in this step; they were upgraded afterwards in §1B.
 
 **Results:**
 - Release build: 0 errors.
@@ -53,6 +53,42 @@ Third-party packages are **unchanged**: Blazorise 1.7.6, Markdig 0.41.1, ClosedX
 - Container smoke test in Development (in-memory database): `/`, `/api/version`, `/swagger/v1/swagger.json`, `blazor.webassembly.js`, `dotnet.js` and the fingerprinted `Amendment.Client.*.wasm` / `Amendment.Shared.*.wasm` return 200, with Brotli served. No `fail`/`crit` log lines.
 - **WASM size baseline:** `_framework` has 303 files, 14.23 MB uncompressed and 4.27 MB Brotli. The full server publish is 216 MB.
 - **Not yet verified:** the browser console, the network tab and interactive UI routes (login, editor Markdown preview, screen control, projector) need a manual browser check.
+
+## 1B. Package upgrade to latest (Phase 1A follow-up, 2026-10-18, user request)
+
+All packages are on their latest stable version, except **MediatR, which stays at `12.5.0`** (user decision).
+
+| Package | From → To | Notes |
+|---|---|---|
+| AutoMapper | 14.0.0 → **removed** | Closes R17 (CVE-2026-32933). All mappings moved to Mapster `.Adapt<T>()`; `MappingProfile.cs` and `RegisterMapperProfile.cs` deleted |
+| Microsoft.AspNetCore.SignalR.Core | 1.1.0 → **removed** | Closes R17. Test-only, unused (`Amendment.Tests`) |
+| Mapster | 7.4.1-pre01 → 10.0.13 | Same version in every project (avoids NU1605 downgrade) |
+| Blazorise.\* (Bootstrap5, Components, FluentValidation, Icons.FontAwesome, Markdown, Snackbar) | 1.7.6 → 2.4.0 | Breaking component/parameter renames fixed in client `.razor` files |
+| Swashbuckle.AspNetCore | 8.1.1 → 10.3.0 | Uses Microsoft.OpenApi 2.x; serves OpenAPI 3.0.4 |
+| FluentValidation (+ DI extensions) | 11.11.0 → 12.2.0 | |
+| Autofac / Autofac.Extensions.DependencyInjection | 8.3.0 / 10.0.0 → 9.3.4 / 11.0.2 | |
+| Markdig | 0.41.1 → 1.4.1 | |
+| QuestPDF | 2025.5.0 → 2026.9.1 | |
+| ClosedXML | 0.105.0 → 0.105.1 | |
+| HtmlAgilityPack | 1.12.1 → 1.13.1 | |
+| Lorem.Universal.NET | 4.0.80 → 5.0.0 | |
+| Microsoft.IdentityModel.Tokens / System.IdentityModel.Tokens.Jwt | 8.10.0 → 8.23.0 | |
+| Microsoft.VisualStudio.Azure.Containers.Tools.Targets | 1.21.2 → 1.23.0 | |
+| Test: Microsoft.NET.Test.Sdk, xunit, xunit.runner.visualstudio, coverlet.collector, Moq, NSubstitute | → 18.11.0, 2.9.3, 4.0.1, 10.1.0, 4.21.0, 6.2.0 | Unused `Newtonsoft.Json` usings removed from server tests |
+
+**R14 fix:** `PostAction_Returns_CreatedAmendmentBody` now posts a body in a language that amendment 1 does not already have, so it no longer collides with the seeded `LanguageId = 1` body. `ci.yml` no longer filters it out.
+
+**Results:**
+- Release build: 0 errors. Debug build: 60 warnings (nullable only; no NU1903).
+- `dotnet list package --vulnerable --include-transitive`: none.
+- Tests: 130/130 Domain, 14/14 Client.Repository, 19/19 `Amendment.Tests`, 46/46 Server (stable across repeated runs).
+- Docker image builds (645 MB). Development-mode container smoke test: `/`, `/api/version`, `/swagger/v1/swagger.json` (19 paths), `/swagger/index.html`, Blazorise CSS under `_content/` and `blazor.webassembly.js` return 200. No `fail`/`crit` log lines.
+- **WASM size:** `_framework` is 18.16 MB uncompressed and 5.54 MB Brotli (was 4.27 MB). `Blazorise.wasm` alone is 341 KB Brotli. Full server publish is 203 MB.
+- **Still pending:** the manual browser check from §1A, now also covering the Blazorise 2 UI.
+
+**Follow-ups (not done, need approval):**
+- `xunit` 2.9.3 is marked legacy; the successor is `xunit.v3` (a different package, so it counts as a new dependency).
+- ~~`Blazored.LocalStorage` 4.5.0 reports "Not found at the sources"~~ **Resolved 2026-10-18:** the package is deprecated, its repository is archived, and every version is unlisted on nuget.org. It was replaced by an in-project `ILocalStorageService`/`LocalStorageService` (`src/Amendment.Client/Services/LocalStorageService.cs`) that calls `localStorage` through `IJSRuntime`. Values are still stored as JSON, so tokens already saved in users' browsers remain readable. No new dependency was added.
 
 ## 2. Open questions (plan §12 plus Phase 0 findings)
 
@@ -93,11 +129,12 @@ Third-party packages are **unchanged**: Blazorise 1.7.6, Markdig 0.41.1, ClosedX
 | R11 | Timer is in-memory and single-instance | M / M | Persist timer state (target design) |
 | R12 | Export output differences (fonts, layout, file names) | M / M | Capture golden files from the legacy app before porting (Q9) |
 | R13 | Data migration from PostgreSQL (IDs, audit fields, `ParentAmendmentId` links, users and password hashes) | M / High | Migration tool plus row-count and hash verification; user migration plan (Q10) |
-| R14 | Pre-existing failing test masks regressions | L / L | Fix the fixture as a separate change once approved (not yet approved; still failing) |
+| R14 | ~~Pre-existing failing test masks regressions~~ **Closed (§1B):** test fixture fixed; CI runs all tests | — | — |
 | R16 | ~~`azure-pipelines.yml` runs `dotnet publish` at the repository root, which picks up `Amendment.sln` and now includes net10.0 projects.~~ **Closed:** the Azure pipeline was unused and `azure-pipelines.yml` has been deleted (user decision). The Docker build (`Amendment.Server` only) is the remaining CI. | — | Phase 1A still pins the SDK in `global.json` and updates the Dockerfile / GitHub workflow SDK |
 | R15 | Domain contracts drift from what the legacy migration needs (int ids → string ids, `LanguageId` → codes) | M / M | Phase 3 migration maps `ENG/SPA/FRA` through `LanguageCode` and keeps an id map |
-| R17 | NU1903 known-vulnerability warnings: `AutoMapper` 14.0.0 (referenced by `Amendment.Model`) and `Microsoft.AspNetCore.SignalR.Core` 1.1.0 (test-only, `Amendment.Tests`). These existed before Phase 1A | M / M | Upgrading needs a third-party version change, so approval is required. Not changed in Phase 1A |
+| R17 | ~~NU1903 known-vulnerability warnings: `AutoMapper` 14.0.0 and `Microsoft.AspNetCore.SignalR.Core` 1.1.0~~ **Closed (§1B):** both removed; no vulnerable packages reported | — | — |
 | R18 | On Windows, `BuildWebCompiler2022` reports `screen.less: --math=always is deprecated` as a build **error**. It happens only on full rebuilds (`--no-incremental`) and also on the pre-upgrade commit. Linux, CI and Docker builds are unaffected because the package is `Windows_NT` only | M / L | Adjust `compilerconfig.json` LESS options or replace the tool (separate change, needs approval) |
+| R19 | Blazorise has moved to a commercial license. 2.4.0 pulls in `Blazorise.Licensing` 1.3.0 transitively. Not blocking now (user decision, 2026-10-18) | M / M | Deferred: choose and migrate to a replacement UI component library in a later phase. Used by `Amendment.Client` via `Blazorise.Bootstrap5`, `.Components`, `.FluentValidation`, `.Icons.FontAwesome`, `.Markdown`, `.Snackbar` |
 
 ## 4. Assumptions (not yet verified)
 

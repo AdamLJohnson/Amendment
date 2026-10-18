@@ -7,7 +7,6 @@ using Amendment.Model.DataModel;
 using Amendment.Repository;
 using Amendment.Repository.Infrastructure;
 using Amendment.Service.Infrastructure;
-using AutoMapper;
 
 namespace Amendment.Service
 {

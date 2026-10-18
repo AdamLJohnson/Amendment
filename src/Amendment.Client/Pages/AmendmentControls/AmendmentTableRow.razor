@@ -122,8 +122,8 @@
     </TableRowCell>
 </TableRow>
 
-<Modal @ref="@_deleteModalRef">
-    <ModalContent Centered>
+<Modal @ref="@_deleteModalRef" Centered>
+    <ModalContent>
         <ModalHeader>
             <ModalTitle>Delete Amendment</ModalTitle>
             <CloseButton />
@@ -138,8 +138,8 @@
     </ModalContent>
 </Modal>
 
-<Modal @ref="@_archiveModalRef">
-    <ModalContent Centered>
+<Modal @ref="@_archiveModalRef" Centered>
+    <ModalContent>
         <ModalHeader>
             <ModalTitle>Archive Amendment</ModalTitle>
             <CloseButton />
@@ -154,8 +154,8 @@
     </ModalContent>
 </Modal>
 
-<Modal @ref="@_unarchiveModalRef">
-    <ModalContent Centered>
+<Modal @ref="@_unarchiveModalRef" Centered>
+    <ModalContent>
         <ModalHeader>
             <ModalTitle>Unarchive Amendment</ModalTitle>
             <CloseButton />
@@ -170,8 +170,8 @@
     </ModalContent>
 </Modal>
 
-<Modal @ref="@_approveModalRef">
-    <ModalContent Centered>
+<Modal @ref="@_approveModalRef" Centered>
+    <ModalContent>
         <ModalHeader>
             <ModalTitle>Approve Amendment</ModalTitle>
             <CloseButton />
@@ -188,7 +188,7 @@
             @if (Model.ParentAmendmentId.HasValue)
             {
                 <div class="mt-3">
-                    <Check @bind-Checked="_updateCurrentAmendmentBodies">
+                    <Check TValue="bool" @bind-Value="_updateCurrentAmendmentBodies">
                         Update this amendment's text (remove formatting)
                     </Check>
                     <small class="form-text text-muted">
@@ -209,8 +209,8 @@
     </ModalContent>
 </Modal>
 
-<Modal @ref="@_cloneModalRef">
-    <ModalContent Centered>
+<Modal @ref="@_cloneModalRef" Centered>
+    <ModalContent>
         <ModalHeader>
             <ModalTitle>Clone Amendment</ModalTitle>
             <CloseButton />
@@ -219,28 +219,28 @@
             <EditForm Model="_cloneRequest" OnValidSubmit="OnCloneBtn">
                 <Field>
                     <FieldLabel For="cloneTitle">Title</FieldLabel>
-                    <TextEdit id="cloneTitle" @bind-Text="_cloneRequest.Title" Placeholder="@($"{Model.Title} (Clone)")">
-                    </TextEdit>
+                    <TextInput id="cloneTitle" @bind-Value="_cloneRequest.Title" Placeholder="@($"{Model.Title} (Clone)")">
+                    </TextInput>
                 </Field>
                 <Field>
                     <FieldLabel For="cloneAuthor">Author</FieldLabel>
-                    <TextEdit id="cloneAuthor" @bind-Text="_cloneRequest.Author" Placeholder="@Model.Author">
-                    </TextEdit>
+                    <TextInput id="cloneAuthor" @bind-Value="_cloneRequest.Author" Placeholder="@Model.Author">
+                    </TextInput>
                 </Field>
                 <Field>
                     <FieldLabel For="cloneMotion">Motion</FieldLabel>
-                    <TextEdit id="cloneMotion" @bind-Text="_cloneRequest.Motion" Placeholder="@Model.Motion">
-                    </TextEdit>
+                    <TextInput id="cloneMotion" @bind-Value="_cloneRequest.Motion" Placeholder="@Model.Motion">
+                    </TextInput>
                 </Field>
                 <Field>
                     <FieldLabel For="cloneSource">Source</FieldLabel>
-                    <TextEdit id="cloneSource" @bind-Text="_cloneRequest.Source" Placeholder="@Model.Source">
-                    </TextEdit>
+                    <TextInput id="cloneSource" @bind-Value="_cloneRequest.Source" Placeholder="@Model.Source">
+                    </TextInput>
                 </Field>
                 <Field>
                     <FieldLabel For="cloneLegisId">Legislative ID</FieldLabel>
-                    <TextEdit id="cloneLegisId" @bind-Text="_cloneRequest.LegisId" Placeholder="@Model.LegisId">
-                    </TextEdit>
+                    <TextInput id="cloneLegisId" @bind-Value="_cloneRequest.LegisId" Placeholder="@Model.LegisId">
+                    </TextInput>
                 </Field>
             </EditForm>
         </ModalBody>

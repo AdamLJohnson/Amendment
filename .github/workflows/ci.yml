@@ -28,11 +28,8 @@ jobs:
       - name: Build (Release)
         run: dotnet build Amendment.sln -c Release --no-restore
 
-      # Excludes the known pre-existing failure tracked as R14 in docs/modernization/decisions.md
       - name: Test (Release)
-        run: >
-          dotnet test Amendment.sln -c Release --no-build
-          --filter "FullyQualifiedName!=Amendment.Server.Tests.AmendmentBodyControllerTests.PostAction_Returns_CreatedAmendmentBody"
+        run: dotnet test Amendment.sln -c Release --no-build
 
       - name: Publish server + Blazor WASM client
         run: dotnet publish src/Amendment.Server/Amendment.Server.csproj -c Release -o artifacts/publish

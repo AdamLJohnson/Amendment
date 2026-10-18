@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Amendment.Repository;
 using Amendment.Shared.Requests;
-using Newtonsoft.Json;
 using Blazorise.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Amendment.Shared;
@@ -63,12 +62,14 @@ namespace Amendment.Server.Tests
         {
             //Arrange
             var client = _factory.CreateClient();
+            var repo = _factory.Services.GetRequiredService<IAmendmentBodyRepository>();
+            var usedLanguageIds = (await repo.GetAllAsync()).Where(x => x.AmendId == 1).Select(x => x.LanguageId).ToList();
             var model = new AmendmentBodyRequest
             {
                 AmendBody = "Hello",
                 AmendStatus = AmendmentBodyStatus.Ready,
                 IsLive = false,
-                LanguageId = 1,
+                LanguageId = new[] { 1, 2, 3 }.First(id => !usedLanguageIds.Contains(id)),
             };
             //Act
             var response = await client.PostAsJsonAsync("/api/Amendment/1/Body", model);

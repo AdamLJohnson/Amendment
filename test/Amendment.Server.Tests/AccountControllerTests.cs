@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using System;
 using System.Net;
 using System.Net.Http.Json;
-using Newtonsoft.Json;
 
 namespace Amendment.Server.Tests
 {
@@ -49,7 +48,6 @@ namespace Amendment.Server.Tests
             var str = await response.Content.ReadAsStringAsync();
             Assert.Equal("application/json; charset=utf-8",
                 response.Content.Headers.ContentType?.ToString());
-            var j = Newtonsoft.Json.JsonConvert.DeserializeObject<Amendment.Shared.ApiFailedResult>(str, new JsonSerializerSettings{ CheckAdditionalContent = true});
             var jsonResponse = await response.Content.ReadFromJsonAsync<Amendment.Shared.ApiFailedResult>();
             Assert.False(jsonResponse?.IsSuccess);
             Assert.True(jsonResponse?.Errors.Count() == 1);

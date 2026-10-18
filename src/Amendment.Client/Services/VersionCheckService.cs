@@ -1,5 +1,4 @@
 using Amendment.Shared.Responses;
-using Blazored.LocalStorage;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System.Net.Http.Json;

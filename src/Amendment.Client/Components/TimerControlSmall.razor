@@ -62,7 +62,7 @@
 <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(300); }" Block class="mt-2">5 Minutes</Button>
 <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(360); }" Block class="mt-2">6 Minutes</Button>
 <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset(600); }" Block class="mt-2">10 Minutes</Button>
-<NumericEdit TValue="decimal?" @bind-Value="@minutes" class="mt-2" />
+<NumericInput TValue="decimal?" @bind-Value="@minutes" class="mt-2" />
 <Button Color="Color.Info" Clicked="() => { TimerControlHubCommandService.Reset((int)Math.Round((minutes ?? 1) * 60)); }" Block class="mt-2">Custom</Button>
 *@
 @*<TimerComponent></TimerComponent>*@

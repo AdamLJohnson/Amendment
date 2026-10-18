@@ -1,5 +1,5 @@
 ﻿using Amendment.Client.Features;
-using Blazored.LocalStorage;
+using Amendment.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
 using System.Security.Claims;

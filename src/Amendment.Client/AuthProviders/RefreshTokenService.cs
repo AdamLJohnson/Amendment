@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿using Amendment.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Amendment.Client.AuthProviders

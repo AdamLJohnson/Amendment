@@ -2,7 +2,6 @@ using Amendment.Client.AuthProviders;
 using Amendment.Client.Helpers;
 using Amendment.Client.Repository;
 using Amendment.Shared.Responses;
-using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -30,7 +29,7 @@ namespace Amendment.Client
             builder.Services.AddHttpClientInterceptor();
             builder.Services.AddScoped<HttpInterceptorService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-            builder.Services.AddBlazoredLocalStorage();
+            builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
             builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
