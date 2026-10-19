@@ -31,6 +31,14 @@ $identity = $outputs."$prefix-Identity"
 $api = $outputs."$prefix-Api"
 if (-not $web -or -not $identity -or -not $api) { throw "Outputs for $prefix-Web/Identity/Api not found in $OutputsFile." }
 
+# Publish from clean Release outputs into an empty folder; the folder is synced to S3 as-is.
+foreach ($project in 'Amendment.Client', 'Amendment.Client.Repository', 'Amendment.Shared') {
+    foreach ($dir in 'bin', 'obj') {
+        $path = Join-Path $repoRoot "src\$project\$dir\Release"
+        if (Test-Path $path) { Remove-Item $path -Recurse -Force }
+    }
+}
+if (Test-Path $PublishDir) { Remove-Item $PublishDir -Recurse -Force }
 Invoke-Checked { dotnet publish (Join-Path $repoRoot 'src\Amendment.Client\Amendment.Client.csproj') -c Release -o $PublishDir --nologo -v q }
 $wwwroot = Join-Path $PublishDir 'wwwroot'
 
