@@ -1,6 +1,4 @@
-﻿@using Amendment.Client.Pages.Timer
-@inject NavigationManager NavigationManager
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 
 <Layout>
     <LayoutHeader Fixed>
@@ -19,39 +17,9 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-8 offset-lg-2">
-                        <AuthorizeView>
-                            <Authorized>
-                                @{
-                                    var currentPage = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-                                    if (!currentPage.Equals("change-password", StringComparison.OrdinalIgnoreCase) &&
-                                        !currentPage.Equals("login", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        <AmendmentErrorBoundary ComponentName="MainLayout-Authorized">
-                                            <PasswordChangeRedirect>
-                                                @Body
-                                            </PasswordChangeRedirect>
-                                        </AmendmentErrorBoundary>
-                                    }
-                                    else
-                                    {
-                                        <AmendmentErrorBoundary ComponentName="MainLayout-Auth">
-                                            @Body
-                                        </AmendmentErrorBoundary>
-                                    }
-                                }
-                            </Authorized>
-                            <NotAuthorized>
-                                <AmendmentErrorBoundary ComponentName="MainLayout-NotAuthorized">
-                                    @Body
-                                </AmendmentErrorBoundary>
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </div>
-                    <div class="col-lg-2">
-                        @if (NavigationManager.ToBaseRelativePath(NavigationManager.Uri) == "ScreenControl")
-                        {
-                            <TimerControlSmall></TimerControlSmall>
-                        }
+                        <AmendmentErrorBoundary ComponentName="MainLayout">
+                            @Body
+                        </AmendmentErrorBoundary>
                     </div>
                 </div>
             </div>
@@ -74,16 +42,5 @@
     </LayoutFooter>
 </Layout>
 
-<AuthorizeView>
-    <Authorized>
-        <AmendmentHubClient></AmendmentHubClient>
-        <NewAmendmentAlert></NewAmendmentAlert>
-        <UpdateNotification ShowAsSnackbar="true" ShowAsModal="false"></UpdateNotification>
-    </Authorized>
-    <NotAuthorized>
-        <ScreenHubClient></ScreenHubClient>
-        <UpdateNotification ShowAsSnackbar="true" ShowAsModal="false"></UpdateNotification>
-    </NotAuthorized>
-</AuthorizeView>
-<DataBootstrapper></DataBootstrapper>
+<UpdateNotification ShowAsSnackbar="true" ShowAsModal="false"></UpdateNotification>
 <VersionCheckManager></VersionCheckManager>

@@ -21,5 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Amendment.Client.Repository\Amendment.Client.Repository.csproj" />
     <ProjectReference Include="..\..\src\Amendment.Shared\Amendment.Shared.csproj" />
+    <ProjectReference Include="..\..\src\Amendment.Client\Amendment.Client.csproj" />
   </ItemGroup>
 </Project>

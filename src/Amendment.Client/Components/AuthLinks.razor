@@ -1,7 +1,7 @@
 ﻿<BarItem TextColor="TextColor.Light">
     <AuthorizeView>
         <Authorized>
-            <Link To="/change-password" style="text-decoration: none; color: white;">Hello, @context.User.Identity!.Name!</Link>            
+            <span style="color: white;">Hello, @context.User.Identity!.Name!</span>
             <Link To="/Logout" Class="btn btn-secondary">Log out</Link>
         </Authorized>
         <NotAuthorized>

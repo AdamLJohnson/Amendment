@@ -13,29 +13,44 @@ using LambdaFunction = Amazon.CDK.AWS.Lambda.Function;
 namespace Amendment.Cdk.Stacks;
 
 /// <summary>
-/// AppSync GraphQL API: Cognito user pool (default) + IAM auth, error-level logs. Reads resolve directly against
-/// DynamoDB (JS resolvers, read-only role); mutations go through the .NET 10 API Lambda (decision D15).
+/// AppSync GraphQL API: Cognito user pool (default), IAM, and the public projector Lambda authorizer (decision D21);
+/// error-level logs. Amendment reads resolve directly against DynamoDB (JS resolvers, read-only role); mutations and
+/// the presentation reads go through the .NET 10 API Lambda (decisions D15, D22).
 /// </summary>
 public sealed class ApiStack : Stack
 {
     /// <summary>CDK context key for the published API Lambda folder (default <c>artifacts/lambda/api</c> under the repository root).</summary>
     public const string ApiLambdaPackageContextKey = "apiLambdaPackage";
 
+    /// <summary>CDK context key for a replacement schema file (used only by <c>floci-validate.ps1</c>; default <c>Schema/amendment.graphql</c>).</summary>
+    public const string SchemaFileContextKey = "schemaFile";
+
     public static readonly string[] MutationFields =
     [
         "createAmendment", "updateAmendment", "archiveAmendment", "cloneAmendment", "approveAmendment", "deleteAmendment",
-        "createAmendmentBody", "updateAmendmentBody", "deleteAmendmentBody"
+        "createAmendmentBody", "updateAmendmentBody", "deleteAmendmentBody",
+        "presentAmendment", "clearPresentation", "setLanguagePresentation"
     ];
+
+    /// <summary>Query fields resolved by the API Lambda (decision D22).</summary>
+    public static readonly string[] LambdaQueryFields = ["presentation", "publicPresentation"];
 
     public GraphqlApi Api { get; }
     public LambdaFunction ApiFunction { get; }
+    public LambdaFunction PublicAuthorizerFunction { get; }
+
+    /// <summary>The fixed, non-secret token anonymous projectors send in the <c>Authorization</c> header (decision D21).</summary>
+    public static string PublicToken(StageConfig config) => $"{config.Prefix}-public-projector";
 
     public ApiStack(Construct scope, string id, StageConfig config, IUserPool userPool, ITable table, IStackProps props) : base(scope, id, props)
     {
+        PublicAuthorizerFunction = CreatePublicAuthorizerFunction(config);
         Api = new GraphqlApi(this, "GraphqlApi", new GraphqlApiProps
         {
             Name = $"{config.Prefix}-api",
-            Definition = Definition.FromFile(Path.Combine(AppContext.BaseDirectory, "Schema", "amendment.graphql")),
+            Definition = Definition.FromFile(Node.TryGetContext(SchemaFileContextKey) as string is { Length: > 0 } schemaFile
+                ? schemaFile
+                : Path.Combine(AppContext.BaseDirectory, "Schema", "amendment.graphql")),
             AuthorizationConfig = new AuthorizationConfig
             {
                 DefaultAuthorization = new AuthorizationMode
@@ -43,7 +58,20 @@ public sealed class ApiStack : Stack
                     AuthorizationType = AuthorizationType.USER_POOL,
                     UserPoolConfig = new UserPoolConfig { UserPool = userPool }
                 },
-                AdditionalAuthorizationModes = [new AuthorizationMode { AuthorizationType = AuthorizationType.IAM }]
+                AdditionalAuthorizationModes =
+                [
+                    new AuthorizationMode { AuthorizationType = AuthorizationType.IAM },
+                    new AuthorizationMode
+                    {
+                        AuthorizationType = AuthorizationType.LAMBDA,
+                        LambdaAuthorizerConfig = new LambdaAuthorizerConfig
+                        {
+                            Handler = PublicAuthorizerFunction,
+                            ResultsCacheTtl = Duration.Hours(1),
+                            ValidationRegex = "^" + System.Text.RegularExpressions.Regex.Escape(PublicToken(config)) + "$"
+                        }
+                    }
+                ]
             },
             XrayEnabled = false
         });
@@ -77,7 +105,7 @@ public sealed class ApiStack : Stack
             FieldName = "apiVersion",
             Runtime = FunctionRuntime.JS_1_0_0,
             Code = Amazon.CDK.AWS.AppSync.Code.FromInline(
-                "export function request(ctx) { return { payload: 'phase-4' }; }\n" +
+                "export function request(ctx) { return { payload: 'phase-5' }; }\n" +
                 "export function response(ctx) { return ctx.result; }\n")
         });
 
@@ -94,9 +122,12 @@ public sealed class ApiStack : Stack
         ApiFunction = CreateApiFunction(config, table);
         var lambdaSource = Api.AddLambdaDataSource("ApiLambdaSource", ApiFunction, new DataSourceOptions { Name = "ApiLambda" });
         foreach (var field in MutationFields)
-            lambdaSource.CreateResolver($"Mutation{char.ToUpperInvariant(field[0])}{field[1..]}Resolver", JsResolver("Mutation", field, "Mutation.invoke-api.js"));
+            lambdaSource.CreateResolver($"Mutation{char.ToUpperInvariant(field[0])}{field[1..]}Resolver", JsResolver("Mutation", field, "invoke-api.js"));
+        foreach (var field in LambdaQueryFields)
+            lambdaSource.CreateResolver($"Query{char.ToUpperInvariant(field[0])}{field[1..]}Resolver", JsResolver("Query", field, "invoke-api.js"));
 
         _ = new CfnOutput(this, "GraphqlUrl", new CfnOutputProps { Value = Api.GraphqlUrl });
+        _ = new CfnOutput(this, "PublicToken", new CfnOutputProps { Value = PublicToken(config) });
         _ = new CfnOutput(this, "GraphqlApiId", new CfnOutputProps { Value = Api.ApiId });
         _ = new CfnOutput(this, "ApiFunctionName", new CfnOutputProps { Value = ApiFunction.FunctionName });
     }
@@ -136,6 +167,39 @@ public sealed class ApiStack : Stack
             Role = role,
             LogGroup = logGroup,
             Environment = new Dictionary<string, string> { ["AMENDMENT_TABLE_NAME"] = table.TableName }
+        });
+    }
+
+    private LambdaFunction CreatePublicAuthorizerFunction(StageConfig config)
+    {
+        var functionName = $"{config.Prefix}-public-authorizer";
+        var logGroup = new LogGroup(this, "PublicAuthorizerLogGroup", new LogGroupProps
+        {
+            LogGroupName = $"/aws/lambda/{functionName}",
+            Retention = Retention.FromDays(config.LogRetentionDays),
+            RemovalPolicy = config.IsProduction ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY
+        });
+
+        // Logs only: the authorizer reads no data.
+        var role = new Role(this, "PublicAuthorizerRole", new RoleProps { AssumedBy = new ServicePrincipal("lambda.amazonaws.com") });
+        role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = ["logs:CreateLogStream", "logs:PutLogEvents"],
+            Resources = [logGroup.LogGroupArn, $"{logGroup.LogGroupArn}:log-stream:*"]
+        }));
+
+        return new LambdaFunction(this, "PublicAuthorizerFunction", new FunctionProps
+        {
+            FunctionName = functionName,
+            Runtime = Runtime.NODEJS_24_X,
+            Architecture = Architecture.ARM_64,
+            Handler = "index.handler",
+            Code = LambdaCode.FromInline(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Authorizer", "public-authorizer.js"))),
+            MemorySize = 128,
+            Timeout = Duration.Seconds(3),
+            Role = role,
+            LogGroup = logGroup,
+            Environment = new Dictionary<string, string> { ["PUBLIC_TOKEN"] = PublicToken(config) }
         });
     }
 

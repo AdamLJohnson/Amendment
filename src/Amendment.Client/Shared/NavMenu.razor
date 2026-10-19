@@ -1,5 +1,4 @@
-﻿@using Amendment.Shared
-<BarBrand>
+﻿<BarBrand>
     Amendments
 </BarBrand>
 <BarToggler />
@@ -21,13 +20,6 @@
                     <BarDropdownItem>
                         <BarLink To="/View/French" TextColor="TextColor.Dark">French</BarLink>
                     </BarDropdownItem>
-                    <AuthorizeView>
-                        <Authorized>
-                            <BarDropdownItem>
-                                <BarLink To="/Timer" TextColor="TextColor.Dark">Timer</BarLink>
-                            </BarDropdownItem>
-                        </Authorized>
-                    </AuthorizeView>
                 </BarDropdownMenu>
             </BarDropdown>
         </BarItem>
@@ -37,34 +29,6 @@
                     <BarLink To="/Amendment">
                         Amendments
                     </BarLink>
-                </BarItem>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="@RoleGroups.AdminScreenController">
-            <Authorized>
-                <BarItem>
-                    <BarLink To="/Timer/Control">
-                        Timer Control
-                    </BarLink>
-                </BarItem>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="@RoleGroups.Admin">
-            <Authorized>
-                <BarItem>
-                    <BarDropdown Background="Background.Light">
-                        <BarDropdownToggle>Admin</BarDropdownToggle>
-                        <BarDropdownMenu>
-                            <BarDropdownItem>
-                                <BarLink To="/Admin/User" TextColor="TextColor.Dark">
-                                    Users
-                                </BarLink>
-                            </BarDropdownItem>
-                            <BarDropdownItem>
-                                <BarLink To="/Admin/SystemSetting" TextColor="TextColor.Dark">System Settings</BarLink>
-                            </BarDropdownItem>
-                        </BarDropdownMenu>
-                    </BarDropdown>
                 </BarItem>
             </Authorized>
         </AuthorizeView>

@@ -22,6 +22,8 @@ public enum Operation
     // Any authenticated user
     ListAmendments,
     ReadAmendment,
+    /// <summary>The operator view of the presentation state (Screen Control).</summary>
+    ReadPresentation,
     ExportAmendments,
     ChangeOwnPassword,
 
@@ -79,6 +81,7 @@ public static class RoleOperationMatrix
 
         [Operation.ListAmendments] = AnyAuthenticated,
         [Operation.ReadAmendment] = AnyAuthenticated,
+        [Operation.ReadPresentation] = AnyAuthenticated,
         [Operation.ExportAmendments] = AnyAuthenticated,
         [Operation.ChangeOwnPassword] = AnyAuthenticated,
 

@@ -641,11 +641,11 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 **Objective:** Make public reads safe before enabling anonymous real-time access.
 
-- [ ] Build single authoritative presentation state and operator mutations (select/clear amendment, visibility/page controls).
-- [ ] Implement `publicPresentation` resolver that returns **only** currently projected content; no arbitrary anonymous get-by-ID.
-- [ ] Define and implement behavior when a live body is deleted/archived or slide count changes.
-- [ ] Verify public vs authenticated schema modes at nested field level.
-- [ ] Test anonymous access via raw GraphQL requests, including enumeration/alias attempts and mutation denial.
+- [x] Build single authoritative presentation state and operator mutations (select/clear amendment, visibility/page controls).
+- [x] Implement `publicPresentation` resolver that returns **only** currently projected content; no arbitrary anonymous get-by-ID.
+- [x] Define and implement behavior when a live body is deleted/archived or slide count changes.
+- [x] Verify public vs authenticated schema modes at nested field level.
+- [x] Test anonymous access via raw GraphQL requests, including enumeration/alias attempts and mutation denial.
 
 **Checkpoint 5:** Anonymous clients read current projection only; cannot read drafts, browse archives, mutate state or enumerate private entities. Presentation state survives reloads.
 

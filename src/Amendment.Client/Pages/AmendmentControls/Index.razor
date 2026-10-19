@@ -1,17 +1,10 @@
 ﻿@page "/Amendment"
 @using Microsoft.AspNetCore.Authorization
-@using Amendment.Shared.Responses
-@using Amendment.Client.Repository
+@using Amendment.Client.Repository.GraphQl
 @using Amendment.Shared
-@using Amendment.Client.Services
-@using Amendment.Shared.Enums
-@using Amendment.Shared.SignalRCommands
-@implements IDisposable
 @attribute [Authorize]
-@inject IAmendmentRepository AmendmentRepository
-@inject IAmendmentBodyRepository AmendmentBodyRepository
-@inject IHubEventService HubEventService
-@inject IAmendmentHubCommandService AmendmentHubCommandService
+@inject IAmendmentApi Api
+@inject INotificationService NotificationService
 
 <CustomPageTitle>Amendments</CustomPageTitle>
 
@@ -21,7 +14,7 @@
     <Column>
         <AuthorizeView Roles="@RoleGroups.AdminScreenController">
             <Authorized>
-                @if (_amendments.Any(a => a.IsLive))
+                @if (_presentation?.ActiveAmendmentId is not null)
                 {
                     <Button Color="Color.Danger" Clicked="ClearScreens">Clear Screens</Button>
                 }
@@ -47,7 +40,7 @@
     </TableHeader>
     <TableBody>
         <Repeater Items="@_amendments">
-            <AmendmentTableRow Model="context" OnDelete="RefreshAmendments" LiveAmendmentId="_amendments.SingleOrDefault(x => x.IsLive)?.Id"/>
+            <AmendmentTableRow Model="context" Languages="_languages" Presentation="_presentation" OnDelete="RefreshAmendments"/>
         </Repeater>
         @if (!_amendments.Any())
         {
@@ -75,22 +68,14 @@
             </Authorized>
         </AuthorizeView>
     </Column>
-    <Column TextAlignment="TextAlignment.End">
-        <AuthorizeView>
-            <Authorized>
-                <ButtonGroup>
-                    <Button Color="Color.Info" Clicked="ExportAllAmendmentsToExcel">Export to Excel</Button>
-                    <Button Color="Color.Info" Clicked="ExportAllAmendmentsToPdf">Export to PDF</Button>
-                </ButtonGroup>
-            </Authorized>
-        </AuthorizeView>
-    </Column>
 </Row>
 
 
 @code {
-    List<AmendmentResponse> _amendments = new();
-    List<AmendmentResponse> _allAmendments = new();
+    List<ApiAmendment> _amendments = new();
+    List<ApiAmendment> _allAmendments = new();
+    IReadOnlyList<ApiLanguage> _languages = [];
+    ApiPresentation? _presentation;
     private bool _showArchived = false;
 
     // This property is used to handle the checkbox binding and trigger filtering
@@ -109,15 +94,33 @@
 
     protected override async Task OnInitializedAsync()
     {
-        HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
-        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
-        HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
         await LoadAmendments();
     }
 
     private async Task LoadAmendments()
     {
-        _allAmendments = (await AmendmentRepository.GetAsync()).ToList();
+        try
+        {
+            if (_languages.Count == 0)
+                _languages = await Api.GetLanguagesAsync();
+            _presentation = await Api.GetPresentationAsync();
+            var all = new List<ApiAmendment>();
+            foreach (var archived in new[] { false, true })
+            {
+                string? nextToken = null;
+                do
+                {
+                    var page = await Api.GetAmendmentsAsync(archived, 100, nextToken);
+                    all.AddRange(page.Items);
+                    nextToken = page.NextToken;
+                } while (nextToken is not null);
+            }
+            _allAmendments = all.OrderBy(a => a.Created.At).ThenBy(a => a.Id, StringComparer.Ordinal).ToList();
+        }
+        catch (AmendmentApiException ex)
+        {
+            await NotificationService.Error(ex.Message, "Amendments");
+        }
         FilterAmendments();
     }
 
@@ -129,111 +132,25 @@
         StateHasChanged();
     }
 
-    private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
-    {
-        foreach (var item in e.Value)
-        {
-            AmendmentBodyUpdatedWork(e.OperationType, item);
-        }
-        StateHasChanged();
-    }
-
-    private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
-    {
-        AmendmentBodyUpdatedWork(e.OperationType, e.Value);
-        StateHasChanged();
-    }
-
-    private void AmendmentBodyUpdatedWork(OperationType operationType, AmendmentBodyResponse body)
-    {
-        var amendment = _amendments.SingleOrDefault(x => x.Id == body.AmendId);
-        if (amendment == null)
-            return;
-        var amendmentBodySummary = new AmendmentBodySummary
-        {
-            Id = body.Id, AmendId = body.AmendId, LanguageId = body.LanguageId, AmendStatus = body.AmendStatus,
-            IsLive = body.IsLive
-        };
-        switch (operationType)
-        {
-            case OperationType.Create:
-                amendment.AmendmentBodies.Add(amendmentBodySummary);
-                break;
-            case OperationType.Update:
-                var i = amendment.AmendmentBodies.FindIndex(x => x.Id == amendmentBodySummary.Id);
-                if (i > -1)
-                    amendment.AmendmentBodies[i] = amendmentBodySummary;
-                break;
-            case OperationType.Delete:
-                amendment?.AmendmentBodies.RemoveAll(x => x.Id == body.Id);
-                break;
-        }
-
-        return;
-    }
-
-    private void AmendmentUpdatedEvent(object? sender, SignalRResponse<AmendmentResponse> e)
-    {
-        // Update the full list of amendments first
-        switch (e.OperationType)
-        {
-            case OperationType.Create:
-                _allAmendments.Add(e.Value);
-                break;
-            case OperationType.Update:
-                var i = _allAmendments.FindIndex(x => x.Id == e.Value.Id);
-                if(i > -1)
-                    _allAmendments[i] = e.Value;
-                break;
-            case OperationType.Delete:
-                _allAmendments.RemoveAll(x => x.Id == e.Value.Id);
-                break;
-        }
-
-        // Then apply the filter
-        FilterAmendments();
-    }
-
     private Task RefreshAmendments()
     {
         return LoadAmendments();
     }
 
-    public void Dispose()
-    {
-        HubEventService.AmendmentUpdated -= AmendmentUpdatedEvent;
-        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
-        HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
-    }
-
     private async Task ClearScreens()
     {
-        var liveAmendment = _amendments.FirstOrDefault(a => a.IsLive);
-        if (liveAmendment == null)
+        if (_presentation == null)
             return;
 
-        var amendmentId = liveAmendment.Id;
-        var amendmentBodies = await AmendmentBodyRepository.GetAsync(amendmentId);
-
-        var amendmentRequest = liveAmendment.ToRequest();
-        amendmentRequest.IsLive = false;
-
-        await AmendmentHubCommandService.SetAmendmentBodyLiveAsync(amendmentBodies.Where(x => x.IsLive).Select(x => new SetAmendmentBodyLiveCommand() { AmendId = amendmentId, Id = x.Id, IsLive = false }).ToArray());
-        await AmendmentRepository.PutAsync(amendmentId, amendmentRequest);
-    }
-
-    private async Task ExportAllAmendmentsToExcel()
-    {
-        // Export all visible amendments (filtered by archived status) to Excel
-        var amendmentIds = _amendments.Select(a => a.Id).ToList();
-        await AmendmentRepository.ExportToExcelAsync(amendmentIds);
-    }
-
-    private async Task ExportAllAmendmentsToPdf()
-    {
-        // Export all visible amendments (filtered by archived status) to PDF
-        var amendmentIds = _amendments.Select(a => a.Id).ToList();
-        await AmendmentRepository.ExportToPdfAsync(amendmentIds);
+        try
+        {
+            _presentation = await Api.ClearPresentationAsync(_presentation.Version);
+        }
+        catch (AmendmentApiException ex)
+        {
+            await NotificationService.Error(ex.Message, "Clear Screens");
+            _presentation = await Api.GetPresentationAsync();
+        }
     }
 
 }

@@ -15,10 +15,13 @@ public sealed class ApiTestClient(AmendmentStore store)
     public static readonly ApiIdentity Screen = new("sub-screen", ["ScreenController"]);
     public static readonly ApiIdentity NoRole = new("sub-norole", []);
 
+    /// <summary>What the resolver sends for a caller authorized by the public Lambda authorizer: no sub, no groups.</summary>
+    public static readonly ApiIdentity Anonymous = new(null, []);
+
     public Task<ApiResponse> Call(ApiIdentity? identity, string field, object args) =>
         _api.HandleAsync(new ApiRequest(field, JsonSerializer.SerializeToElement(args), identity));
 
-    public async Task<T> Ok<T>(ApiIdentity identity, string field, object args)
+    public async Task<T> Ok<T>(ApiIdentity? identity, string field, object args)
     {
         var response = await Call(identity, field, args);
         Assert.True(response.Error is null, $"{field} failed: {response.Error?.Type} {response.Error?.Message}");

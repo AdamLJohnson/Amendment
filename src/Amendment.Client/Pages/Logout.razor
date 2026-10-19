@@ -1,14 +1,13 @@
 ﻿@page "/logout"
 @using Amendment.Client.AuthProviders
+@inject CognitoAuth CognitoAuth
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 @code {
-    [Inject]
-    public IAuthenticationService? AuthenticationService { get; set; }
-    [Inject]
-    public NavigationManager? NavigationManager { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        await AuthenticationService!.Logout();
-        NavigationManager!.NavigateTo("/");
+        await JS.InvokeVoidAsync("sessionStorage.clear");
+        NavigationManager.NavigateTo(CognitoAuth.SignOutUrl(NavigationManager.BaseUri), forceLoad: true);
     }
 }

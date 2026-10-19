@@ -86,4 +86,47 @@ public sealed class AmendmentApiClientTests
         await Assert.ThrowsAsync<AmendmentApiException>(() => client.ApproveAmendmentAsync("01J", "3", bestEffort: true));
         Assert.Equal("BEST_EFFORT", (string)handler.LastRequest!["variables"]!["failureMode"]!);
     }
+
+    [Fact]
+    public async Task Reads_the_public_presentation_with_hidden_languages_offline()
+    {
+        var (client, _) = Create("""
+            {"data":{"publicPresentation":{"version":"7","activeAmendmentId":"01J","languages":[
+            {"language":"ENG","visible":true,"page":1,"pageCount":2,"markdown":"a**NEWSLIDE**b","bodyVersion":"3"},
+            {"language":"SPA","visible":false,"page":0,"pageCount":0,"markdown":null,"bodyVersion":null}]}}}
+            """);
+
+        var presentation = await client.GetPublicPresentationAsync();
+
+        Assert.Equal(("7", "01J"), (presentation.Version, presentation.ActiveAmendmentId));
+        Assert.Equal(new ApiPublicLanguageView("ENG", true, 1, 2, "a**NEWSLIDE**b", "3"), presentation.Languages[0]);
+        Assert.Equal(new ApiPublicLanguageView("SPA", false, 0, 0, null, null), presentation.Languages[1]);
+        Assert.Equal("b", presentation.Languages[0].CurrentSlide);
+        Assert.Equal("", presentation.Languages[1].CurrentSlide);
+    }
+
+    [Theory]
+    [InlineData(true, 0, "a**NEWSLIDE**b", "a")]
+    [InlineData(true, 1, "a**NEWSLIDE**b", "b")]
+    [InlineData(true, 5, "a**NEWSLIDE**b", "a")]
+    [InlineData(true, 0, "", "")]
+    [InlineData(false, 0, "a", "")]
+    public void Current_slide_follows_the_slide_rules(bool visible, int page, string markdown, string expected) =>
+        Assert.Equal(expected, new ApiPublicLanguageView("ENG", visible, page, 2, markdown, "1").CurrentSlide);
+
+    [Fact]
+    public async Task Language_changes_send_the_expected_version_and_changes()
+    {
+        var (client, handler) = Create("""
+            {"data":{"setLanguagePresentation":{"activeAmendmentId":"01J","languages":[{"language":"ENG","visible":true,"page":0}],"version":"8","updated":null}}}
+            """);
+
+        var presentation = await client.SetLanguagePresentationAsync("7", [new ApiLanguageChange("ENG", Visible: true), new ApiLanguageChange("SPA", Page: 2)]);
+
+        Assert.Equal("8", presentation.Version);
+        Assert.Equal(new ApiLanguageScreen("ENG", true, 0), Assert.Single(presentation.Languages));
+        Assert.Equal(
+            """{"expectedVersion":"7","changes":[{"language":"ENG","visible":true,"page":null},{"language":"SPA","visible":null,"page":2}]}""",
+            handler.LastRequest!["variables"]!.ToJsonString());
+    }
 }

@@ -1,16 +1,10 @@
 ﻿@page "/View/{Language}"
-@using Amendment.Shared.Responses
-@using Amendment.Shared.Enums
 @using Amendment.Client.Repository
+@using Amendment.Client.Repository.GraphQl
 @using System.ComponentModel
-@using Amendment.Client.Services
-@inject ILanguageRepository LanguageRepository
-@inject IAmendmentRepository AmendmentRepository
-@inject IHubEventService HubEventService
+@inject IAmendmentApi Api
 @inject IJSRuntime JS
 @inject ISystemSettingRepository SystemSettingRepository
-@inject IAmendmentHubCommandService AmendmentHubCommandService
-@inject IScreenHubCommandService ScreenHubCommandService
 @implements IDisposable
 <CustomPageTitle>@_title</CustomPageTitle>
 <h3>@_title</h3>
@@ -19,17 +13,17 @@
 
 @{
     var slideClass = "slideonline";
-    if (_body == null)
+    if (_view == null)
         slideClass = "slideoffline";
 }
 <Div id="fullscreen" Class=@($"{slideClass} {Language} {_invertedClass}")>
-    @if (!_screenHubConnected && !_amendmentHubConnected)
+    @if (_error != null)
     {
-        <div class="connection-error alert alert-danger">Connection to server lost. Attempting to reconnect.</div>
+        <div class="connection-error alert alert-danger">@_error</div>
     }
-    @if (_body != null)
+    @if (_view != null)
     {
-        <AmendmentBodySingleRenderer BodyText=@(_body?.AmendBodyPagedText ?? "")></AmendmentBodySingleRenderer>
+        <AmendmentBodySingleRenderer BodyText=@_view.CurrentSlide></AmendmentBodySingleRenderer>
     }
 </Div>
 
@@ -38,26 +32,16 @@
     [Parameter]
     public string Language { get; set; } = "";
 
-    int LanguageId = -1;
-    AmendmentBodyResponse? _body;
+    ApiPublicLanguageView? _view;
     string _title = "";
+    string? _error;
     IJSObjectReference? _module;
-
-    bool _amendmentHubConnected = true;
-    bool _screenHubConnected = true;
 
     string _invertedClass => SystemSettingRepository.InvertedSlideText ? "inverted" : "";
 
 
     protected override Task OnInitializedAsync()
     {
-        _amendmentHubConnected = AmendmentHubCommandService.IsConnected;
-        _screenHubConnected = ScreenHubCommandService.IsConnected;
-        AmendmentHubCommandService.PropertyChanged += AmendmentHubCommandServiceOnPropertyChanged;
-        ScreenHubCommandService.PropertyChanged += ScreenHubCommandServiceOnPropertyChanged;
-
-        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
-        HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
         SystemSettingRepository.PropertyChanged += SystemSettingRepositoryOnPropertyChanged;
 
         return Task.CompletedTask;
@@ -66,11 +50,20 @@
     protected override async Task OnParametersSetAsync()
     {
         _title = Language;
-        _title = Language;
-        var languages = (await LanguageRepository.GetAsync()).ToList();
-        LanguageId = languages.FirstOrDefault(x => x.LanguageName == Language)?.Id ?? -1;
-        var amendment = await AmendmentRepository.GetLiveAsync();
-        _body = amendment?.AmendmentBodies.FirstOrDefault(x => x.LanguageId == LanguageId && x.IsLive);
+        try
+        {
+            // The route uses the language name (legacy URLs); the API uses the language code
+            var languages = await Api.GetLanguagesAsync();
+            var code = languages.FirstOrDefault(x => string.Equals(x.Name, Language, StringComparison.OrdinalIgnoreCase))?.Code;
+            var presentation = await Api.GetPublicPresentationAsync();
+            _view = presentation.Languages.FirstOrDefault(x => x.Language == code && x.Visible);
+            _error = null;
+        }
+        catch (Exception ex) when (ex is AmendmentApiException or HttpRequestException)
+        {
+            _view = null;
+            _error = "Could not load the presentation. Reload the page to try again.";
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -81,81 +74,12 @@
         _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/ViewFullScreen.js");
     }
 
-    private void ScreenHubCommandServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == "IsConnected")
-            _screenHubConnected = ScreenHubCommandService.IsConnected;
-        StateHasChanged();
-    }
-
-    private void AmendmentHubCommandServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == "IsConnected")
-            _amendmentHubConnected = AmendmentHubCommandService.IsConnected;
-        StateHasChanged();
-    }
-
     private async Task EnterFullScreen()
     {
         if (_module == null)
             return;
 
         await _module.InvokeVoidAsync("EnterFullScreen");
-    }
-
-    private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
-    {
-        foreach (var item in e.Value)
-        {
-            AmendmentBodyUpdatedWork(e.OperationType, item);
-        }
-        StateHasChanged();
-    }
-
-    private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
-    {
-        AmendmentBodyUpdatedWork(e.OperationType, e.Value);
-
-        StateHasChanged();
-    }
-
-    private void AmendmentBodyUpdatedWork(OperationType operationType, AmendmentBodyResponse body)
-    {
-        if (body.LanguageId != LanguageId)
-            return;
-
-        if (_body == null)
-        {
-            switch (operationType)
-            {
-                case OperationType.Create:
-                    if (body.IsLive)
-                        _body = body;
-                    break;
-                case OperationType.Update:
-                    if (body.IsLive)
-                        _body = body;
-                    break;
-                case OperationType.Delete:
-                    break;
-            }
-        }
-        else if (_body.Id == body.Id)
-        {
-            switch (operationType)
-            {
-                case OperationType.Create:
-                    break;
-                case OperationType.Update:
-                    _body = body;
-                    if (!body.IsLive)
-                        _body = null;
-                    break;
-                case OperationType.Delete:
-                    _body = null;
-                    break;
-            }
-        }
     }
 
     private void SystemSettingRepositoryOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -165,11 +89,7 @@
 
     public void Dispose()
     {
-        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
-        HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
         SystemSettingRepository.PropertyChanged -= SystemSettingRepositoryOnPropertyChanged;
-        AmendmentHubCommandService.PropertyChanged -= AmendmentHubCommandServiceOnPropertyChanged;
-        ScreenHubCommandService.PropertyChanged -= ScreenHubCommandServiceOnPropertyChanged;
     }
 
 }

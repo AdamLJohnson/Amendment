@@ -1,12 +1,10 @@
-﻿@using Amendment.Shared.Responses
-@using Amendment.Shared.Enums
+﻿@using Amendment.Client.Repository.GraphQl
 @using Amendment.Shared
 
-@if (Amendment.AmendmentBodies.Any(x => x.LanguageId == Language.Id))
+@if (Amendment.Bodies.FirstOrDefault(x => x.Language == Language.Code) is { } body)
 {
     Background bg = Background.Primary;
-    var body = Amendment.AmendmentBodies.First(x => x.LanguageId == Language.Id);
-    if (body.AmendStatus == AmendmentBodyStatus.Ready)
+    if (body.Status == ApiBodyStatus.Ready)
     {
         bg = Background.Success;
     }
@@ -14,18 +12,18 @@
     {
         bg = Background.Info;
     }
-    if (body.IsLive)
+    if (IsLive)
     {
         bg = Background.Danger;
     }
     <AuthorizeView Roles="@RoleGroups.AdminTranslatorAmendEditor">
         <Authorized>
-            <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Edit/{body.Id}")>
-                <Badge Background="bg">@Language.LanguageName</Badge>
+            <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Edit/{body.Language}")>
+                <Badge Background="bg">@Language.Name</Badge>
             </Anchor>
         </Authorized>
         <NotAuthorized>
-            <Badge Background="bg">@Language.LanguageName</Badge>
+            <Badge Background="bg">@Language.Name</Badge>
         </NotAuthorized>
     </AuthorizeView>
 }
@@ -33,19 +31,22 @@ else
 {
     <AuthorizeView Roles="@RoleGroups.AdminTranslatorAmendEditor">
         <Authorized>
-            <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Create/{Language.Id}")>
-                <Badge Background="Background.Light" TextColor="TextColor.Black50">@Language.LanguageName</Badge>
+            <Anchor To=@($"/Amendment/{Amendment.Id}/Body/Create/{Language.Code}")>
+                <Badge Background="Background.Light" TextColor="TextColor.Black50">@Language.Name</Badge>
             </Anchor>
         </Authorized>
         <NotAuthorized>
-            <Badge Background="Background.Light" TextColor="TextColor.Black50">@Language.LanguageName</Badge>
+            <Badge Background="Background.Light" TextColor="TextColor.Black50">@Language.Name</Badge>
         </NotAuthorized>
     </AuthorizeView>
 }
 @code {
-    [Parameter]
-    public AmendmentResponse Amendment { get; set; } = new();
+    [Parameter, EditorRequired]
+    public ApiAmendment Amendment { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public ApiLanguage Language { get; set; } = null!;
 
     [Parameter]
-    public LanguageResponse Language { get; set; } = new();
+    public bool IsLive { get; set; }
 }

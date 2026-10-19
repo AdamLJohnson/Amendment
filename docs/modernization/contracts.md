@@ -43,7 +43,7 @@ Legend: ✔ allowed, — denied. "Auth" = any signed-in user, even with no role.
 | Operation | Anon | Auth | Translator | Amend. Editor | Screen Ctrl | Admin |
 |---|---|---|---|---|---|---|
 | publicPresentation, publicTimer, public settings, languages | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| List/read amendments, export, change own password | — | ✔ | ✔ | ✔ | ✔ | ✔ |
+| List/read amendments, operator presentation state, export, change own password | — | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Create/update/archive/clone/**approve** amendment | — | — | — | ✔ | — | ✔ |
 | Approve with `BEST_EFFORT` | — | — | — | — | — | ✔ |
 | Delete amendment | — | — | — | — | — | ✔ |

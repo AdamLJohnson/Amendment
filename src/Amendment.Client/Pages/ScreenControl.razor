@@ -1,17 +1,10 @@
 ﻿@page "/ScreenControl"
 @using Microsoft.AspNetCore.Authorization
-@using Amendment.Client.Repository
-@using Amendment.Client.Services
-@using Amendment.Shared.Enums
-@using Amendment.Shared.Responses
-@using Amendment.Shared.SignalRCommands
+@using Amendment.Client.Repository.GraphQl
 @using Amendment.Shared
 @attribute [Authorize(Roles = RoleGroups.AdminScreenController)]
-@implements IDisposable
-@inject IAmendmentRepository AmendmentRepository
-@inject ILanguageRepository LanguageRepository
-@inject IHubEventService HubEventService
-@inject IAmendmentHubCommandService AmendmentHubCommandService
+@inject IAmendmentApi Api
+@inject INotificationService NotificationService
 
 <CustomPageTitle>Screen Control</CustomPageTitle>
 <h3>Screen Control</h3>
@@ -45,7 +38,7 @@
             <Button Color="Color.Success" Clicked="() => _showPreview = !_showPreview">Change Views</Button>
         </Column>
         <Column ColumnSize="ColumnSize.Is4.OnDesktop">
-            @if (_amendment.AmendmentBodies.Any(x => x.IsLive))
+            @if (_presentation!.Languages.Any(x => x.Visible))
             {
                 <Button Color="Color.Danger" Block Size="Size.Large" Clicked="TakeAllDown">Take all down</Button>
             }
@@ -61,13 +54,15 @@
         </Column>
     </Row>
     <Row Style="margin-top:10px;">
-        <Repeater Items="@_amendment.AmendmentBodies.OrderBy(x => x.LanguageId)">
+        <Repeater Items="@OrderedBodies">
             <Column ColumnSize="ColumnSize.Is4.OnDesktop">
-                <ScreenControlItem 
-                    Body="@context" 
-                    LanguageName="@_languages.First(x => x.Id == context.LanguageId).LanguageName"
-                    PrimaryLanguageId="_amendment.PrimaryLanguageId"
-                    ShowPreview="@_showPreview"></ScreenControlItem> 
+                <ScreenControlItem
+                    Body="@context"
+                    LanguageName="@(_languages.FirstOrDefault(x => x.Code == context.Language)?.Name ?? context.Language)"
+                    IsPrimary="@(context.Language == _amendment.PrimaryLanguage)"
+                    Screen="@ScreenFor(context.Language)"
+                    ShowPreview="@_showPreview"
+                    OnChange="@(change => ApplyAsync([change]))"></ScreenControlItem>
             </Column>
         </Repeater>
     </Row>
@@ -79,133 +74,67 @@ else
 }
 
 @code {
-    AmendmentFullBodyResponse? _amendment = null;
-    List<LanguageResponse> _languages = new();
+    ApiAmendment? _amendment = null;
+    ApiPresentation? _presentation;
+    IReadOnlyList<ApiLanguage> _languages = [];
     bool _showPreview = true;
+
+    private IEnumerable<ApiAmendmentBody> OrderedBodies =>
+        _amendment!.Bodies.OrderBy(b => _languages.FirstOrDefault(l => l.Code == b.Language)?.SortOrder ?? int.MaxValue);
+
     protected override async Task OnInitializedAsync()
     {
-        _languages = (await LanguageRepository.GetAsync()).ToList();
-        _amendment = await AmendmentRepository.GetLiveAsync();
-        HubEventService.AmendmentUpdated += AmendmentUpdatedEvent;
-        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
-        HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
-        HubEventService.ClearScreens += ClearScreensEvent;
-    }
-
-    private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
-    {
-        foreach (var item in e.Value)
+        try
         {
-            AmendmentBodyUpdatedWork(e.OperationType, item);
+            _languages = await Api.GetLanguagesAsync();
+            await LoadAsync();
         }
-        StateHasChanged();
-    }
-
-    private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
-    {
-        AmendmentBodyUpdatedWork(e.OperationType, e.Value);
-
-        StateHasChanged();
-    }
-
-    private void AmendmentBodyUpdatedWork(OperationType operationType, AmendmentBodyResponse body)
-    {
-        if (_amendment == null)
-            return;
-        if (_amendment.Id != body.AmendId)
-            return;
-
-        switch (operationType)
+        catch (AmendmentApiException ex)
         {
-            case OperationType.Create:
-                _amendment.AmendmentBodies.Add(body);
-                break;
-            case OperationType.Update:
-                var i = _amendment.AmendmentBodies.FindIndex(x => x.Id == body.Id);
-                if (i > -1)
-                    _amendment.AmendmentBodies[i] = body;
-                break;
-            case OperationType.Delete:
-                _amendment?.AmendmentBodies.RemoveAll(x => x.Id == body.Id);
-                break;
+            await NotificationService.Error(ex.Message, "Screen Control");
         }
     }
 
-    private async void AmendmentUpdatedEvent(object? sender, SignalRResponse<AmendmentResponse> e)
+    private async Task LoadAsync()
     {
-        if (e.Value.IsLive)
+        _presentation = await Api.GetPresentationAsync();
+        _amendment = _presentation.ActiveAmendmentId is { } id ? await Api.GetAmendmentAsync(id) : null;
+    }
+
+    private ApiLanguageScreen ScreenFor(string language) =>
+        _presentation?.Languages.FirstOrDefault(l => l.Language == language) ?? new ApiLanguageScreen(language, false, 0);
+
+    /// <summary>Legacy page rule: a page outside the slide range resets to 0 (matches the server).</summary>
+    private static int NormalizePage(int page, int pageCount) => page < 0 || page > pageCount - 1 ? 0 : page;
+
+    private async Task ApplyAsync(IReadOnlyList<ApiLanguageChange> changes)
+    {
+        if (_presentation == null || changes.Count == 0)
+            return;
+        try
         {
-            _amendment = await AmendmentRepository.GetLiveAsync();
-            StateHasChanged();
-            return;
+            _presentation = await Api.SetLanguagePresentationAsync(_presentation.Version, changes);
         }
-
-
-        if (_amendment != null && _amendment.Id == e.Value.Id && !e.Value.IsLive)
+        catch (AmendmentApiException ex)
         {
-            _amendment = null;
-            StateHasChanged();
+            await NotificationService.Error(ex.Message, "Screen Control");
+            await LoadAsync();
         }
     }
 
-    private async Task TakeAllDown()
-    {
-        if (_amendment == null)
-            return;
-        await AmendmentHubCommandService.SetAmendmentBodyLiveAsync(
-            _amendment.AmendmentBodies.Where(x => x.IsLive).Select(x => new SetAmendmentBodyLiveCommand { AmendId = _amendment.Id, Id = x.Id, IsLive = false})
-                .ToArray());
-    }
+    private Task TakeAllDown() =>
+        ApplyAsync(_amendment!.Bodies.Where(x => ScreenFor(x.Language).Visible).Select(x => new ApiLanguageChange(x.Language, Visible: false)).ToList());
 
-    private async Task AllGoLive()
-    {
-        if (_amendment == null)
-            return;
+    private Task AllGoLive() =>
+        ApplyAsync(_amendment!.Bodies.Where(x => !ScreenFor(x.Language).Visible).Select(x => new ApiLanguageChange(x.Language, Visible: true)).ToList());
 
-        await AmendmentHubCommandService.SetAmendmentBodyLiveAsync(
-            _amendment.AmendmentBodies.Where(x => !x.IsLive).Select(x => new SetAmendmentBodyLiveCommand { AmendId = _amendment.Id, Id = x.Id, IsLive = true })
-                .ToArray());
-    }
+    private Task ResetAllPages() =>
+        ApplyAsync(_amendment!.Bodies.Select(x => new ApiLanguageChange(x.Language, Page: 0)).ToList());
 
-    private void ClearScreensEvent(object? sender, EventArgs e) => _amendment = null;
+    private Task AllPrevPage() =>
+        ApplyAsync(_amendment!.Bodies.Select(x => new ApiLanguageChange(x.Language, Page: NormalizePage(ScreenFor(x.Language).Page - 1, x.PageCount))).ToList());
 
-    public void Dispose()
-    {
-        HubEventService.AmendmentUpdated -= AmendmentUpdatedEvent;
-        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
-        HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
-        HubEventService.ClearScreens -= ClearScreensEvent;
-    }
-
-    private async Task ResetAllPages()
-    {
-        if (_amendment == null)
-            return;
-
-        await AmendmentHubCommandService.SetAmendmentBodyPage(
-            _amendment.AmendmentBodies.Select(x => new SetAmendmentBodyPageCommand { AmendId = _amendment.Id, Id = x.Id, Page = 0})
-                .ToArray());
-    }
-
-    private async Task AllPrevPage()
-    {
-        if (_amendment == null)
-            return;
-
-        await AmendmentHubCommandService.SetAmendmentBodyPage(
-            _amendment.AmendmentBodies.Select(x => new SetAmendmentBodyPageCommand { AmendId = _amendment.Id, Id = x.Id, Page = x.ChangeBodyPage(x.Page - 1) })
-                .ToArray());
-
-    }
-
-    private async Task AllNextPage()
-    {
-        if (_amendment == null)
-            return;
-
-        await AmendmentHubCommandService.SetAmendmentBodyPage(
-            _amendment.AmendmentBodies.Select(x => new SetAmendmentBodyPageCommand { AmendId = _amendment.Id, Id = x.Id, Page = x.ChangeBodyPage(x.Page + 1) })
-                .ToArray());
-    }
+    private Task AllNextPage() =>
+        ApplyAsync(_amendment!.Bodies.Select(x => new ApiLanguageChange(x.Language, Page: NormalizePage(ScreenFor(x.Language).Page + 1, x.PageCount))).ToList());
 
 }

@@ -6,8 +6,9 @@ using Amendment.Infrastructure.DynamoDb;
 namespace Amendment.Api.Lambda;
 
 /// <summary>
-/// GraphQL mutations (decision D15). Every operation authorizes with <see cref="RoleOperationMatrix"/> before reading
-/// data, validates with the domain rules, and commits with one conditional DynamoDB transaction.
+/// GraphQL mutations (decision D15) and the presentation reads (D22). Every operation authorizes with
+/// <see cref="RoleOperationMatrix"/> before reading data, validates with the domain rules, and commits with one
+/// conditional DynamoDB transaction.
 /// </summary>
 public sealed partial class AmendmentApi(AmendmentStore store, LanguageProvider languages, TimeProvider clock)
 {
@@ -28,6 +29,11 @@ public sealed partial class AmendmentApi(AmendmentStore store, LanguageProvider 
             "createAmendmentBody" => await CreateBodyAsync(principal, args, ct),
             "updateAmendmentBody" => await UpdateBodyAsync(principal, args, ct),
             "deleteAmendmentBody" => await DeleteBodyAsync(principal, args, ct),
+            "presentation" => await GetPresentationAsync(principal, ct),
+            "publicPresentation" => await GetPublicPresentationAsync(principal, ct),
+            "presentAmendment" => await PresentAmendmentAsync(principal, args, ct),
+            "clearPresentation" => await ClearPresentationAsync(principal, args, ct),
+            "setLanguagePresentation" => await SetLanguagePresentationAsync(principal, args, ct),
             _ => ApiResponse.Fail(DomainError.Validation("field", $"Unknown operation '{request.Field}'."))
         };
     }

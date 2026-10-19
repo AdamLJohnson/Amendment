@@ -16,7 +16,7 @@ public class SecurityAndCostTests
         "AWS::CDK::Metadata", "AWS::S3::BucketPolicy", "AWS::SNS::TopicPolicy", "AWS::IAM::Policy",
         "AWS::AppSync::GraphQLSchema", "AWS::AppSync::DataSource", "AWS::AppSync::Resolver",
         "AWS::Cognito::UserPoolClient", "AWS::Cognito::UserPoolGroup", "AWS::Cognito::UserPoolDomain", "AWS::CloudFront::OriginAccessControl",
-        "AWS::Route53::RecordSet", "AWS::Budgets::Budget"
+        "AWS::Route53::RecordSet", "AWS::Budgets::Budget", "AWS::Lambda::Permission"
     ];
 
     [Theory, MemberData(nameof(Stages))]
@@ -129,7 +129,7 @@ public class SecurityAndCostTests
     {
         var s = For(stage);
         var logGroups = s.Resources().Where(r => r.Type == "AWS::Logs::LogGroup").Select(r => r.Resource["Properties"]!).ToList();
-        Assert.Equal(2, logGroups.Count); // AppSync API + API Lambda
+        Assert.Equal(3, logGroups.Count); // AppSync API + API Lambda + public authorizer
         Assert.All(logGroups, g => Assert.Equal(s.Config.LogRetentionDays, (int)g["RetentionInDays"]!));
         var api = s.Resources().Single(r => r.Type == "AWS::AppSync::GraphQLApi").Resource["Properties"]!;
         Assert.Equal("ERROR", (string)api["LogConfig"]!["FieldLogLevel"]!);
@@ -144,7 +144,7 @@ public class SecurityAndCostTests
     public void Api_lambda_is_dotnet10_arm64_zip_with_least_privilege_table_access(string stage)
     {
         var s = For(stage);
-        var fn = s.Resources().Single(r => r.Type == "AWS::Lambda::Function").Resource["Properties"]!;
+        var fn = s.Resources().Single(r => r.Type == "AWS::Lambda::Function" && r.LogicalId.StartsWith("ApiFunction", StringComparison.Ordinal)).Resource["Properties"]!;
         Assert.Equal("dotnet10", (string)fn["Runtime"]!);
         Assert.Equal("arm64", (string)fn["Architectures"]![0]!);
         Assert.Equal("Amendment.Api.Lambda::Amendment.Api.Lambda.Function::HandleAsync", (string)fn["Handler"]!);
@@ -166,7 +166,7 @@ public class SecurityAndCostTests
         string[] Fields(string type) => resolvers.Where(r => (string)r["TypeName"]! == type).Select(r => (string)r["FieldName"]!).Order().ToArray();
 
         Assert.Equal(Amendment.Cdk.Stacks.ApiStack.MutationFields.Order().ToArray(), Fields("Mutation"));
-        Assert.Equal(["amendment", "amendments", "apiVersion", "languages"], Fields("Query"));
+        Assert.Equal(["amendment", "amendments", "apiVersion", "languages", "presentation", "publicPresentation"], Fields("Query"));
         Assert.Equal(["bodies"], Fields("Amendment"));
         Assert.All(resolvers, r => Assert.Equal("APPSYNC_JS", (string)r["Runtime"]!["Name"]!));
 
@@ -175,5 +175,55 @@ public class SecurityAndCostTests
         Assert.DoesNotContain("dynamodb:PutItem", readPolicy);
         Assert.DoesNotContain("dynamodb:DeleteItem", readPolicy);
         Assert.DoesNotContain("dynamodb:UpdateItem", readPolicy);
+    }
+
+    [Theory, MemberData(nameof(Stages))]
+    public void Public_projectors_use_a_cached_logs_only_node_authorizer_and_no_api_key(string stage)
+    {
+        var s = For(stage);
+        var token = Amendment.Cdk.Stacks.ApiStack.PublicToken(s.Config);
+        var api = s.Resources().Single(r => r.Type == "AWS::AppSync::GraphQLApi").Resource["Properties"]!;
+        var lambdaMode = api["AdditionalAuthenticationProviders"]!.AsArray().Single(p => (string)p!["AuthenticationType"]! == "AWS_LAMBDA")!;
+        Assert.Equal(3600, (int)lambdaMode["LambdaAuthorizerConfig"]!["AuthorizerResultTtlInSeconds"]!);
+        Assert.Equal($"^{token}$", (string)lambdaMode["LambdaAuthorizerConfig"]!["IdentityValidationExpression"]!);
+        Assert.DoesNotContain(s.Resources(), r => r.Type == "AWS::AppSync::ApiKey");
+
+        var fn = s.Resources().Single(r => r.Type == "AWS::Lambda::Function" && r.LogicalId.StartsWith("PublicAuthorizerFunction", StringComparison.Ordinal)).Resource["Properties"]!;
+        Assert.Equal("nodejs24.x", (string)fn["Runtime"]!);
+        Assert.Equal("arm64", (string)fn["Architectures"]![0]!);
+        Assert.Equal(token, (string)fn["Environment"]!["Variables"]!["PUBLIC_TOKEN"]!);
+        Assert.Contains("event.authorizationToken === TOKEN", (string)fn["Code"]!["ZipFile"]!);
+
+        var policy = s.Resources().Single(r => r.Type == "AWS::IAM::Policy" && r.LogicalId.StartsWith("PublicAuthorizerRole", StringComparison.Ordinal)).Resource.ToJsonString();
+        Assert.DoesNotContain("dynamodb:", policy);
+        var permission = s.Resources().Single(r => r.Type == "AWS::Lambda::Permission").Resource["Properties"]!;
+        Assert.Equal("appsync.amazonaws.com", (string)permission["Principal"]!);
+    }
+
+    [Fact]
+    public void Anonymous_schema_access_is_limited_to_public_fields()
+    {
+        var schema = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Schema", "amendment.graphql"));
+        var lambdaLines = schema.Split('\n').Where(l => l.Contains("@aws_lambda", StringComparison.Ordinal)).Select(l => l.Trim().Split(' ', '(', ':')[0]).ToArray();
+        Assert.Equal(["type", "type", "type", "languages", "publicPresentation"], lambdaLines.Where(l => !l.StartsWith('#')).ToArray());
+        Assert.Contains("type Language @aws_lambda @aws_cognito_user_pools", schema);
+        Assert.Contains("type PublicLanguageView @aws_lambda @aws_cognito_user_pools", schema);
+        Assert.Contains("type PublicPresentation @aws_lambda @aws_cognito_user_pools", schema);
+    }
+
+    [Fact]
+    public void Deployed_schema_is_the_real_schema_unless_a_replacement_file_is_given()
+    {
+        static string DeployedSchema(SynthesizedStage s) =>
+            (string)s.Resources().Single(r => r.Type == "AWS::AppSync::GraphQLSchema").Resource["Properties"]!["Definition"]!;
+
+        var schema = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Schema", "amendment.graphql"));
+        Assert.Equal(schema, DeployedSchema(Dev));
+
+        var replacement = Path.Combine(Path.GetTempPath(), "amendment-cdk-tests", "replacement.graphql");
+        Directory.CreateDirectory(Path.GetDirectoryName(replacement)!);
+        File.WriteAllText(replacement, "type Query { ping: String }");
+        var replaced = SynthesizedStage.Create("dev", new Dictionary<string, object> { [Amendment.Cdk.Stacks.ApiStack.SchemaFileContextKey] = replacement });
+        Assert.Equal("type Query { ping: String }", DeployedSchema(replaced));
     }
 }

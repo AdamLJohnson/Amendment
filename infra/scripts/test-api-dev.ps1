@@ -90,6 +90,9 @@ try {
         $tokenVars += $var
         Write-Host "  created test user $username ($(if ($users[$role]) { $users[$role] } else { 'no group' }))"
     }
+    # The public projector token (decision D21) is not a secret; it ships in the web app.
+    [Environment]::SetEnvironmentVariable('AMENDMENT_API_TEST_TOKEN_PUBLIC', (Get-Output "$prefix-Api" 'PublicToken'), 'Process')
+    $tokenVars += 'AMENDMENT_API_TEST_TOKEN_PUBLIC'
 
     $env:AMENDMENT_API_TEST_URL = $graphqlUrl
     Invoke-Checked { dotnet test (Join-Path $repoRoot 'test\Amendment.Infrastructure.Tests\Amendment.Infrastructure.Tests.csproj') -c Release --filter 'FullyQualifiedName~DeployedApiTests' --nologo }

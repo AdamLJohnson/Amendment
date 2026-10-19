@@ -89,6 +89,85 @@ public class AmendmentApiIntegrationTests(DynamoDbTestTable table) : IClassFixtu
     }
 
     [DynamoDbFact]
+    public async Task Presentation_controls_follow_the_role_matrix_and_versions()
+    {
+        var a = await _api.CreateAmendment("Screen");
+        await _api.CreateBody(a.Id, "en", "One **NEWSLIDE** Two");
+        await _api.CreateBody(a.Id, "es", "Uno");
+        var current = await _api.Ok<PresentationDto>(NoRole, "presentation", new { });
+        var present = new { id = a.Id, expectedVersion = current.Version };
+
+        Assert.Equal("FORBIDDEN", (await _api.Fails(null, "presentation", new { })).Type);
+        foreach (var identity in new ApiIdentity?[] { null, Anonymous, NoRole, Translator, Editor })
+            Assert.Equal("FORBIDDEN", (await _api.Fails(identity, "presentAmendment", present)).Type);
+        Assert.Equal("CONFLICT", (await _api.Fails(Screen, "presentAmendment", new { id = a.Id, expectedVersion = current.Version + 1 })).Type);
+        Assert.Equal("NOT_FOUND", (await _api.Fails(Screen, "presentAmendment", new { id = "missing", expectedVersion = current.Version })).Type);
+
+        var presented = await _api.Ok<PresentationDto>(Screen, "presentAmendment", present);
+        Assert.Equal((a.Id, current.Version + 1), (presented.ActiveAmendmentId, presented.Version));
+        Assert.Equal([new LanguageScreenDto("en", false, 0), new LanguageScreenDto("es", false, 0)], presented.Languages);
+
+        Assert.Equal("FORBIDDEN", (await _api.Fails(Editor, "setLanguagePresentation",
+            new { expectedVersion = presented.Version, changes = new[] { new { language = "en", visible = true } } })).Type);
+        var shown = await _api.Ok<PresentationDto>(Screen, "setLanguagePresentation",
+            new { expectedVersion = presented.Version, changes = new object[] { new { language = "ENG", visible = true, page = 1 }, new { language = "es", page = 7 } } });
+        Assert.Equal([new LanguageScreenDto("en", true, 1), new LanguageScreenDto("es", false, 0)], shown.Languages);
+        Assert.Equal(presented.Version + 1, shown.Version);
+        Assert.Equal("NOT_FOUND", (await _api.Fails(Screen, "setLanguagePresentation",
+            new { expectedVersion = shown.Version, changes = new[] { new { language = "fr", visible = true } } })).Type);
+        Assert.Equal("CONFLICT", (await _api.Fails(Screen, "setLanguagePresentation",
+            new { expectedVersion = presented.Version, changes = new[] { new { language = "en", visible = false } } })).Type);
+
+        var archived = await _api.CreateAmendment("Archived");
+        await _api.Ok<AmendmentDto>(Editor, "archiveAmendment", new { id = archived.Id, expectedVersion = 1, archived = true });
+        Assert.Equal("PRECONDITION_FAILED", (await _api.Fails(Screen, "presentAmendment", new { id = archived.Id, expectedVersion = shown.Version })).Type);
+
+        Assert.Equal("FORBIDDEN", (await _api.Fails(Translator, "clearPresentation", new { expectedVersion = shown.Version })).Type);
+        var cleared = await _api.Ok<PresentationDto>(Screen, "clearPresentation", new { expectedVersion = shown.Version });
+        Assert.Equal((null, shown.Version + 1), (cleared.ActiveAmendmentId, cleared.Version));
+        Assert.Empty(cleared.Languages);
+        Assert.Equal(cleared.Version, (await _api.Ok<PresentationDto>(Screen, "clearPresentation", new { expectedVersion = cleared.Version })).Version);
+        Assert.Equal(cleared.Version, (await table.Store.GetPresentationAsync()).Version);
+    }
+
+    [DynamoDbFact]
+    public async Task Public_presentation_shows_only_visible_bodies_and_follows_live_edits()
+    {
+        var a = await _api.CreateAmendment("Public");
+        await _api.CreateBody(a.Id, "en", "One **NEWSLIDE** Two");
+        var es = await _api.CreateBody(a.Id, "es", "Borrador secreto");
+        var current = await _api.Ok<PresentationDto>(Screen, "presentation", new { });
+        var presented = await _api.Ok<PresentationDto>(Screen, "presentAmendment", new { id = a.Id, expectedVersion = current.Version });
+        var shown = await _api.Ok<PresentationDto>(Screen, "setLanguagePresentation",
+            new { expectedVersion = presented.Version, changes = new[] { new { language = "en", visible = true, page = 1 } } });
+
+        foreach (var identity in new ApiIdentity?[] { null, Anonymous, NoRole })
+        {
+            var view = await _api.Ok<PublicPresentationDto>(identity!, "publicPresentation", new { });
+            Assert.Equal((shown.Version, a.Id), (view.Version, view.ActiveAmendmentId));
+            Assert.Equal(new PublicLanguageViewDto("en", true, 1, 2, "One **NEWSLIDE** Two", 1), view.Languages[0]);
+            Assert.Equal(new PublicLanguageViewDto("es", false, 0, 0, null, null), view.Languages[1]);
+        }
+
+        // Anonymous callers cannot write anything.
+        Assert.Equal("FORBIDDEN", (await _api.Fails(Anonymous, "updateAmendmentBody",
+            new { amendmentId = a.Id, language = "es", expectedVersion = es.Version, markdown = "x", status = "READY" })).Type);
+        Assert.Equal("FORBIDDEN", (await _api.Fails(Anonymous, "clearPresentation", new { expectedVersion = shown.Version })).Type);
+
+        // A translator's edit of the visible body is public at once; a shorter deck resets the page.
+        await _api.Ok<AmendmentBodyDto>(Translator, "updateAmendmentBody",
+            new { amendmentId = a.Id, language = "en", expectedVersion = 1, markdown = "Only one slide", status = "READY" });
+        var edited = await _api.Ok<PublicPresentationDto>(Anonymous, "publicPresentation", new { });
+        Assert.Equal(new PublicLanguageViewDto("en", true, 0, 1, "Only one slide", 2), edited.Languages[0]);
+        Assert.Equal(shown.Version + 1, edited.Version);
+
+        var cleared = await _api.Ok<PresentationDto>(Screen, "clearPresentation", new { expectedVersion = edited.Version });
+        var empty = await _api.Ok<PublicPresentationDto>(Anonymous, "publicPresentation", new { });
+        Assert.Equal((cleared.Version, null), (empty.Version, empty.ActiveAmendmentId));
+        Assert.Empty(empty.Languages);
+    }
+
+    [DynamoDbFact]
     public async Task Clone_copies_all_bodies_as_a_child()
     {
         var source = await _api.CreateAmendment("Source");

@@ -50,6 +50,32 @@ public sealed record ApiAmendmentInput(
     string? LegisId = null,
     string? ParentAmendmentId = null);
 
+public sealed record ApiLanguageScreen(string Language, bool Visible, int Page);
+
+public sealed record ApiPresentation(string? ActiveAmendmentId, IReadOnlyList<ApiLanguageScreen> Languages, string Version, ApiAudit? Updated);
+
+/// <summary>A language change for <c>setLanguagePresentation</c>; null fields are left unchanged.</summary>
+public sealed record ApiLanguageChange(string Language, bool? Visible = null, int? Page = null);
+
+public sealed record ApiPublicLanguageView(string Language, bool Visible, int Page, int PageCount, string? Markdown, string? BodyVersion)
+{
+    public const string SlideDelimiter = "**NEWSLIDE**";
+
+    /// <summary>Markdown of the current slide (<c>**NEWSLIDE**</c> split, as in <c>SlideDeck</c>); empty when hidden.</summary>
+    public string CurrentSlide
+    {
+        get
+        {
+            if (!Visible || string.IsNullOrEmpty(Markdown))
+                return "";
+            var slides = Markdown.Split(SlideDelimiter);
+            return Page >= 0 && Page < slides.Length ? slides[Page] : slides[0];
+        }
+    }
+}
+
+public sealed record ApiPublicPresentation(string Version, string? ActiveAmendmentId, IReadOnlyList<ApiPublicLanguageView> Languages);
+
 /// <summary>Body status values of the GraphQL <c>BodyStatus</c> enum.</summary>
 public static class ApiBodyStatus
 {

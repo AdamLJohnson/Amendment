@@ -5,7 +5,10 @@ using System.Text.Json.Nodes;
 
 namespace Amendment.Client.Repository.GraphQl;
 
-/// <summary>Typed client for the private GraphQL amendment API (Phase 4).</summary>
+/// <summary>
+/// Typed client for the GraphQL amendment API. <see cref="GetLanguagesAsync"/> and <see cref="GetPublicPresentationAsync"/>
+/// also work anonymously (public token, decision D21).
+/// </summary>
 public interface IAmendmentApi
 {
     Task<ApiAmendmentPage> GetAmendmentsAsync(bool archived = false, int limit = 50, string? nextToken = null, CancellationToken ct = default);
@@ -20,6 +23,11 @@ public interface IAmendmentApi
     Task<ApiAmendmentBody> CreateBodyAsync(string amendmentId, string language, string markdown, string status = ApiBodyStatus.New, CancellationToken ct = default);
     Task<ApiAmendmentBody> UpdateBodyAsync(string amendmentId, string language, string expectedVersion, string markdown, string status, CancellationToken ct = default);
     Task DeleteBodyAsync(string amendmentId, string language, string expectedVersion, CancellationToken ct = default);
+    Task<ApiPresentation> GetPresentationAsync(CancellationToken ct = default);
+    Task<ApiPublicPresentation> GetPublicPresentationAsync(CancellationToken ct = default);
+    Task<ApiPresentation> PresentAmendmentAsync(string id, string expectedVersion, CancellationToken ct = default);
+    Task<ApiPresentation> ClearPresentationAsync(string expectedVersion, CancellationToken ct = default);
+    Task<ApiPresentation> SetLanguagePresentationAsync(string expectedVersion, IReadOnlyList<ApiLanguageChange> changes, CancellationToken ct = default);
 }
 
 /// <summary>
@@ -31,6 +39,7 @@ public sealed class AmendmentApiClient(HttpClient http) : IAmendmentApi
     private const string AuditFields = "by at";
     private const string BodyFields = $"amendmentId language markdown status pageCount version created {{ {AuditFields} }} updated {{ {AuditFields} }}";
     private const string AmendmentFields = $"id title author motion source legisId primaryLanguage isArchived isApproved parentAmendmentId version created {{ {AuditFields} }} updated {{ {AuditFields} }} bodies {{ {BodyFields} }}";
+    private const string PresentationFields = $"activeAmendmentId languages {{ language visible page }} version updated {{ {AuditFields} }}";
 
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
@@ -88,6 +97,28 @@ public sealed class AmendmentApiClient(HttpClient http) : IAmendmentApi
         SendAsync<string>("deleteAmendmentBody",
             "mutation($amendmentId: ID!, $language: String!, $expectedVersion: String!) { deleteAmendmentBody(amendmentId: $amendmentId, language: $language, expectedVersion: $expectedVersion) }",
             new { amendmentId, language, expectedVersion }, ct);
+
+    public async Task<ApiPresentation> GetPresentationAsync(CancellationToken ct = default) =>
+        (await SendAsync<ApiPresentation>("presentation", $"{{ presentation {{ {PresentationFields} }} }}", null, ct))!;
+
+    public async Task<ApiPublicPresentation> GetPublicPresentationAsync(CancellationToken ct = default) =>
+        (await SendAsync<ApiPublicPresentation>("publicPresentation",
+            "{ publicPresentation { version activeAmendmentId languages { language visible page pageCount markdown bodyVersion } } }", null, ct))!;
+
+    public async Task<ApiPresentation> PresentAmendmentAsync(string id, string expectedVersion, CancellationToken ct = default) =>
+        (await SendAsync<ApiPresentation>("presentAmendment",
+            $"mutation($id: ID!, $expectedVersion: String!) {{ presentAmendment(id: $id, expectedVersion: $expectedVersion) {{ {PresentationFields} }} }}",
+            new { id, expectedVersion }, ct))!;
+
+    public async Task<ApiPresentation> ClearPresentationAsync(string expectedVersion, CancellationToken ct = default) =>
+        (await SendAsync<ApiPresentation>("clearPresentation",
+            $"mutation($expectedVersion: String!) {{ clearPresentation(expectedVersion: $expectedVersion) {{ {PresentationFields} }} }}",
+            new { expectedVersion }, ct))!;
+
+    public async Task<ApiPresentation> SetLanguagePresentationAsync(string expectedVersion, IReadOnlyList<ApiLanguageChange> changes, CancellationToken ct = default) =>
+        (await SendAsync<ApiPresentation>("setLanguagePresentation",
+            $"mutation($expectedVersion: String!, $changes: [LanguageChangeInput!]!) {{ setLanguagePresentation(expectedVersion: $expectedVersion, changes: $changes) {{ {PresentationFields} }} }}",
+            new { expectedVersion, changes }, ct))!;
 
     private async Task<T?> SendAsync<T>(string field, string query, object? variables, CancellationToken ct)
     {

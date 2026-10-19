@@ -25,18 +25,15 @@ namespace Amendment.Client
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
             await AddStageConfigAsync(builder);
-            var cognitoPreview = CognitoGraphQlPreview.FromConfiguration(builder.Configuration);
+            var cognitoAuth = CognitoAuth.FromConfiguration(builder.Configuration);
 
             builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) }.EnableIntercept(sp));
             builder.Services.AddHttpClientInterceptor();
-            builder.Services.AddScoped<HttpInterceptorService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
             builder.Services.AddAuthorizationCore();
-            cognitoPreview.Register(builder.Services);
-            if (!cognitoPreview.Enabled)
-                builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
+            cognitoAuth.Register(builder.Services);
             builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             builder.Services.AddScoped<IAmendmentRepository, AmendmentRepository>();
             builder.Services.AddScoped<IAmendmentBodyRepository, AmendmentBodyRepository>();
@@ -66,12 +63,7 @@ namespace Amendment.Client
 
             builder.Services.AddValidatorsFromAssembly(typeof(UserResponse).Assembly);
 
-            var app = builder.Build();
-
-            var interceptorService = app.Services.GetRequiredService<HttpInterceptorService>();
-            interceptorService.RegisterEvent();
-
-            await app.RunAsync();
+            await builder.Build().RunAsync();
         }
 
         /// <summary>

@@ -1,36 +1,32 @@
 ﻿@page "/"
-@using Amendment.Client.Repository
-@using Amendment.Shared.Enums
-@using Amendment.Shared.Responses
-@inject ILanguageRepository LanguageRepository
-@inject IHubEventService HubEventService
-@inject IAmendmentRepository AmendmentRepository
-@implements IDisposable
+@using Amendment.Client.Repository.GraphQl
+@inject IAmendmentApi Api
+@inject INotificationService NotificationService
 
 <CustomPageTitle>Amendments</CustomPageTitle>
 
 <h1>Amendments</h1>
 
 <Row>
-    <Repeater Items="_languages" TItem="LanguageResponse">
+    <Repeater Items="_languages" TItem="ApiLanguage">
         <Column ColumnSize="ColumnSize.Is4">
-            <h4>@context.LanguageName</h4>
+            <h4>@context.Name</h4>
             @{
-                var body = _bodies.FirstOrDefault(x => x.LanguageId == context.Id && x.IsLive);
+                var view = _presentation?.Languages.FirstOrDefault(x => x.Language == context.Code && x.Visible);
             }
-            
-            @if (body != null)
+
+            @if (view != null)
             {
-                <div class=@($"small-screen-container well slideonline {@context.LanguageName}")>
-                    <AmendmentBodySingleRenderer BodyText="@body.AmendBodyPagedText"></AmendmentBodySingleRenderer>
+                <div class=@($"small-screen-container well slideonline {context.Name}")>
+                    <AmendmentBodySingleRenderer BodyText="@view.CurrentSlide"></AmendmentBodySingleRenderer>
                 </div>
             }
             else
             {
-                <div class=@($"small-screen-container well fill-well slideoffline {@context.LanguageName}")></div>
+                <div class=@($"small-screen-container well fill-well slideoffline {context.Name}")></div>
             }
             <Div TextAlignment="TextAlignment.Center">
-                <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/View/{context.LanguageName ?? ""}")>View</Button>
+                <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/View/{context.Name}")>View</Button>
             </Div>
         </Column>
     </Repeater>
@@ -38,66 +34,18 @@
 
 @code
 {
-    List<LanguageResponse> _languages = null!;
-    List<AmendmentBodyResponse> _bodies = new();
+    IReadOnlyList<ApiLanguage> _languages = [];
+    ApiPublicPresentation? _presentation;
     protected override async Task OnInitializedAsync()
     {
-        _languages = (await LanguageRepository.GetAsync()).ToList();
-        var amendment = await AmendmentRepository.GetLiveAsync();
-        if (amendment != null)
+        try
         {
-            _bodies = amendment.AmendmentBodies.ToList();
+            _languages = await Api.GetLanguagesAsync();
+            _presentation = await Api.GetPublicPresentationAsync();
         }
-        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
-        HubEventService.AmendmentBodyUpdatedMany += AmendmentBodyUpdatedEventMany;
-    }
-
-    private void AmendmentBodyUpdatedEventMany(object? sender, SignalRResponse<List<AmendmentBodyResponse>> e)
-    {
-        foreach (var item in e.Value)
+        catch (Exception ex) when (ex is AmendmentApiException or HttpRequestException)
         {
-            AmendmendBodyUpdatedWork(e.OperationType, item);
+            await NotificationService.Error(ex.Message, "Amendments");
         }
-        StateHasChanged();
-    }
-
-    private void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
-    {
-        AmendmendBodyUpdatedWork(e.OperationType, e.Value);
-
-        StateHasChanged();
-    }
-
-    private void AmendmendBodyUpdatedWork(OperationType operationType, AmendmentBodyResponse body)
-    {
-        switch (operationType)
-        {
-            case OperationType.Create:
-                if (body.IsLive)
-                    _bodies.Add(body);
-                break;
-            case OperationType.Update:
-                if (body.IsLive)
-                {
-                    var i = _bodies.FindIndex(x => x.Id == body.Id);
-                    if (i > -1)
-                        _bodies[i] = body;
-                    else
-                        _bodies.Add(body);
-                }
-                else
-                    _bodies.RemoveAll(x => x.Id == body.Id);
-
-                break;
-            case OperationType.Delete:
-                _bodies.RemoveAll(x => x.Id == body.Id);
-                break;
-        }
-    }
-
-    public void Dispose()
-    {
-        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
-        HubEventService.AmendmentBodyUpdatedMany -= AmendmentBodyUpdatedEventMany;
     }
 }

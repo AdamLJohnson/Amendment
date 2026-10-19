@@ -1,66 +1,47 @@
-﻿@page "/Amendment/{AmendmentId:int}/Body/Create/{LanguageId:int?}"
-@page "/Amendment/{AmendmentId:int}/Body/Edit/{id:int}"
+﻿@page "/Amendment/{AmendmentId}/Body/Create/{CreateLanguage?}"
+@page "/Amendment/{AmendmentId}/Body/Edit/{EditLanguage}"
 @using Microsoft.AspNetCore.Authorization
-@using Amendment.Client.Repository
-@using Amendment.Shared.Enums
-@using Amendment.Shared.Requests
-@using Amendment.Shared.Responses
+@using Amendment.Client.Repository.GraphQl
 @using Amendment.Shared
 @attribute [Authorize(Roles = RoleGroups.AdminTranslatorAmendEditor)]
-@inject IAmendmentRepository AmendmentRepository
-@inject IAmendmentBodyRepository AmendmentBodyRepository
-@inject ILanguageRepository LanguageRepository
-@inject ISystemSettingRepository SystemSettingRepository
+@inject IAmendmentApi Api
 @inject NavigationManager NavigationManager
 @inject INotificationService NotificationService
-@inject IHubEventService HubEventService
-@implements IDisposable
 <CustomPageTitle>@_title</CustomPageTitle>
-<h3>@_amendment.Title</h3>
+<h3>@_amendment?.Title</h3>
 
 <Row>
     <Column>
-        <EditForm Model="_model" OnValidSubmit="OnSave">
-            <Validations @ref="@_fluentValidations" Mode="ValidationMode.Manual" Model="@_model" HandlerType="typeof(FluentValidationHandler)">
-                <Validation>
-                    <Field>
-                        <FieldLabel For="status">Status</FieldLabel>
-                        <Select id="status" @bind-Value="@_model.AmendStatus" TValue="AmendmentBodyStatus">
-                            <ChildContent>
-                                <Repeater Items="_statusEnumerable">
-                                    <ChildContent Context="item">
-                                        <SelectItem Value="@item">@item.GetDisplayName()</SelectItem>
-                                    </ChildContent>
-                                </Repeater>
-                            </ChildContent>
-                            <Feedback>
-                                <ValidationError/>
-                            </Feedback>
-                        </Select>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field>
-                        <FieldLabel For="language">Language</FieldLabel>
-                        <Select id="language" @bind-Value="@_model.LanguageId" TValue="int">
-                            <ChildContent>
-                                <Repeater Items="_languages">
-                                    <ChildContent Context="item">
-                                        <SelectItem Value="@item.Id">@item.LanguageName</SelectItem>
-                                    </ChildContent>
-                                </Repeater>
-                            </ChildContent>
-                            <Feedback>
-                                <ValidationError />
-                            </Feedback>
-                        </Select>
-                    </Field>
-                </Validation>
+        <EditForm Model="this" OnValidSubmit="OnSave">
+                <Field>
+                    <FieldLabel For="status">Status</FieldLabel>
+                    <Select id="status" @bind-Value="@_status" TValue="string">
+                        <ChildContent>
+                            <Repeater Items="Statuses">
+                                <ChildContent Context="item">
+                                    <SelectItem Value="@item.Value">@item.Label</SelectItem>
+                                </ChildContent>
+                            </Repeater>
+                        </ChildContent>
+                    </Select>
+                </Field>
+                <Field>
+                    <FieldLabel For="language">Language</FieldLabel>
+                    <Select id="language" @bind-Value="@_language" TValue="string" Disabled="@(EditLanguage != null)">
+                        <ChildContent>
+                            <Repeater Items="_languages">
+                                <ChildContent Context="item">
+                                    <SelectItem Value="@item.Code">@item.Name</SelectItem>
+                                </ChildContent>
+                            </Repeater>
+                        </ChildContent>
+                    </Select>
+                </Field>
                 <Field>
                     <FieldLabel For="amendmentBody">Amendment Body</FieldLabel>
-                    @if (_initialized)
+                    @if (_initialized && _loaded)
                     {
-                        <Markdown Value="@_model.AmendBody" id="amendmentBody" ValueChanged="MarkdownValueChanged" UploadImage="false" SpellChecker="false" @ref="_markdown" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}, Link = new []{"<u>", "</u>"}, Table = new []{"<span style=\"color: red;\">", "</span>"}})>
+                        <Markdown Value="@_markdown" id="amendmentBody" ValueChanged="MarkdownValueChanged" UploadImage="false" SpellChecker="false" InsertTexts=@(new MarkdownInsertTexts() {HorizontalRule = new []{"", "**NEWSLIDE**"}, Link = new []{"<u>", "</u>"}, Table = new []{"<span style=\"color: red;\">", "</span>"}})>
                             <Toolbar>
                                 <MarkdownToolbarButton Action="MarkdownAction.Bold"/>
                                 <MarkdownToolbarButton Action="MarkdownAction.Italic" />
@@ -78,7 +59,6 @@
                         </Markdown>
                     }
                 </Field>
-            </Validations>
 
             <Button Color="Color.Primary" Type="ButtonType.Submit">Save</Button>
         </EditForm>
@@ -91,11 +71,11 @@
             </Items>
             <Content>
                 <TabPanel Name="primaryLanguageTab" Class="tab-pane">
-                    <AmendmentBodyMultiRenderer BodyText="@_primaryLanguageBody.AmendBody"></AmendmentBodyMultiRenderer>
+                    <AmendmentBodyMultiRenderer BodyText="@(_primaryLanguageBody?.Markdown ?? "")"></AmendmentBodyMultiRenderer>
                 </TabPanel>
                 <TabPanel Name="preview" Class="tab-pane">
                     <Div class="text-preview">
-                        <AmendmentBodyMultiRenderer BodyText="@_model.AmendBody"></AmendmentBodyMultiRenderer>
+                        <AmendmentBodyMultiRenderer BodyText="@_markdown"></AmendmentBodyMultiRenderer>
                     </Div>
                 </TabPanel>
             </Content>
@@ -106,24 +86,29 @@
 
 @code {
     [Parameter]
-    public int? Id { get; set; }
+    public string AmendmentId { get; set; } = "";
     [Parameter]
-    public int AmendmentId { get; set; }
+    public string? CreateLanguage { get; set; }
     [Parameter]
-    public int? LanguageId { get; set; }
+    public string? EditLanguage { get; set; }
     string _title = "";
-    AmendmentBodyRequest _model = new() { AmendBody = "" };
     string _selectedTab = "primaryLanguageTab";
 
-    AmendmentResponse _amendment = new();
-    AmendmentBodyResponse _primaryLanguageBody = new() { AmendBody = "", AmendStatus = AmendmentBodyStatus.Ready } ;
+    ApiAmendment? _amendment;
+    ApiAmendmentBody? _primaryLanguageBody;
+    ApiAmendmentBody? _body;
     string _primaryLanguageName = "English";
 
-    Validations _fluentValidations = null!;
-    Markdown _markdown = null!;
-    IEnumerable<AmendmentBodyStatus> _statusEnumerable = Enum.GetValues(typeof(AmendmentBodyStatus)).Cast<AmendmentBodyStatus>();
-    List<LanguageResponse> _languages = new();
+    static readonly (string Value, string Label)[] Statuses =
+    [
+        (ApiBodyStatus.New, "New"), (ApiBodyStatus.Draft, "Draft"), (ApiBodyStatus.UnderReview, "Under Review"), (ApiBodyStatus.Ready, "Ready")
+    ];
+    string _status = ApiBodyStatus.New;
+    string _language = "";
+    string _markdown = "";
+    List<ApiLanguage> _languages = new();
     private bool _initialized;
+    private bool _loaded;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -136,164 +121,80 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _title = Id == null ? "Create Amendment Body" : "Edit Amendment Body";
-        var languages = await LanguageRepository.GetAsync();
-        _amendment = await AmendmentRepository.GetAsync(AmendmentId);
-        _languages = languages.ToList();
-
-        _primaryLanguageName = _languages.Single(x => x.Id == _amendment.PrimaryLanguageId).LanguageName;
-
-        var primaryBodyId = _amendment.AmendmentBodies.FirstOrDefault(x => x.LanguageId == _amendment.PrimaryLanguageId)?.Id;
-        if (primaryBodyId != null)
-            _primaryLanguageBody = await AmendmentBodyRepository.GetAsync(AmendmentId, primaryBodyId.Value);
-
-        // Subscribe to real-time updates for amendment bodies
-        HubEventService.AmendmentBodyUpdated += AmendmentBodyUpdatedEvent;
-
-        if (Id != null)
+        _title = EditLanguage == null ? "Create Amendment Body" : "Edit Amendment Body";
+        try
         {
-            var response = await AmendmentBodyRepository.GetAsync(AmendmentId, Id.Value);
-            _model = response.ToRequest();
-            if (string.IsNullOrEmpty(_model.AmendBody))
-                await _markdown.SetValueAsync(" ");
+            _languages = (await Api.GetLanguagesAsync()).ToList();
+            _amendment = await Api.GetAmendmentAsync(AmendmentId);
         }
-        else
-            await _markdown.SetValueAsync("");
-
-        _languages.RemoveAll(x => _amendment.AmendmentBodies.Any(y => y.LanguageId == x.Id && y.LanguageId != _model.LanguageId));
-        if (Id == null)
+        catch (AmendmentApiException ex)
         {
-            if (LanguageId != null)
-                _model.LanguageId = LanguageId.Value;
-            else
-                _model.LanguageId = !_languages.Any() ? 0 : _languages.First().Id;
+            await NotificationService.Error(ex.Message, "Amendment Body Error");
+            return;
         }
-        if (!_languages.Any())
-            _model.LanguageId = 0;
+        if (_amendment == null)
+        {
+            await NotificationService.Error("The amendment was not found.", "Amendment Body Error");
+            return;
+        }
+
+        _primaryLanguageName = _languages.FirstOrDefault(x => x.Code == _amendment.PrimaryLanguage)?.Name ?? _amendment.PrimaryLanguage;
+        _primaryLanguageBody = _amendment.Bodies.FirstOrDefault(x => x.Language == _amendment.PrimaryLanguage);
+
+        if (EditLanguage != null)
+        {
+            _body = _amendment.Bodies.FirstOrDefault(x => x.Language == EditLanguage);
+            if (_body == null)
+            {
+                await NotificationService.Error("The amendment body was not found.", "Amendment Body Error");
+                return;
+            }
+            _language = _body.Language;
+            _status = _body.Status;
+            _markdown = _body.Markdown;
+        }
+
+        _languages.RemoveAll(x => _amendment.Bodies.Any(y => y.Language == x.Code && y.Language != _language));
+        if (EditLanguage == null)
+            _language = CreateLanguage != null && _languages.Any(x => x.Code == CreateLanguage) ? CreateLanguage : _languages.FirstOrDefault()?.Code ?? "";
+        _loaded = true;
     }
 
     protected async Task OnSave()
     {
-        var isValid = await _fluentValidations.ValidateAll();
-        if (string.IsNullOrEmpty(_model.AmendBody))
+        if (_amendment == null)
+            return;
+        if (string.IsNullOrEmpty(_markdown))
         {
             await NotificationService.Error("Amendment Body can not be empty", "Error");
-            isValid = false;
+            return;
         }
-        if (isValid)
+
+        try
         {
-            if (Id == null)
-            {
-                // Handle creation with specific error handling for duplicate language
-                var (response, errorMessage) = await AmendmentBodyRepository.PostAsync(AmendmentId, _model);
-                if (response != null)
-                {
-                    // Success - navigate away
-                    NavigationManager.NavigateTo("/Amendment");
-                }
-                else if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    // Show the specific error message while preserving user input
-                    await NotificationService.Error(errorMessage, "Validation Error");
-                    // Don't navigate away - keep the form with user's input intact
-                }
-            }
+            if (_body == null)
+                await Api.CreateBodyAsync(AmendmentId, _language, _markdown, _status);
             else
-            {
-                // Handle update with error handling
-                var (response, errorMessage) = await AmendmentBodyRepository.PutWithErrorHandlingAsync(AmendmentId, Id ?? 0, _model);
-                if (response != null)
-                {
-                    // Success - navigate away
-                    NavigationManager.NavigateTo("/Amendment");
-                }
-                else if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    // Show the specific error message while preserving user input
-                    await NotificationService.Error(errorMessage, "Validation Error");
-                    // Don't navigate away - keep the form with user's input intact
-                }
-            }
+                _body = await Api.UpdateBodyAsync(AmendmentId, _body.Language, _body.Version, _markdown, _status);
+            NavigationManager.NavigateTo("/Amendment");
+        }
+        catch (AmendmentApiException ex)
+        {
+            // Keep the form with the user's input intact
+            await NotificationService.Error(ex.Message, "Validation Error");
         }
         StateHasChanged();
     }
 
-
-
     private Task MarkdownValueChanged(string value)
     {
-        _model.AmendBody = value;
+        _markdown = value;
         return Task.CompletedTask;
     }
 
     private void SelectedTabChanged(string tabName)
     {
         _selectedTab = tabName;
-    }
-
-    private async void AmendmentBodyUpdatedEvent(object? sender, SignalRResponse<AmendmentBodyResponse> e)
-    {
-        // Check if this update is for the current amendment
-        if (e.Value.AmendId == AmendmentId)
-        {
-            // If this is the primary language body, update the display
-            if (e.Value.LanguageId == _amendment.PrimaryLanguageId)
-            {
-                // Store the previous body text to check if it changed
-                string previousBodyText = _primaryLanguageBody.AmendBody;
-
-                // Update the primary language body with the new content
-                _primaryLanguageBody = e.Value;
-
-                // If the primary language body text has changed and we're editing a non-primary language version
-                if (Id != null && _model.LanguageId != _amendment.PrimaryLanguageId &&
-                    !string.Equals(previousBodyText, e.Value.AmendBody))
-                {
-                    // If the current status is Ready, automatically change it to Draft
-                    if (_model.AmendStatus == AmendmentBodyStatus.Ready)
-                    {
-                        _model.AmendStatus = AmendmentBodyStatus.Draft;
-
-                        try
-                        {
-                            // Get the language name for better messaging
-                            var currentLanguageName = _languages.FirstOrDefault(l => l.Id == _model.LanguageId)?.LanguageName ?? "non-primary language";
-
-                            // Show notification using the NotificationService
-                            await NotificationService.Warning(
-                                $"The {_primaryLanguageName} text has been updated. The status of your {currentLanguageName} translation has been changed to Draft.",
-                                "Primary Text Changed");
-
-                            // Log to console for debugging
-                            Console.WriteLine($"Toast notification sent: Primary Text Changed");
-                        }
-                        catch (Exception ex)
-                        {
-                            // Log any errors that occur when showing the notification
-                            Console.WriteLine($"Error showing toast notification: {ex.Message}");
-                        }
-                    }
-                }
-
-                // Force UI refresh
-                StateHasChanged();
-            }
-            // If this is the body we're currently editing, update our model
-            else if (Id != null && e.Value.Id == Id.Value)
-            {
-                // Update our model with the new status (in case it was changed by the server)
-                _model.AmendStatus = e.Value.AmendStatus;
-
-                // Force UI refresh
-                StateHasChanged();
-            }
-        }
-    }
-
-    public void Dispose()
-    {
-        // Unsubscribe from events when component is disposed
-        HubEventService.AmendmentBodyUpdated -= AmendmentBodyUpdatedEvent;
     }
 }
 

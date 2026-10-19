@@ -3,7 +3,9 @@
   Deploys, checks and destroys a stage against a local Floci emulator (https://floci.io). No AWS account is used.
 .DESCRIPTION
   1. Starts a fresh Floci container (Docker socket mounted; AppSync schema validation runs in a sidecar container).
-  2. Creates a stand-in public hosted zone, bootstraps CDK and deploys all stacks for the stage.
+  2. Creates a stand-in public hosted zone, bootstraps CDK and deploys all stacks for the stage. Floci requires the
+     cognito_groups argument on @aws_cognito_user_pools (AWS does not), so a copy of the schema that lists all four
+     role groups is deployed instead of the real schema.
   3. Checks stack status, tags, alias records, and publishes the web client to the emulated bucket.
   4. Destroys the stage and checks the shared hosted zone survives with only its NS/SOA records.
 #>
@@ -61,11 +63,18 @@ try {
     $repoRoot = Resolve-Path (Join-Path $cdkDir '..\..')
     Invoke-Checked { dotnet publish (Join-Path $repoRoot 'src\Amendment.Api.Lambda\Amendment.Api.Lambda.csproj') -c Release -o (Join-Path $repoRoot 'artifacts\lambda\api') --nologo -v q }
 
+    # Cognito group names from IdentityStack.RoleGroups (D13)
+    $groups = '"SystemAdministrator", "ScreenController", "AmendmentEditor", "Translator"'
+    $flociSchema = Join-Path $repoRoot 'artifacts\floci\amendment.graphql'
+    New-Item -ItemType Directory -Force -Path (Split-Path $flociSchema) | Out-Null
+    [IO.File]::WriteAllText($flociSchema,
+        ((Get-Content (Join-Path $cdkDir 'Schema\amendment.graphql') -Raw) -replace '@aws_cognito_user_pools(?!\s*\()', "@aws_cognito_user_pools(cognito_groups: [$groups])"))
+
     Push-Location $cdkDir
     try {
         $account = aws sts get-caller-identity --query Account --output text
         Invoke-Checked { npx cdk bootstrap "aws://$account/$($env:AWS_REGION)" }
-        Invoke-Checked { npx cdk deploy --all -c "stage=$Stage" -c "hostedZoneId=$zoneId" --require-approval never --outputs-file $outputsFile }
+        Invoke-Checked { npx cdk deploy --all -c "stage=$Stage" -c "hostedZoneId=$zoneId" -c "schemaFile=$flociSchema" --require-approval never --outputs-file $outputsFile }
     }
     finally { Pop-Location }
 

@@ -72,6 +72,23 @@ public sealed class StoreWrite
         AmendmentTable.AmendmentKey(amendmentId), $"Amendment {amendmentId}",
         _ => DomainError.NotFound($"Amendment {amendmentId} was not found."));
 
+    /// <summary>The amendment still has the version that was read (for example, it was not archived in the meantime).</summary>
+    public static StoreWrite AmendmentUnchanged(AmendmentRecord amendment)
+    {
+        var description = $"Amendment {amendment.Id}";
+        return new(
+            new TransactWriteItem
+            {
+                ConditionCheck = new ConditionCheck
+                {
+                    Key = AmendmentTable.AmendmentKey(amendment.Id), ConditionExpression = VersionCondition,
+                    ExpressionAttributeNames = VersionName(), ExpressionAttributeValues = Expected(amendment.Version)
+                }
+            },
+            AmendmentTable.AmendmentKey(amendment.Id), description,
+            current => current is null ? DomainError.NotFound($"{description} was not found.") : VersionError(description, VersionOf(current), amendment.Version));
+    }
+
     /// <summary>The referenced parent amendment exists; a missing parent is <c>PRECONDITION_FAILED</c> (contracts.md §3).</summary>
     public static StoreWrite ParentExists(string parentAmendmentId) => new(
         new TransactWriteItem { ConditionCheck = new ConditionCheck { Key = AmendmentTable.AmendmentKey(parentAmendmentId), ConditionExpression = "attribute_exists(PK)" } },

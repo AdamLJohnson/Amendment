@@ -1,15 +1,13 @@
-﻿@using Amendment.Shared.Responses
-@using Amendment.Shared.Requests
-@using Amendment.Client.Repository
+﻿@using Amendment.Shared.Requests
+@using Amendment.Client.Repository.GraphQl
 @using Amendment.Shared
-@inject IAmendmentRepository AmendmentRepository
-@inject ILanguageRepository LanguageRepository
+@inject IAmendmentApi Api
 @inject INotificationService NotificationService
 <TableRow>
     <TableRowCell>
         @Model.Title
         <div style="float: right!important">
-            @if (Model.IsLive)
+            @if (IsLive)
             {
                 <Badge Color="Color.Danger">LIVE</Badge>
             }
@@ -17,7 +15,7 @@
             {
                 <Badge Color="Color.Secondary">ARCHIVED</Badge>
             }
-            @if (Model.ParentAmendmentId.HasValue)
+            @if (Model.ParentAmendmentId is not null)
             {
                 <Badge Color="Color.Info">CLONE</Badge>
             }
@@ -26,19 +24,19 @@
     <TableRowCell>@Model.Author</TableRowCell>
     <TableRowCell>@Model.Motion</TableRowCell>
     <TableRowCell>
-        <Repeater Items="_languages">
-            <AmendmentBodyBadge Amendment="@Model" Language="@context"></AmendmentBodyBadge>
+        <Repeater Items="Languages">
+            <AmendmentBodyBadge Amendment="@Model" Language="@context" IsLive="@IsLanguageLive(context.Code)"></AmendmentBodyBadge>
             <span></span>
         </Repeater>
     </TableRowCell>
     <TableRowCell TextAlignment="TextAlignment.Center">
         <AuthorizeView Roles="@RoleGroups.AdminScreenController">
             <Authorized>
-                @if (Model.IsLive)
+                @if (IsLive)
                 {
                     <Button Color="Color.Success" Type="ButtonType.Link" To=@("/ScreenControl")>Control Screens</Button>
                 }
-                @if ((LiveAmendmentId ?? 0) == 0)
+                @if (Presentation is { ActiveAmendmentId: null } && !Model.IsArchived)
                 {
                     <Button Color="Color.Warning" Clicked="GoLive">Go Live</Button>
                 }
@@ -49,7 +47,7 @@
                 <span></span>
 
                 <span></span>
-                @if (Model.IsLive)
+                @if (IsLive)
                 {
                     <Dropdown>
                         <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/Edit/{Model.Id}")>Edit</Button>
@@ -67,9 +65,6 @@
                                 <Icon Name="IconName.Copy"/>
                                 Clone Amendment
                             </DropdownItem>
-                            <DropdownDivider/>
-                            <DropdownItem Color="Color.Info" Clicked="ExportAmendmentToExcel">Export to Excel</DropdownItem>
-                            <DropdownItem Color="Color.Info" Clicked="ExportAmendmentToPdf">Export to PDF</DropdownItem>
                             <AuthorizeView Roles="@RoleGroups.Admin">
                                 <Authorized Context="AdminContext">
                                     <DropdownDivider/>
@@ -105,9 +100,6 @@
                             {
                                 <DropdownItem Color="Color.Warning" Clicked="() => _archiveModalRef!.Show()">Archive</DropdownItem>
                             }
-                            <DropdownDivider/>
-                            <DropdownItem Color="Color.Info" Clicked="ExportAmendmentToExcel">Export to Excel</DropdownItem>
-                            <DropdownItem Color="Color.Info" Clicked="ExportAmendmentToPdf">Export to PDF</DropdownItem>
                             <AuthorizeView Roles="@RoleGroups.Admin">
                                 <Authorized Context="AdminContext">
                                     <DropdownDivider/>
@@ -185,7 +177,7 @@
                 <li>Remove underline formatting but keep the text (inserted content)</li>
                 <li>Clean up all language versions</li>
             </ul>
-            @if (Model.ParentAmendmentId.HasValue)
+            @if (Model.ParentAmendmentId is not null)
             {
                 <div class="mt-3">
                     <Check TValue="bool" @bind-Value="_updateCurrentAmendmentBodies">
@@ -256,15 +248,21 @@
 
 @code {
     [Parameter]
-    public AmendmentResponse Model { get; set; } = null!;
+    public ApiAmendment Model { get; set; } = null!;
 
     [Parameter]
     public EventCallback OnDelete { get; set; }
 
     [Parameter]
-    public int? LiveAmendmentId { get; set; }
+    public IReadOnlyList<ApiLanguage> Languages { get; set; } = [];
 
-    IEnumerable<LanguageResponse> _languages = Enumerable.Empty<LanguageResponse>();
+    [Parameter]
+    public ApiPresentation? Presentation { get; set; }
+
+    private bool IsLive => Presentation?.ActiveAmendmentId == Model.Id;
+
+    private bool IsLanguageLive(string language) =>
+        IsLive && Presentation!.Languages.Any(l => l.Language == language && l.Visible);
 
     private Modal? _deleteModalRef;
     private Modal? _archiveModalRef;
@@ -274,15 +272,10 @@
     private CloneAmendmentRequest _cloneRequest = new();
     private bool _updateCurrentAmendmentBodies = false;
 
-    protected override async Task OnInitializedAsync()
-    {
-        _languages = await LanguageRepository.GetAsync();
-    }
-
     private async Task OnDeleteBtn()
     {
-        await AmendmentRepository.DeleteAsync(Model.Id);
-        await _deleteModalRef!.Hide();
+        if (await RunAsync("Delete Error", () => Api.DeleteAmendmentAsync(Model.Id, Model.Version)))
+            await _deleteModalRef!.Hide();
 #pragma warning disable CS4014
         OnDelete.InvokeAsync();
 #pragma warning restore CS4014
@@ -290,11 +283,8 @@
 
     private async Task OnArchiveBtn()
     {
-        var amendmentRequest = Model.ToRequest();
-        // Set the amendment as archived
-        amendmentRequest.IsArchived = true;
-        await AmendmentRepository.PutAsync(Model.Id, amendmentRequest);
-        await _archiveModalRef!.Hide();
+        if (await RunAsync("Archive Error", () => Api.ArchiveAmendmentAsync(Model.Id, Model.Version, true)))
+            await _archiveModalRef!.Hide();
 #pragma warning disable CS4014
         OnDelete.InvokeAsync();
 #pragma warning restore CS4014
@@ -302,11 +292,8 @@
 
     private async Task OnUnarchiveBtn()
     {
-        var amendmentRequest = Model.ToRequest();
-        // Set the amendment as not archived
-        amendmentRequest.IsArchived = false;
-        await AmendmentRepository.PutAsync(Model.Id, amendmentRequest);
-        await _unarchiveModalRef!.Hide();
+        if (await RunAsync("Unarchive Error", () => Api.ArchiveAmendmentAsync(Model.Id, Model.Version, false)))
+            await _unarchiveModalRef!.Hide();
 #pragma warning disable CS4014
         OnDelete.InvokeAsync();
 #pragma warning restore CS4014
@@ -314,62 +301,60 @@
 
     private async Task GoLive()
     {
-        var amendmentRequest = Model.ToRequest();
-        amendmentRequest.IsLive = true;
-        await AmendmentRepository.PutAsync(Model.Id, amendmentRequest);
-    }
-
-    private async Task ExportAmendmentToExcel()
-    {
-        await AmendmentRepository.ExportToExcelAsync(Model.Id);
-    }
-
-    private async Task ExportAmendmentToPdf()
-    {
-        await AmendmentRepository.ExportToPdfAsync(Model.Id);
+        if (Presentation == null)
+            return;
+        await RunAsync("Go Live Error", () => Api.PresentAmendmentAsync(Model.Id, Presentation.Version));
+#pragma warning disable CS4014
+        OnDelete.InvokeAsync();
+#pragma warning restore CS4014
     }
 
     private async Task OnApproveBtn()
     {
-        var amendmentRequest = Model.ToRequest();
-        // Set the amendment as approved
-        amendmentRequest.IsApproved = true;
-        // Set whether to update current amendment bodies based on checkbox
-        amendmentRequest.UpdateCurrentAmendmentBodies = _updateCurrentAmendmentBodies;
-
-        try
+        var cleanCurrentBodies = Model.ParentAmendmentId is null || _updateCurrentAmendmentBodies;
+        if (await RunAsync("Approval Error", () => Api.ApproveAmendmentAsync(Model.Id, Model.Version, cleanCurrentBodies)))
         {
-            await AmendmentRepository.PutAsync(Model.Id, amendmentRequest);
             await _approveModalRef!.Hide();
             await NotificationService.Success("Amendment approved and cleaned up successfully!", "Amendment Approved");
 #pragma warning disable CS4014
             OnDelete.InvokeAsync(); // Refresh the list
 #pragma warning restore CS4014
         }
-        catch (Exception ex)
-        {
-            await NotificationService.Error($"Failed to approve amendment: {ex.Message}", "Approval Error");
-        }
     }
 
     private async Task OnCloneBtn()
     {
+        var overrides = new ApiAmendmentInput(
+            Blank(_cloneRequest.Title) ?? $"{Model.Title} (Clone)",
+            Blank(_cloneRequest.Author) ?? Model.Author,
+            Model.PrimaryLanguage,
+            Blank(_cloneRequest.Motion) ?? Model.Motion,
+            Blank(_cloneRequest.Source) ?? Model.Source,
+            Blank(_cloneRequest.LegisId) ?? Model.LegisId);
+        if (await RunAsync("Clone Error", () => Api.CloneAmendmentAsync(Model.Id, overrides)))
+        {
+            await _cloneModalRef!.Hide();
+            // Reset the clone request for next use
+            _cloneRequest = new CloneAmendmentRequest();
+#pragma warning disable CS4014
+            OnDelete.InvokeAsync(); // Refresh the list
+#pragma warning restore CS4014
+        }
+    }
+
+    private static string? Blank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
+
+    private async Task<bool> RunAsync(string errorTitle, Func<Task> action)
+    {
         try
         {
-            var clonedAmendment = await AmendmentRepository.CloneAsync(Model.Id, _cloneRequest);
-            if (clonedAmendment != null)
-            {
-                await _cloneModalRef!.Hide();
-                // Reset the clone request for next use
-                _cloneRequest = new CloneAmendmentRequest();
-#pragma warning disable CS4014
-                OnDelete.InvokeAsync(); // Refresh the list
-#pragma warning restore CS4014
-            }
+            await action();
+            return true;
         }
-        catch (Exception ex)
+        catch (AmendmentApiException ex)
         {
-            await NotificationService.Error($"Failed to clone amendment: {ex.Message}", "Clone Error");
+            await NotificationService.Error(ex.Message, errorTitle);
+            return false;
         }
     }
 

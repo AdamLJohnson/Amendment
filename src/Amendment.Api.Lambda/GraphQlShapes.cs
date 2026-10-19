@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Amendment.Domain.Approval;
 using Amendment.Domain.Model;
+using Amendment.Domain.Presentation;
 
 namespace Amendment.Api.Lambda;
 
@@ -26,6 +27,21 @@ public sealed record ApprovalResultDto(
     AmendmentDto Amendment, bool ApprovalApplied, IReadOnlyList<string> UpdatedChildLanguages,
     IReadOnlyList<string> UpdatedParentLanguages, IReadOnlyList<string> Warnings);
 
+public sealed record LanguageScreenDto(string Language, bool Visible, int Page);
+
+public sealed record PresentationDto(
+    string? ActiveAmendmentId, IReadOnlyList<LanguageScreenDto> Languages,
+    [property: JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)] long Version,
+    AuditDto? Updated);
+
+public sealed record PublicLanguageViewDto(
+    string Language, bool Visible, int Page, int PageCount, string? Markdown,
+    [property: JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)] long? BodyVersion);
+
+public sealed record PublicPresentationDto(
+    [property: JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)] long Version,
+    string? ActiveAmendmentId, IReadOnlyList<PublicLanguageViewDto> Languages);
+
 public static class GraphQlShapes
 {
     public static AuditDto ToDto(AuditStamp stamp) =>
@@ -38,6 +54,15 @@ public static class GraphQlShapes
         new(a.Id, a.Title, a.Author, a.Motion, a.Source, a.LegisId, a.PrimaryLanguage.Value, a.IsArchived, a.IsApproved,
             a.ParentAmendmentId, a.Version, ToDto(a.Created), ToDto(a.Updated),
             bodies.OrderBy(b => b.Language.Value, StringComparer.Ordinal).Select(ToDto).ToList());
+
+    public static PresentationDto ToDto(PresentationState p) =>
+        new(p.ActiveAmendmentId,
+            p.Languages.OrderBy(kv => kv.Key.Value, StringComparer.Ordinal).Select(kv => new LanguageScreenDto(kv.Key.Value, kv.Value.Visible, kv.Value.Page)).ToList(),
+            p.Version, p.Updated is { } updated ? ToDto(updated) : null);
+
+    public static PublicPresentationDto ToDto(PublicPresentation p) =>
+        new(p.Version, p.ActiveAmendmentId,
+            p.Languages.Select(l => new PublicLanguageViewDto(l.Language, l.Visible, l.Page, l.PageCount, l.Markdown, l.BodyVersion)).ToList());
 
     /// <summary>GraphQL <c>BodyStatus</c> enum value, e.g. <c>UNDER_REVIEW</c>.</summary>
     public static string ToWire(BodyStatus status) => status switch
@@ -85,8 +110,17 @@ public sealed class Args(JsonElement root)
         return v.ValueKind == JsonValueKind.String && long.TryParse(v.GetString(), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var s) ? s : null;
     }
 
+    public int? Int(string name) =>
+        root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var n) ? n : null;
+
     public Args? Object(string name) =>
         root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Object ? new Args(v) : null;
+
+    /// <summary>The object items of a list argument; null when missing or not a list.</summary>
+    public IReadOnlyList<Args>? List(string name) =>
+        root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Array
+            ? v.EnumerateArray().Select(e => new Args(e)).ToList()
+            : null;
 
     public AmendmentInput ToAmendmentInput() =>
         new(String("title"), String("author"), String("primaryLanguage"), String("motion"), String("source"), String("legisId"), String("parentAmendmentId"));

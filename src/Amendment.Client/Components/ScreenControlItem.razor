@@ -1,6 +1,4 @@
-﻿@using Amendment.Shared.Responses
-@using Amendment.Client.Repository
-@inject IAmendmentBodyRepository AmendmentBodyRepository
+﻿@using Amendment.Client.Repository.GraphQl
 
 <h5>
     <Row>
@@ -10,14 +8,14 @@
             <Icon Name="IconName.ArrowDown" Clicked="NextPage"></Icon>
         </Column>
         <Column ColumnSize="ColumnSize.Is4" TextAlignment="TextAlignment.Center">
-            @if (PrimaryLanguageId == Body.LanguageId)
+            @if (IsPrimary)
             {
                 <Badge Color="Color.Primary">PRIMARY</Badge>
                 <span></span>
             }
         </Column>
         <Column ColumnSize="ColumnSize.Is4" TextAlignment="TextAlignment.End">
-            <Button Color=@(Body.IsLive ? Color.Danger : Color.Info) Size="Size.Small" Clicked="ToggleIsLive">LIVE</Button>
+            <Button Color=@(Screen.Visible ? Color.Danger : Color.Info) Size="Size.Small" Clicked="ToggleIsLive">LIVE</Button>
         </Column>
     </Row>
 </h5>
@@ -30,11 +28,11 @@
 }
 <Div Class="@($"small-screen-container well {textPrev} fill-well")">
     <div>
-        <AmendmentBodyMultiRenderer BodyText="@Body.AmendBody" ActivePage="@Body.Page"></AmendmentBodyMultiRenderer>
+        <AmendmentBodyMultiRenderer BodyText="@Body.Markdown" ActivePage="@Screen.Page"></AmendmentBodyMultiRenderer>
     </div>
 </Div>
 <Div TextAlignment="TextAlignment.Center">
-    @if (!Body.IsLive)
+    @if (!Screen.Visible)
     {
         <Button Color="Color.Success" Clicked="ToggleIsLive">GO LIVE</Button>
     }
@@ -47,36 +45,31 @@
 @code {
 
     [Parameter, EditorRequired]
-    public AmendmentBodyResponse Body { get; set; } = new();
+    public ApiAmendmentBody Body { get; set; } = null!;
 
     [Parameter, EditorRequired]
     public string? LanguageName { get; set; }
 
     [Parameter, EditorRequired]
-    public int PrimaryLanguageId { get; set; } = -1;
+    public bool IsPrimary { get; set; }
+
+    [Parameter, EditorRequired]
+    public ApiLanguageScreen Screen { get; set; } = null!;
 
     [Parameter, EditorRequired]
     public bool ShowPreview { get; set; } = true;
-    
-    private async Task ToggleIsLive()
-    {
-        var bodyRequest = Body.ToRequest();
-        bodyRequest.IsLive = !bodyRequest.IsLive;
-        await AmendmentBodyRepository.PutAsync(Body.AmendId, Body.Id, bodyRequest);
-    }
 
-    private Task NextPage()
-    {
-        var bodyRequest = Body.ToRequest();
-        bodyRequest.ChangeBodyPage(bodyRequest.Page + 1);
-        return AmendmentBodyRepository.PutAsync(Body.AmendId, Body.Id, bodyRequest);
-    }
+    [Parameter, EditorRequired]
+    public EventCallback<ApiLanguageChange> OnChange { get; set; }
 
-    private Task PrevPage()
-    {
-        var bodyRequest = Body.ToRequest();
-        bodyRequest.ChangeBodyPage(bodyRequest.Page - 1);
-        return AmendmentBodyRepository.PutAsync(Body.AmendId, Body.Id, bodyRequest);
-    }
+    private Task ToggleIsLive() => OnChange.InvokeAsync(new ApiLanguageChange(Body.Language, Visible: !Screen.Visible));
+
+    private Task NextPage() => ChangePage(Screen.Page + 1);
+
+    private Task PrevPage() => ChangePage(Screen.Page - 1);
+
+    // Legacy page rule: a page outside the slide range resets to 0
+    private Task ChangePage(int page) =>
+        OnChange.InvokeAsync(new ApiLanguageChange(Body.Language, Page: page < 0 || page > Body.PageCount - 1 ? 0 : page));
 
 }

@@ -1,5 +1,8 @@
-# Amendment GraphQL API - Phase 4 (private, Cognito user pools only).
-# Reads resolve directly against DynamoDB; mutations go through the .NET 10 API Lambda (decision D15).
+# Amendment GraphQL API - Phase 5.
+# Default auth is the Cognito user pool. Anonymous projectors use the Lambda authorizer (decision D21) and can reach
+# only fields marked @aws_lambda; those fields and types also carry @aws_cognito_user_pools so signed-in users keep access.
+# Amendment reads resolve directly against DynamoDB; mutations and the presentation reads go through the .NET 10 API
+# Lambda (decisions D15, D22).
 # Versions are decimal strings of 64-bit integers (decision D19: AppSync has no 64-bit integer scalar).
 # Role rules are enforced server-side by RoleOperationMatrix (docs/modernization/contracts.md section 4).
 
@@ -38,7 +41,35 @@ type AmendmentBody {
 
 type AmendmentConnection { items: [Amendment!]! nextToken: String }
 
-type Language { code: String! name: String! sortOrder: Int! }
+type Language @aws_lambda @aws_cognito_user_pools { code: String! name: String! sortOrder: Int! }
+
+# Operator view of PRESENTATION#MAIN (Screen Control).
+type LanguageScreen { language: String! visible: Boolean! page: Int! }
+
+type Presentation {
+  activeAmendmentId: ID
+  languages: [LanguageScreen!]!
+  version: String!
+  updated: Audit
+}
+
+# Public projector read model (decision D6): markdown and bodyVersion are set only for visible languages.
+type PublicLanguageView @aws_lambda @aws_cognito_user_pools {
+  language: String!
+  visible: Boolean!
+  page: Int!
+  pageCount: Int!
+  markdown: String
+  bodyVersion: String
+}
+
+type PublicPresentation @aws_lambda @aws_cognito_user_pools {
+  version: String!
+  activeAmendmentId: ID
+  languages: [PublicLanguageView!]!
+}
+
+input LanguageChangeInput { language: String! visible: Boolean page: Int }
 
 type ApprovalResult {
   amendment: Amendment!
@@ -62,7 +93,9 @@ type Query {
   apiVersion: String!
   amendments(archived: Boolean = false, limit: Int = 50, nextToken: String): AmendmentConnection!
   amendment(id: ID!): Amendment
-  languages: [Language!]!
+  languages: [Language!]! @aws_lambda @aws_cognito_user_pools
+  presentation: Presentation!
+  publicPresentation: PublicPresentation! @aws_lambda @aws_cognito_user_pools
 }
 
 type Mutation {
@@ -77,4 +110,8 @@ type Mutation {
   createAmendmentBody(amendmentId: ID!, language: String!, markdown: String!, status: BodyStatus = NEW): AmendmentBody!
   updateAmendmentBody(amendmentId: ID!, language: String!, expectedVersion: String!, markdown: String!, status: BodyStatus!): AmendmentBody!
   deleteAmendmentBody(amendmentId: ID!, language: String!, expectedVersion: String!): String!
+
+  presentAmendment(id: ID!, expectedVersion: String!): Presentation!
+  clearPresentation(expectedVersion: String!): Presentation!
+  setLanguagePresentation(expectedVersion: String!, changes: [LanguageChangeInput!]!): Presentation!
 }

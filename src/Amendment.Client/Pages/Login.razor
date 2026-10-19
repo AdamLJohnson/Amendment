@@ -1,35 +1,15 @@
 ﻿@page "/login"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject NavigationManager NavigationManager
 <CustomPageTitle>Login</CustomPageTitle>
 <h3>Login</h3>
+<p>Redirecting to sign-in...</p>
 
-@if (ShowAuthError)
-{
-    <div class="alert alert-danger" role="alert">
-        @Error
-    </div>
+@code {
+    protected override void OnInitialized() =>
+        NavigationManager.NavigateToLogin("authentication/login", new InteractiveRequestOptions
+        {
+            Interaction = InteractionType.SignIn,
+            ReturnUrl = NavigationManager.BaseUri
+        });
 }
-
-<EditForm Model="_userForAuthentication" OnValidSubmit="ExecuteLogin" class="card card-body bg-light mt-5">
-    <DataAnnotationsValidator />
-    <div class="form-group row">
-        <label for="email" class="col-md-2 col-form-label">Username:</label>
-        <div class="col-md-10">
-            <InputText id="email" class="form-control" @bind-Value="_userForAuthentication.Username" />
-            <ValidationMessage For="@(() => _userForAuthentication.Username)" />
-        </div>
-    </div>
-
-    <div class="form-group row mt-2">
-        <label for="password" class="col-md-2 col-form-label">Password:</label>
-        <div class="col-md-10">
-            <InputText type="password" id="password" class="form-control" @bind-Value="_userForAuthentication.Password" />
-            <ValidationMessage For="@(() => _userForAuthentication.Password)" />
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <button type="submit" class="btn btn-success">Login</button>
-        </div>
-    </div>
-</EditForm>

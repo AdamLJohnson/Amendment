@@ -1,5 +1,6 @@
-// Every Mutation field: forwards the field name, arguments and verified Cognito identity to the API Lambda
-// (ApiRequest in src/Amendment.Api.Lambda) and maps its error object to a GraphQL error with errorType.
+// Every Mutation field and the presentation queries: forwards the field name, arguments and verified Cognito identity
+// to the API Lambda (ApiRequest in src/Amendment.Api.Lambda) and maps its error object to a GraphQL error with errorType.
+// Callers authorized by the public Lambda authorizer have no sub, so the Lambda treats them as anonymous.
 export function request(ctx) {
   const identity = ctx.identity || {};
   return {

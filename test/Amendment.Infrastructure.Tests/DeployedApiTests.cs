@@ -27,14 +27,17 @@ public sealed class DeployedApi
     public static string Token(string role) =>
         Environment.GetEnvironmentVariable($"AMENDMENT_API_TEST_TOKEN_{role}") ?? throw new InvalidOperationException($"No test token for {role}.");
 
-    public static async Task<(HttpStatusCode Status, JsonNode? Body)> Send(string? role, string query, object? variables = null)
+    public static Task<(HttpStatusCode Status, JsonNode? Body)> Send(string? role, string query, object? variables = null) =>
+        SendWithToken(role is null ? null : Token(role), query, variables);
+
+    public static async Task<(HttpStatusCode Status, JsonNode? Body)> SendWithToken(string? token, string query, object? variables = null)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, Environment.GetEnvironmentVariable(UrlVariable))
         {
             Content = JsonContent.Create(new { query, variables })
         };
-        if (role is not null)
-            request.Headers.TryAddWithoutValidation("Authorization", Token(role));
+        if (token is not null)
+            request.Headers.TryAddWithoutValidation("Authorization", token);
         using var response = await Http.SendAsync(request);
         return (response.StatusCode, JsonNode.Parse(await response.Content.ReadAsStringAsync()));
     }
@@ -65,7 +68,8 @@ public sealed class DeployedApi
 
 public sealed class DeployedApiTests : IAsyncLifetime
 {
-    private const string Admin = "ADMIN", Editor = "EDITOR", Translator = "TRANSLATOR", Screen = "SCREEN", NoRole = "NOROLE";
+    private const string Admin = "ADMIN", Editor = "EDITOR", Translator = "TRANSLATOR", Screen = "SCREEN", NoRole = "NOROLE", Public = "PUBLIC";
+    private const string PublicView = "{ publicPresentation { version activeAmendmentId languages { language visible page pageCount markdown bodyVersion } } }";
     private const string CreateAmendment = "mutation($input: AmendmentInput!) { createAmendment(input: $input) { id version } }";
     private const string CreateBody = "mutation($id: ID!, $lang: String!, $md: String!) { createAmendmentBody(amendmentId: $id, language: $lang, markdown: $md) { version } }";
     private const string GetAmendment = "query($id: ID!) { amendment(id: $id) { id version isApproved bodies { language markdown version } } }";
@@ -162,6 +166,63 @@ public sealed class DeployedApiTests : IAsyncLifetime
 
         await translator.DeleteBodyAsync(created.Id, "es", edited.Version);
         Assert.Empty((await editor.GetAmendmentAsync(created.Id))!.Bodies);
+    }
+
+    [DeployedApiFact]
+    public async Task Public_token_reaches_only_the_public_fields()
+    {
+        Assert.NotNull((await DeployedApi.Ok(Public, PublicView))["publicPresentation"]!["version"]);
+        Assert.Contains((await DeployedApi.Ok(Public, "{ languages { code } }"))["languages"]!.AsArray(), l => (string)l!["code"]! == "en");
+
+        string[] denied =
+        [
+            "{ amendments { items { id title } } }",
+            "{ amendment(id: \"x\") { id } }",
+            "{ presentation { version activeAmendmentId } }",
+            "{ apiVersion }",
+            "{ p: publicPresentation { version } a: amendments { items { id } } }",
+            "mutation { clearPresentation(expectedVersion: \"1\") { version } }",
+            "mutation { createAmendment(input: { title: \"x\", author: \"x\", primaryLanguage: \"en\" }) { id } }"
+        ];
+        foreach (var query in denied)
+        {
+            var (_, body) = await DeployedApi.Send(Public, query);
+            Assert.True(body?["errors"] is not null, $"Expected an authorization error for: {query}");
+            Assert.All(body!["data"]?.AsObject().Where(f => f.Key != "p") ?? [], f => Assert.Null(f.Value));
+        }
+
+        var (wrong, _) = await DeployedApi.SendWithToken(DeployedApi.Token(Public) + "-x", PublicView);
+        Assert.Equal(HttpStatusCode.Unauthorized, wrong);
+    }
+
+    [DeployedApiFact]
+    public async Task Operator_presents_and_projectors_see_only_visible_bodies()
+    {
+        var id = await Create("presented");
+        await AddBody(id, "en", "One**NEWSLIDE**Two");
+        await AddBody(id, "es", "Borrador");
+        const string Present = "mutation($id: ID!, $v: String!) { presentAmendment(id: $id, expectedVersion: $v) { version } }";
+        const string Show = "mutation($v: String!, $c: [LanguageChangeInput!]!) { setLanguagePresentation(expectedVersion: $v, changes: $c) { version languages { language visible page } } }";
+        const string Clear = "mutation($v: String!) { clearPresentation(expectedVersion: $v) { version } }";
+
+        var version = (string)(await DeployedApi.Ok(Screen, "{ presentation { version } }"))["presentation"]!["version"]!;
+        Assert.Equal("FORBIDDEN", await DeployedApi.ErrorType(Translator, Present, new { id, v = version }));
+        version = (string)(await DeployedApi.Ok(Screen, Present, new { id, v = version }))["presentAmendment"]!["version"]!;
+        try
+        {
+            version = (string)(await DeployedApi.Ok(Screen, Show, new { v = version, c = new[] { new { language = "en", visible = true, page = 1 } } }))["setLanguagePresentation"]!["version"]!;
+
+            var view = (await DeployedApi.Ok(Public, PublicView))["publicPresentation"]!;
+            Assert.Equal((version, id), ((string)view["version"]!, (string)view["activeAmendmentId"]!));
+            var languages = view["languages"]!.AsArray();
+            Assert.Equal("""{"language":"en","visible":true,"page":1,"pageCount":2,"markdown":"One**NEWSLIDE**Two","bodyVersion":"1"}""", languages[0]!.ToJsonString());
+            Assert.Equal("""{"language":"es","visible":false,"page":0,"pageCount":0,"markdown":null,"bodyVersion":null}""", languages[1]!.ToJsonString());
+        }
+        finally
+        {
+            await DeployedApi.Ok(Screen, Clear, new { v = version });
+        }
+        Assert.Empty((await DeployedApi.Ok(Public, PublicView))["publicPresentation"]!["languages"]!.AsArray());
     }
 
     [DeployedApiFact]

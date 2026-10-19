@@ -1,7 +1,6 @@
-﻿@using Amendment.Shared.Responses
-@using Amendment.Client.Repository
-@inject ILanguageRepository LanguageRepository
-@inject IAmendmentBodyRepository AmendmentBodyRepository
+﻿@using Amendment.Client.Repository.GraphQl
+@inject IAmendmentApi Api
+@inject INotificationService NotificationService
 
 <h3>Amendment Texts</h3>
 
@@ -13,23 +12,22 @@
         </TableRow>
     </TableHeader>
     <TableBody>
-        <Repeater Items="@_languages">
+        <Repeater Items="@Languages">
             <TableRow>
-                <TableRowCell>@context.LanguageName</TableRowCell>
+                <TableRowCell>@context.Name</TableRowCell>
                 <TableRowCell TextAlignment="TextAlignment.Center">
-                    @if (AmendmentBodies.Any(x => x.LanguageId == context.Id))
+                    @if (AmendmentBodies.FirstOrDefault(x => x.Language == context.Code) is { } amendmentBody)
                     {
-                        var amendmentBody = AmendmentBodies.First(x => x.LanguageId == context.Id);
-                        <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/{AmendmentId}/Body/Edit/{amendmentBody.Id}")>Edit</Button>
+                        <Button Color="Color.Primary" Type="ButtonType.Link" To=@($"/Amendment/{AmendmentId}/Body/Edit/{amendmentBody.Language}")>Edit</Button>
                         <span></span>
-                        if (PrimaryLanguageId != amendmentBody.LanguageId)
+                        if (PrimaryLanguage != amendmentBody.Language)
                         {
-                            <Button Color="Color.Danger" Clicked="() => ShowConfirmDelete(amendmentBody.Id)">Delete</Button>
+                            <Button Color="Color.Danger" Clicked="() => ShowConfirmDelete(amendmentBody)">Delete</Button>
                         }
                     }
                     else
                     {
-                        <Button Color="Color.Success" Type="ButtonType.Link" To=@($"/Amendment/{AmendmentId}/Body/Create/{context.Id}")>Create</Button>
+                        <Button Color="Color.Success" Type="ButtonType.Link" To=@($"/Amendment/{AmendmentId}/Body/Create/{context.Code}")>Create</Button>
                     }
                 </TableRowCell>
             </TableRow>
@@ -57,35 +55,40 @@
 {
     private Modal? _modalRef;
     [Parameter, EditorRequired]
-    public int AmendmentId { get; set; }
+    public string AmendmentId { get; set; } = "";
     [Parameter, EditorRequired]
-    public int PrimaryLanguageId { get; set; }
+    public string PrimaryLanguage { get; set; } = "";
     [Parameter, EditorRequired]
-    public List<AmendmentBodySummary> AmendmentBodies { get; set; } = new();
+    public List<ApiAmendmentBody> AmendmentBodies { get; set; } = new();
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ApiLanguage> Languages { get; set; } = [];
 
-    IEnumerable<LanguageResponse> _languages = Enumerable.Empty<LanguageResponse>();
-    int _deleteBody = 0;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _languages = await LanguageRepository.GetAsync();
-    }
+    ApiAmendmentBody? _deleteBody;
 
     private async Task DeleteBody()
     {
-        await AmendmentBodyRepository.DeleteAsync(AmendmentId, _deleteBody);
-        AmendmentBodies.RemoveAll(x => x.Id == _deleteBody);
+        if (_deleteBody == null)
+            return;
+        try
+        {
+            await Api.DeleteBodyAsync(AmendmentId, _deleteBody.Language, _deleteBody.Version);
+            AmendmentBodies.Remove(_deleteBody);
+        }
+        catch (AmendmentApiException ex)
+        {
+            await NotificationService.Error(ex.Message, "Delete Error");
+        }
         await _modalRef!.Hide();
     }
 
-    private void ShowConfirmDelete(int amendmentBodyId)
+    private void ShowConfirmDelete(ApiAmendmentBody body)
     {
-        _deleteBody = amendmentBodyId;
+        _deleteBody = body;
         _modalRef!.Show();
     }
 
     private void ModalClosed()
     {
-        _deleteBody = 0;
+        _deleteBody = null;
     }
 }

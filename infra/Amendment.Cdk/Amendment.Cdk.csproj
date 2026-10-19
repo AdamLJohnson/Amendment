@@ -12,6 +12,7 @@
     <None Update="Config\stages.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Schema\amendment.graphql" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Resolvers\*.js" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Authorizer\*.js" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
