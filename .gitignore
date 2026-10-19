@@ -398,3 +398,7 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# AWS CDK
+cdk.out*/
+cdk-outputs*.json

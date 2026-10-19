@@ -22,6 +22,14 @@ jobs:
         with:
           global-json-file: global.json
 
+      # Node runs the jsii runtime used by CDK tests and the pinned CDK CLI
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: infra/Amendment.Cdk/package-lock.json
+
       - name: Restore
         run: dotnet restore Amendment.sln
 
@@ -30,6 +38,13 @@ jobs:
 
       - name: Test (Release)
         run: dotnet test Amendment.sln -c Release --no-build
+
+      - name: CDK synth (dev + prod)
+        working-directory: infra/Amendment.Cdk
+        run: |
+          npm ci
+          npx cdk synth -c stage=dev -q
+          npx cdk synth -c stage=prod -q -o cdk.out.prod
 
       - name: Publish server + Blazor WASM client
         run: dotnet publish src/Amendment.Server/Amendment.Server.csproj -c Release -o artifacts/publish

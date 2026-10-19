@@ -13,6 +13,11 @@
 | D7 | Phase 1 domain code lives in the new `src/Amendment.Domain` project (net10.0, no packages), tested by `test/Amendment.Domain.Tests`. Both are in `Amendment.sln`. Legacy projects do not reference it yet. | Phase 1 |
 | D8 | Deliberate changes from legacy behavior are marked **[Δ]** in `contracts.md`. Each one is covered by a domain test. | Phase 1 |
 | D9 | `global.json` pins SDK `10.0.200` with `rollForward: latestFeature`, so any 10.0 SDK in the 2xx band or newer is accepted. All 13 C# projects target `net10.0` and there are **no legacy exceptions**. Details in §1A. | Phase 1A |
+| D10 | DEV and PROD deploy to `us-east-1`, so the CloudFront certificate and app resources share one region and stack (no cross-region references). | User, Phase 2 |
+| D11 | Every stack and taggable resource carries `Application=Amendment` and `Environment=<stage>` (applied at the CDK app root; asserted by tests). | User, Phase 2 |
+| D12 | Infrastructure is validated on Floci (`infra/scripts/floci-validate.ps1`) before real deployments, now and in all future phases. | User, Phase 2 |
+| D13 | Cognito group names cannot contain spaces, so legacy roles map to `SystemAdministrator`, `ScreenController`, `AmendmentEditor`, `Translator`; the legacy name is the group description (`IdentityStack.RoleGroups`). | Phase 2 |
+| D14 | Phase 2 stacks contain no Lambda-backed custom resources (no `autoDeleteObjects`, no `LogRetention`, no `BucketDeployment`). Static files are uploaded by `infra/scripts/publish-web.ps1`, and `destroy-stage.ps1` empties the bucket before `cdk destroy`. This keeps idle cost at zero and works on Floci. | Phase 2 |
 
 ## 1. Legacy test baseline (2026-10-18, SDK 10.0.202, Windows)
 
@@ -90,6 +95,22 @@ All packages are on their latest stable version, except **MediatR, which stays a
 - `xunit` 2.9.3 is marked legacy; the successor is `xunit.v3` (a different package, so it counts as a new dependency).
 - ~~`Blazored.LocalStorage` 4.5.0 reports "Not found at the sources"~~ **Resolved 2026-10-18:** the package is deprecated, its repository is archived, and every version is unlisted on nuget.org. It was replaced by an in-project `ILocalStorageService`/`LocalStorageService` (`src/Amendment.Client/Services/LocalStorageService.cs`) that calls `localStorage` through `IJSRuntime`. Values are still stored as JSON, so tokens already saved in users' browsers remain readable. No new dependency was added.
 
+## 1C. CDK foundation record (Phase 2, 2026-10-18)
+
+- **Project:** `infra/Amendment.Cdk` (`net10.0`, `Amazon.CDK.Lib` 2.273.0, `Constructs` 10.8.1). CDK CLI pinned to `aws-cdk` 2.1145.0 in `infra/Amendment.Cdk/package.json`. Tests: `test/Amendment.Cdk.Tests` (27 assertions). Both projects are in `Amendment.sln`.
+- **Stacks per stage:** `Amendment-{stage}-Data` (DynamoDB `AmendmentData-{stage}`, PK/SK, on-demand, stream), `-Identity` (Cognito pool, 4 groups, public PKCE client), `-Api` (AppSync, Cognito default + IAM, placeholder `apiVersion` query, ERROR logs), `-Web` (private S3 + CloudFront OAC, ACM DNS-validated certificate, A/AAAA aliases in the imported `adamlj.com` zone `Z3A6EHPCI5BABT`), `-Observability` (SNS alert topic, AppSync 5XX alarm, monthly budget filtered on `user:Application$Amendment`).
+- **Retention:** DEV is fully disposable (`DESTROY`). PROD retains the table, user pool, bucket and log group, enables deletion protection and point-in-time recovery, and sets stack termination protection.
+- **CI:** `ci.yml` installs Node 24 and runs `npx cdk synth` for `dev` and `prod` after the tests.
+- **Real DEV deploy (account via `default` profile):** all five stacks deployed in about 9 minutes. Checks passed: `https://dev-amendments.adamlj.com` serves the Blazor client over TLS 1.3 with an Amazon-issued certificate; HTTP redirects to HTTPS (301); unknown routes fall back to `index.html`; `.wasm` is served as `application/wasm`; HSTS is present; direct S3 access returns 403; anonymous AppSync calls return 401; zone NS records match the public delegation. The old `amendments`/`dev-amendments` CNAMEs were deleted by the user beforehand. The client loads, but API calls fail until the backend exists (Phases 3–8).
+- **Floci (2.3.0):** bootstrap, deploy, publish and destroy of all five stacks pass. The container needs `/var/run/docker.sock` mounted, because AppSync schema validation runs in a sidecar container. Floci's state is in memory, so the script bootstraps a fresh container each run.
+
+**GitHub OIDC deployment plan (AWS side done; workflow not yet implemented):**
+1. **Done (user, manually):** IAM OIDC identity provider for `token.actions.githubusercontent.com` (audience `sts.amazonaws.com`). It is not managed by CDK.
+2. **Done:** roles `amendment-github-deploy-dev` and `amendment-github-deploy-prod`, created with the AWS CLI (not CDK). Each trusts only `repo:AdamLJohnson/Amendment:environment:<stage>`. A job that declares a GitHub environment gets an `environment:` subject, not a `ref:` subject; limit each environment's deployment branches to `main` in GitHub. Inline policy `<role>-permissions`: `sts:AssumeRole`/`sts:TagSession` on the CDK bootstrap deploy, file-publishing and lookup roles; `s3:ListBucket` on `amendment-<stage>-web-sitebucket*` and `s3:PutObject`/`DeleteObject` on its objects; `cloudfront:CreateInvalidation` on `distribution/*` (any distribution, user decision). Maximum session 1 hour.
+3. Workflow: on push to `main`, run build, test, `cdk diff`, `cdk deploy --all -c stage=dev` and `publish-web.ps1`. Floci validation runs first in the same job. Each deploy job declares `environment: dev|prod`, `permissions: id-token: write`, and passes `role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}`. The ARN is stored as an **environment secret** named `AWS_DEPLOY_ROLE_ARN` in each GitHub environment (user decision), not as a variable.
+4. The `prod` GitHub environment needs a required reviewer. That job posts `cdk diff -c stage=prod` for approval before deploying.
+5. Later: replace the bootstrap `AdministratorAccess` execution policy with a scoped policy (`cdk bootstrap --cloudformation-execution-policies`).
+
 ## 2. Open questions (plan §12 plus Phase 0 findings)
 
 | ID | Question | Evidence |
@@ -107,7 +128,7 @@ All packages are on their latest stable version, except **MediatR, which stays a
 | Q11 | **Resolved (D6).** | — |
 | Q12 | Is it acceptable that timer state lives in one process (lost on restart, not shared)? | `TimerService` singleton |
 | Q13 | Languages are hard-coded in `NavMenu` (English/Spanish/French). Should they be data-driven? | `NavMenu.razor` |
-| Q14 | AWS region, DNS, environments, budget, live-update latency SLO. | Plan §12 |
+| Q14 | Region, DNS and environments are **resolved (D10, §1C)**. Still open: the budget alert email (placeholder `alertEmail` in `stages.json`) and the live-update latency SLO. | Plan §12 |
 | Q15 | When an amendment is presented, should languages start hidden on page 0 (Phase 1 proposal) or reuse each body's last page and visibility (legacy stored them on the body)? | `PresentationState.Present` |
 | Q16 | Is a 100,000-character markdown limit acceptable? | `BodyRules.MaxMarkdownLength` |
 | Q17 | Should the legacy title rule that rejects exactly `"not allowed"` be kept? It looks like a leftover test value. | `AmendmentRequestValidator` |
@@ -135,6 +156,9 @@ All packages are on their latest stable version, except **MediatR, which stays a
 | R17 | ~~NU1903 known-vulnerability warnings: `AutoMapper` 14.0.0 and `Microsoft.AspNetCore.SignalR.Core` 1.1.0~~ **Closed (§1B):** both removed; no vulnerable packages reported | — | — |
 | R18 | On Windows, `BuildWebCompiler2022` reports `screen.less: --math=always is deprecated` as a build **error**. It happens only on full rebuilds (`--no-incremental`) and also on the pre-upgrade commit. Linux, CI and Docker builds are unaffected because the package is `Windows_NT` only | M / L | Adjust `compilerconfig.json` LESS options or replace the tool (separate change, needs approval) |
 | R19 | Blazorise has moved to a commercial license. 2.4.0 pulls in `Blazorise.Licensing` 1.3.0 transitively. Not blocking now (user decision, 2026-10-18) | M / M | Deferred: choose and migrate to a replacement UI component library in a later phase. Used by `Amendment.Client` via `Blazorise.Bootstrap5`, `.Components`, `.FluentValidation`, `.Icons.FontAwesome`, `.Markdown`, `.Snackbar` |
+
+| R20 | Floci is an emulator. It confirms that templates deploy, update and delete, but not real AWS behavior: CloudFront serving, ACM validation timing, IAM enforcement and AppSync resolver results | M / M | Floci is a gate before real DEV deploys, not a replacement for them; check DEV in a browser after deploying |
+| R21 | The budget filters on the `Application` tag, so it reports $0 until `Application` is activated as a cost allocation tag in the Billing console. It also covers all Amendment stages together | H / L | Activate the cost allocation tag (one-time console step). Add an `Environment` filter later if per-stage budgets are needed |
 
 ## 4. Assumptions (not yet verified)
 

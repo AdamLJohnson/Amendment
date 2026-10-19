@@ -594,13 +594,15 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 **Objective:** Reproducible, low-cost AWS baseline.
 
-- [ ] Create **`infra/Amendment.Cdk/` targeting `net10.0`** (not under `src/`) using AWS CDK v2 C# and typed stage configuration; use compatible `Amazon.CDK.Lib`/`Constructs` package versions.
-- [ ] Provision dev DynamoDB table, Cognito pool and groups, basic AppSync API, S3+CloudFront, minimal logs/budget alerts.
-- [ ] Reuse the existing Route 53 `adamlj.com` public hosted zone and configure `dev-amendments.adamlj.com` for DEV and `amendments.adamlj.com` for PROD using typed, overrideable stage-domain configuration; do **not** create a new hosted zone.
-- [ ] Configure CloudFront certificates in `us-east-1`, Route 53 A/AAAA alias records, and stage-isolated domains; validate DNS delegation and protect unrelated zone records.
-- [ ] Add CDK assertions for security defaults, no NAT/VPC, resource removal/retention, and every managed C# Lambda using **`dotnet10`** (when functions are introduced).
-- [ ] Add `cdk synth`, `cdk diff`, deploy instructions and a GitHub OIDC plan (initially least-privilege dev).
-- [ ] Use stage-specific names, outputs and nonsecret frontend config generation.
+- [x] Create **`infra/Amendment.Cdk/` targeting `net10.0`** (not under `src/`) using AWS CDK v2 C# and typed stage configuration; use compatible `Amazon.CDK.Lib`/`Constructs` package versions.
+- [x] Provision dev DynamoDB table, Cognito pool and groups, basic AppSync API, S3+CloudFront, minimal logs/budget alerts.
+- [x] Reuse the existing Route 53 `adamlj.com` public hosted zone and configure `dev-amendments.adamlj.com` for DEV and `amendments.adamlj.com` for PROD using typed, overrideable stage-domain configuration; do **not** create a new hosted zone.
+- [x] Configure CloudFront certificates in `us-east-1`, Route 53 A/AAAA alias records, and stage-isolated domains; validate DNS delegation and protect unrelated zone records.
+- [x] Add CDK assertions for security defaults, no NAT/VPC, resource removal/retention, and every managed C# Lambda using **`dotnet10`** (when functions are introduced).
+- [x] Add `cdk synth`, `cdk diff`, deploy instructions and a GitHub OIDC plan (initially least-privilege dev).
+- [x] Use stage-specific names, outputs and nonsecret frontend config generation.
+- [x] Add tags to everything "Application:Amendment" and an environment tag.
+- [x] Test `cdk deploy` using https://floci.io/. All future phases should validate stacks using Floci.
 
 **Checkpoint 2:** A fresh dev stack can be deployed/destroyed intentionally from a clean checkout using the pinned **.NET 10** SDK; synth assertions pass; no unexpected standing services/costs. `https://dev-amendments.adamlj.com` serves DEV over valid TLS, and deleting DEV cannot delete the shared `adamlj.com` zone or impact `amendments.adamlj.com`. PROD domain is defined in configuration but not deployed without production approval.
 
@@ -610,11 +612,11 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 - [ ] Implement amendment/body metadata keys, conditional create/update, optimistic concurrency and query pagination.
 - [ ] Add only proven GSIs; integration tests against real dev DynamoDB (or compatible local emulator **plus** AWS tests for behavior).
-- [ ] Build a **read-only** PostgreSQL export/conversion tool. Preserve original IDs or create an explicit ID mapping.
+- [ ] Seed the table with data. Use similar seed data to what gets created in the application now.
 - [ ] Prototype import with a small scrubbed fixture; verify counts, content checksums, language uniqueness, relationships and markdown rendering.
 - [ ] Document backup/rollback and dual-system consistency strategy during transition.
 
-**Checkpoint 3:** Create/read/update/duplicate/conflict tests pass; fixture round-trip matches source; migration is repeatable and doesn't modify production source data.
+**Checkpoint 3:** Create/read/update/duplicate/conflict tests pass; fixture round-trip matches source; migration is repeatable and doesn't modify production source data. Seed data exists in the table
 
 ### Phase 4 — Private authenticated GraphQL amendment API
 

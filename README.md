@@ -41,6 +41,43 @@ sudo systemctl start aspnetcore-amendment.service
 sudo journalctl -fu aspnetcore-amendment.service
 ```
 
+## AWS infrastructure (CDK)
+
+The AWS CDK v2 app lives in `infra/Amendment.Cdk` (C#, `net10.0`). Stage settings (region, hosted zone, hostname,
+budget, log retention) are in `infra/Amendment.Cdk/Config/stages.json` and can be overridden with `-c key=value`
+(`hostedZoneId`, `hostedZoneName`, `siteDomainName`, `alertEmail`, `monthlyBudgetUsd`).
+
+| Stage | Hostname | Stacks |
+|---|---|---|
+| `dev` | `https://dev-amendments.adamlj.com` | `Amendment-dev-{Data,Identity,Api,Web,Observability}` |
+| `prod` | `https://amendments.adamlj.com` | `Amendment-prod-*` (defined, not deployed without production approval) |
+
+All stacks deploy to `us-east-1` (the CloudFront certificate must be there). The existing `adamlj.com` hosted zone is
+imported by ID and never created or deleted. Every resource is tagged `Application=Amendment` and `Environment=<stage>`.
+
+Prerequisites: .NET 10 SDK, Node.js 24, AWS CLI v2, Docker (for Floci). Run CDK commands from `infra/Amendment.Cdk`:
+
+```
+npm ci                                    # installs the pinned CDK CLI (package.json)
+npx cdk synth -c stage=dev
+npx cdk diff --all -c stage=dev
+npx cdk deploy --all -c stage=dev --outputs-file cdk-outputs-dev.json
+```
+
+Then, from the repository root:
+
+```
+infra/scripts/publish-web.ps1 -Stage dev    # publishes the Blazor client, writes amendment-config.json, invalidates CloudFront
+infra/scripts/destroy-stage.ps1 -Stage dev  # empties the site bucket, then cdk destroy --all (refuses production stages)
+```
+
+**Local validation with [Floci](https://floci.io)** (no AWS account used): `infra/scripts/floci-validate.ps1` starts a
+fresh Floci container, deploys all dev stacks into it, checks status, tags and DNS records, publishes the web client,
+destroys the stage and checks the shared hosted zone is untouched. Run it before every real deployment.
+
+CDK assertion tests are in `test/Amendment.Cdk.Tests` and run with `dotnet test`. Production deployments need a reviewed
+`npx cdk diff --all -c stage=prod` and explicit approval.
+
 ## Setup
 
 Be sure that the user that runs the Azure DevOps agent has Read/Write permissions to `/var/aspnetcore/amendments`. You may need to create the directory.

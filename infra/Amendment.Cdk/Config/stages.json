@@ -1,0 +1,28 @@
+{
+  "dev": {
+    "region": "us-east-1",
+    "isProduction": false,
+    "domain": {
+      "hostedZoneName": "adamlj.com",
+      "hostedZoneId": "Z3A6EHPCI5BABT",
+      "siteDomainName": "dev-amendments.adamlj.com"
+    },
+    "logRetentionDays": 14,
+    "monthlyBudgetUsd": 10,
+    "alertEmail": "",
+    "additionalCallbackUrls": [ "https://localhost:5001/", "http://localhost:5165/" ]
+  },
+  "prod": {
+    "region": "us-east-1",
+    "isProduction": true,
+    "domain": {
+      "hostedZoneName": "adamlj.com",
+      "hostedZoneId": "Z3A6EHPCI5BABT",
+      "siteDomainName": "amendments.adamlj.com"
+    },
+    "logRetentionDays": 90,
+    "monthlyBudgetUsd": 25,
+    "alertEmail": "",
+    "additionalCallbackUrls": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "amendment-cdk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pins the AWS CDK CLI used for infra/Amendment.Cdk",
+  "scripts": {
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "aws-cdk": "2.1145.0"
+  }
+}
