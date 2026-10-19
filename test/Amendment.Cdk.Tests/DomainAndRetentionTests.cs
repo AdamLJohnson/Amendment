@@ -1,6 +1,7 @@
 using Amendment.Cdk.Config;
 using Amendment.Cdk.Stacks;
 using Amendment.Domain.Authorization;
+using Amendment.Infrastructure.DynamoDb;
 
 namespace Amendment.Cdk.Tests;
 
@@ -94,6 +95,27 @@ public class DomainAndRetentionTests
         var props = Dev.Resources().Single(r => r.Type == "AWS::DynamoDB::Table").Resource["Properties"]!;
         Assert.Equal("AmendmentData-dev", (string)props["TableName"]!);
         Assert.Equal("""[{"AttributeName":"PK","KeyType":"HASH"},{"AttributeName":"SK","KeyType":"RANGE"}]""", props["KeySchema"]!.ToJsonString());
+    }
+
+    [Theory]
+    [InlineData("dev")]
+    [InlineData("prod")]
+    public void Table_has_only_the_amendment_list_index_matching_the_persistence_layer(string stage)
+    {
+        var props = (stage == "dev" ? Dev : Prod).Resources().Single(r => r.Type == "AWS::DynamoDB::Table").Resource["Properties"]!;
+        var index = Assert.Single(props["GlobalSecondaryIndexes"]!.AsArray())!;
+        var request = AmendmentTable.CreateTableRequest("x");
+        var expected = Assert.Single(request.GlobalSecondaryIndexes);
+
+        Assert.Equal(AmendmentTable.Gsi1, DataStack.AmendmentListIndex);
+        Assert.Equal(expected.IndexName, (string)index["IndexName"]!);
+        Assert.Equal(
+            expected.KeySchema.Select(k => $"{k.AttributeName}:{k.KeyType.Value}"),
+            index["KeySchema"]!.AsArray().Select(k => $"{(string)k!["AttributeName"]!}:{(string)k["KeyType"]!}"));
+        Assert.Equal("ALL", (string)index["Projection"]!["ProjectionType"]!);
+        Assert.Equal(
+            request.AttributeDefinitions.Select(a => a.AttributeName).Order(),
+            props["AttributeDefinitions"]!.AsArray().Select(a => (string)a!["AttributeName"]!).Order());
     }
 
     [Fact]

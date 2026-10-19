@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\infra\Amendment.Cdk\Amendment.Cdk.csproj" />
     <ProjectReference Include="..\..\src\Amendment.Domain\Amendment.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Amendment.Infrastructure\Amendment.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,7 +14,7 @@ This document describes the **target architecture and migration process**, not p
 1. **Inspect the current repository first.** Inventory actual features, routes, roles, handlers, validation, data models, real-time messages, tests, exports, imports, settings, deployment scripts, and current .NET versions. The source of truth for *existing* behavior is the repository, not assumptions in this plan.
 2. Create a dedicated modernization branch. Do **not** delete the legacy implementation until parity tests and cutover gates pass.
 3. Implement **one phase at a time**, in the order below. Each phase must produce a small, reviewable PR with tests, documentation, a demonstration, and a checkpoint report. **Stop after each phase and ask for approval before starting the next.**
-4. **Target .NET 10 LTS (`net10.0`) across all maintained C# projects**, including Blazor WASM, domain/contracts/infrastructure, Lambda functions, tests, migration utilities, and **AWS CDK v2 in C#**. Use AppSync JavaScript resolvers only where they simplify straightforward data operations.
+4. **Target .NET 10 LTS (`net10.0`) across all maintained C# projects**, including Blazor WASM, domain/contracts/infrastructure, Lambda functions, tests, seeding utilities, and **AWS CDK v2 in C#**. Use AppSync JavaScript resolvers only where they simplify straightforward data operations.
 5. Preserve **Blazor WebAssembly**, existing markdown slide semantics, localization, translator editing behavior, projector experience, and import/export behavior unless explicitly approved otherwise.
 6. Prefer managed, pay-per-use AWS services. Avoid EC2, ECS/Fargate, RDS, Redis, VPCs and NAT gateways for the target architecture unless a verified requirement demands them.
 7. **Never rely on client validation or UI hiding for security.** Authenticate/authorize on the server, enforce persistence invariants with conditional/transactional writes, and test anonymous access explicitly.
@@ -154,7 +154,7 @@ Test all language matches and the optional child-body cleanup flag. Confirm pare
 
 ## 2A. .NET 10 Upgrade Standard (Applies Throughout)
 
-**Framework policy:** All **actively built and maintained C# code** in the final solution targets `net10.0`: Blazor WebAssembly client, domain/contracts/shared models, infrastructure/data libraries, Lambda handlers, import/export and migration tools, CDK application, and automated test projects. Do not create new .NET 8/9 projects. The deprecated legacy host may temporarily remain on its original framework if changing it would jeopardize a safe migration; document this as a time-boxed exception, retain a separately verified build, and remove it at cutover. If practical, upgrade the legacy host too before retirement rather than running a split-framework production solution.
+**Framework policy:** All **actively built and maintained C# code** in the final solution targets `net10.0`: Blazor WebAssembly client, domain/contracts/shared models, infrastructure/data libraries, Lambda handlers, import/export and seeding tools, CDK application, and automated test projects. Do not create new .NET 8/9 projects. The deprecated legacy host may temporarily remain on its original framework if changing it would jeopardize a safe migration; document this as a time-boxed exception, retain a separately verified build, and remove it at cutover. If practical, upgrade the legacy host too before retirement rather than running a split-framework production solution.
 
 **Toolchain policy:** Pin an approved .NET 10 SDK using `global.json` with an intentional roll-forward policy, and pin compatible NuGet packages using central package management (`Directory.Packages.props`) where useful. Use the supported .NET 10 Blazor WebAssembly packages/runtime and update workload/hosting/build tools. Check breaking changes, serialization, globalization, trimming and linker behavior, authentication libraries, Markdig/PDF/Excel libraries, GraphQL client generation, test adapters, and any source generators before upgrading each project. Avoid indiscriminate major-version dependency updates unrelated to .NET 10 compatibility.
 
@@ -460,9 +460,8 @@ schema/
   events/                            # public/private event contract files
   resolvers/                         # AppSync JS resolvers if used
 scripts/
-  export-legacy-data/
-  import-dynamodb/
-  verify-migration/
+  seed-dynamodb/                     # Phase 3 seeding tool and fixed seed fixture
+  verify-seed/
 tests/
   Amendment.Domain.Tests/
   Amendment.Api.Tests/
@@ -606,17 +605,24 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 **Checkpoint 2:** A fresh dev stack can be deployed/destroyed intentionally from a clean checkout using the pinned **.NET 10** SDK; synth assertions pass; no unexpected standing services/costs. `https://dev-amendments.adamlj.com` serves DEV over valid TLS, and deleting DEV cannot delete the shared `adamlj.com` zone or impact `amendments.adamlj.com`. PROD domain is defined in configuration but not deployed without production approval.
 
-### Phase 3 — DynamoDB persistence and data migration prototype
+### Phase 3 — DynamoDB persistence and seed data
 
-**Objective:** Confirm access patterns and safe persistence semantics.
+**Objective:** Confirm access patterns and safe persistence semantics, and seed the DynamoDB table with the same data the legacy application seeds. There is no existing database to convert or import from.
 
-- [ ] Implement amendment/body metadata keys, conditional create/update, optimistic concurrency and query pagination.
-- [ ] Add only proven GSIs; integration tests against real dev DynamoDB (or compatible local emulator **plus** AWS tests for behavior).
-- [ ] Seed the table with data. Use similar seed data to what gets created in the application now.
-- [ ] Prototype import with a small scrubbed fixture; verify counts, content checksums, language uniqueness, relationships and markdown rendering.
-- [ ] Document backup/rollback and dual-system consistency strategy during transition.
+- [x] Implement amendment/body metadata keys, conditional create/update, optimistic concurrency and query pagination.
+- [x] Add only proven GSIs; integration tests against real dev DynamoDB (or compatible local emulator **plus** AWS tests for behavior).
+- [x] Build a repeatable .NET 10 seeding tool for `AmendmentData-{stage}` that writes the same data as the legacy seed (`AmendmentContext.OnModelCreating` `HasData` and `SeedDatabase.SeedSampleAmendment`):
+  - Languages: `LANGUAGE#en` (English, legacy `ENG`), `LANGUAGE#es` (Spanish, `SPA`), `LANGUAGE#fr` (French, `FRA`).
+  - Settings: `SETTING#ShowDeafSigner`, `SETTING#ShowDeafSignerBox`, `SETTING#InvertedSlideText`, each with value `"1"`.
+  - Amendments, in legacy insert order with stable IDs: "Test Amendment 1" (one `en` body), "Test Amendment 2" (`es`/`en`/`fr` bodies with the G-1 headings and three `**NEWSLIDE**` slides each), and "Test Amendment 4" to "Test Amendment 9" (`Amendment.GenerateNew`: `en`/`es`/`fr` bodies). Same titles, authors, motions, `LegisId`, source, primary language `en`, body status `Ready`, and a fixed system identity for the legacy `-1` audit user.
+  - Presentation: `PRESENTATION#MAIN` presents "Test Amendment 2" with `en`/`es`/`fr` visible on page 0 (legacy `IsLive = true` on that amendment and its bodies).
+  - Lorem text: legacy generates it randomly at each startup; the seed uses fixed text generated once with `LoremNET` using the same paragraph sizes, so every run writes identical content.
+  - Not in DynamoDB: the four roles are already Cognito groups (D13); the legacy `admin` user is handled in Phase 8.
+- [x] Seeding is idempotent (legacy only seeds an empty database): it skips when amendments already exist and uses conditional puts (`attribute_not_exists`), so a rerun never overwrites edited data. It runs against Floci first, then DEV; PROD only with explicit approval.
+- [x] Verify the seeded table: item counts, content checksums against the seed fixture, language uniqueness, and markdown rendering/page counts.
+- [x] Document backup/rollback (point-in-time recovery, reseed of a disposable stage). No dual-system data sync is needed: there is no legacy production data.
 
-**Checkpoint 3:** Create/read/update/duplicate/conflict tests pass; fixture round-trip matches source; migration is repeatable and doesn't modify production source data. Seed data exists in the table
+**Checkpoint 3:** Create/read/update/duplicate/conflict tests pass; seeding a fresh table produces data matching the legacy seed; reseeding is repeatable and never overwrites existing data.
 
 ### Phase 4 — Private authenticated GraphQL amendment API
 
@@ -672,7 +678,7 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 **Objective:** Replace legacy user/password management safely.
 
 - [ ] Complete Cognito hosted/managed login and token handling for Blazor.
-- [ ] Map existing users/roles to Cognito groups (document account migration/reset path and invitation method).
+- [ ] Map the legacy roles to Cognito groups and replace the seeded legacy `admin` user with an invited Cognito admin user (document the invitation and password-reset method). There are no other legacy accounts to migrate.
 - [ ] Make all admin/editor/operator mutations protected on backend; audit direct AppSync and Event API permissions.
 - [ ] Implement logout, session expiry and permission-changed behavior; prevent leaking sensitive cached content.
 - [ ] Keep anonymous projection available as agreed; verify no role escalation.
@@ -690,32 +696,32 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 **Checkpoint 9:** Feature parity matrix is complete or remaining exceptions are explicitly accepted; outputs are accurate and access-controlled.
 
-### Phase 10 — Full migration rehearsal and production readiness
+### Phase 10 — Full rehearsal and production readiness
 
 **Objective:** Prove performance, security, data correctness, recoverability and cost.
 
-- [ ] Export real legacy data from a consistent snapshot and validate import mapping/counts/checksums.
+- [ ] Seed a fresh rehearsal stage with the Phase 3 tool and verify counts/checksums against the seed fixture; confirm a rerun changes nothing.
 - [ ] Exercise the full session: login, create/edit translations, present/clear, live edits, page/visibility, timer, export, reconnect.
 - [ ] Run anonymous auth negative tests, load/soak simulations, failure injection for event publisher and CloudFront errors.
 - [ ] Verify alarm alerts, backups/PITR, operational runbook, billing alerts and a documented rollback plan.
-- [ ] Reconcile changes made to legacy data after export (migration freeze or carefully planned final delta import).
+- [ ] Rehearse recovery: restore the table from point-in-time recovery and reseed a disposable stage.
 
-**Checkpoint 10:** Signed-off rehearsal and rollback drill; migration reconciliation fully green; go/no-go checklist approved.
+**Checkpoint 10:** Signed-off rehearsal and rollback drill; seed verification fully green; go/no-go checklist approved.
 
 ### Phase 11 — Cutover, validation and decommission
 
 **Objective:** Switch traffic safely and remove legacy operating cost.
 
-- [ ] Back up PostgreSQL, capture final change freeze, perform final import and checksums.
+- [ ] Seed PROD with the Phase 3 tool (explicit approval required) and verify counts/checksums against the seed fixture.
 - [ ] Deploy production CDK/API/website at `https://amendments.adamlj.com` through the existing `adamlj.com` hosted zone; verify certificate, DNS alias, anonymous/public access and role tests without changing the DEV hostname.
 - [ ] Run live projector and translator smoke test before a real session.
-- [ ] Keep legacy infrastructure available but **read-only** for a defined rollback window; avoid divergent writes.
+- [ ] Keep the legacy application buildable and deployable for a defined rollback window. It has no production data to keep in sync.
 - [ ] Monitor user reports, errors, throttles, event lag, streaming publisher failures and actual spend.
-- [ ] After acceptance, delete old server/EF/Redis/SignalR deployment configuration and decommission host/db carefully; update developer docs.
+- [ ] After acceptance, delete old server/EF/Redis/SignalR code and deployment configuration and decommission any legacy host carefully; update developer docs.
 
 **Checkpoint 11:** New serverless stack is the sole writer; user/session smoke tests succeed; rollback window complete; decommission approved.
 
-### Phase 12 — Post-migration optimization (optional)
+### Phase 12 — Post-modernization optimization (optional)
 
 - [ ] Evaluate simplifying GSI usage and expensive/high-volume resolver calls from real metrics.
 - [ ] Improve operational dashboards, mutation tracing and failure recovery.
@@ -744,7 +750,7 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 | A12 | Timer runs for 10 minutes | No per-second backend activity; countdown persists/reconstructs |
 | A13 | Stream event delivered twice or out of order | Version-aware client converges to latest state |
 | A14 | Publisher temporarily fails | Alarms/retry path visible; projector eventually re-syncs |
-| A15 | Full migration rehearsal | Source/target counts, content, relationships and fixtures reconcile |
+| A15 | Seed rehearsal | A fresh table seeded by the tool matches the legacy seed fixture (counts, content, languages, presentation); a rerun changes nothing |
 | A16 | CDK production diff | No unexpected database replacement, public bucket or NAT/RDS cost |
 | A17 | Conference approves child amendment | `isBeingApproved` transition and cleanup produce the exact expected parent amendment content, with struck-through text removed and underlined text retained without tags |
 | A18 | Approval saved/retried twice | No accidental repeated cleanup or duplicate modifications; documented idempotency/conflict behavior |
@@ -763,7 +769,7 @@ The coding agent should **discover or ask** rather than invent answers:
 4. Beyond the verified false→true `isBeingApproved` transition and full parent-body replacement, what are the underlying service side effects, rollback expectations, behavior for multiple approved siblings, reversals/re-approvals, and any markup corner cases? (Keep this separate from translator live-edit behavior.)
 5. What should happen when a currently projected amendment is archived/deleted or hidden?
 6. What are the complete search/sort filters for amendment lists (determines GSI needs)?
-7. What are the exact role names, user migration needs and authentication UI requirements?
+7. What are the exact role names and authentication UI requirements? (No legacy user accounts need migrating.)
 8. What import/export formats, templates and audit expectations exist in production?
 9. Which AWS region, DNS name(s), environment separation, retention/backup, conference traffic and budget thresholds should be used?
 10. How quickly should a successful live save appear (target SLO)? Decide and measure; avoid promising instant delivery with an asynchronous stream.

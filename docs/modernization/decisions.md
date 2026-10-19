@@ -111,6 +111,16 @@ All packages are on their latest stable version, except **MediatR, which stays a
 4. The `prod` GitHub environment needs a required reviewer. That job posts `cdk diff -c stage=prod` for approval before deploying.
 5. Later: replace the bootstrap `AdministratorAccess` execution policy with a scoped policy (`cdk bootstrap --cloudformation-execution-policies`).
 
+## 1D. DynamoDB persistence and seed record (Phase 3, 2026-10-19)
+
+- **Projects:** `src/Amendment.Infrastructure` (`AWSSDK.DynamoDBv2` 4.0.107.3, `Ulid` 1.4.1), the seeding tool `scripts/seed-dynamodb` (`Amendment.SeedDynamoDb`), and tests in `test/Amendment.Infrastructure.Tests`. All are in `Amendment.sln`.
+- **Store (`AmendmentStore`):** creates use `attribute_not_exists(PK)`, so a duplicate is a `Conflict`. Updates are compare-and-swap on `version`; a stale version is a `Conflict` and a missing item is `NotFound`. A body create fails with `NotFound` when its amendment does not exist. Point reads and partition queries are strongly consistent. New amendment ids are ULIDs.
+- **GSI1 (index name `GSI1`; C# constants `DataStack.AmendmentListIndex` and `AmendmentTable.Gsi1`):** `GSI1PK = AMENDMENTS#ACTIVE|ARCHIVED`, `GSI1SK = <created ISO-8601>#<id>`, projection `ALL`. Only `META` items carry these keys. This is the only GSI. `AmendmentTable.CreateTableRequest` mirrors `DataStack`, and a CDK test checks the two match. Page tokens are bound to their list; a token from another list is rejected as a validation error. Page size is 1–100.
+- **Eventual consistency (found in AWS tests, not shown by Floci):** GSI1 reads can lag writes on AWS. The listing tests wait for the index. The seeder decides "other amendments exist" with a strongly consistent scan (`ScanAmendmentIdsAsync`), not GSI1. Callers of `ListAmendmentsAsync` must not expect to see their own write immediately.
+- **Seed:** `scripts/seed-dynamodb/seed-fixture.json` holds 37 items: 3 languages, 3 settings, 8 amendments, 22 bodies and the presentation. Its checksum is `fa652d90…4022`. `SeedFixtureParityTests` compares it with `AmendmentContext`/`SeedDatabase`. Set `AMENDMENT_REGENERATE_SEED_FIXTURE=1` to rewrite it after a legacy seed change.
+- **Validation:** the integration tests (22) pass on Floci (`AMENDMENT_DYNAMODB_TEST_ENDPOINT`) and on real AWS (`AMENDMENT_DYNAMODB_TEST_AWS=1`, temporary tagged tables that are deleted afterwards). `floci-validate.ps1` passes with GSI1. `Amendment-dev-Data` was deployed to DEV (adding GSI1 in place). The DEV seed wrote 37 items, a reseed wrote 0, and verify passed with matching checksums.
+- **Backup/rollback:** DEV is disposable: destroy and redeploy the stage, then rerun `seed`. PROD has point-in-time recovery and deletion protection. To roll back, restore the table to a point in time as a new table, verify it with `verify --table <restored>`, then point the stage at it or copy the items back. A reseed never overwrites items, so it is safe after a partial restore. No dual-system sync is needed.
+
 ## 2. Open questions (plan §12 plus Phase 0 findings)
 
 | ID | Question | Evidence |
@@ -124,7 +134,7 @@ All packages are on their latest stable version, except **MediatR, which stays a
 | Q7 | Search/sort/filter needs for the amendment list? Today the full list loads client-side. | `GetAllAmendmentsHandler` |
 | Q8 | **Resolved (D4).** Remaining [VERIFY]: should body delete use the body-edit roles? | `RoleOperationMatrix` |
 | Q9 | Is the exact Excel/PDF layout a contract? Are templates or audit requirements needed? | `ExcelExportService`, `PdfExportService` |
-| Q10 | What are the production `DbType`, data size, backup state, Redis use, and hosting (Docker/Azure)? | `Program.cs`, pipelines |
+| Q10 | What are the production `DbType`, data size, backup state, Redis use, and hosting (Docker/Azure)? Partly answered: there is no production database to migrate (user decision) | `Program.cs`, pipelines |
 | Q11 | **Resolved (D6).** | — |
 | Q12 | Is it acceptable that timer state lives in one process (lost on restart, not shared)? | `TimerService` singleton |
 | Q13 | Languages are hard-coded in `NavMenu` (English/Spanish/French). Should they be data-driven? | `NavMenu.razor` |
@@ -149,10 +159,10 @@ All packages are on their latest stable version, except **MediatR, which stays a
 | R10 | ~~`src/Amendment.Tests` is outside the solution~~ **Closed:** added to `Amendment.sln` and run by `ci.yml` | — | — |
 | R11 | Timer is in-memory and single-instance | M / M | Persist timer state (target design) |
 | R12 | Export output differences (fonts, layout, file names) | M / M | Capture golden files from the legacy app before porting (Q9) |
-| R13 | Data migration from PostgreSQL (IDs, audit fields, `ParentAmendmentId` links, users and password hashes) | M / High | Migration tool plus row-count and hash verification; user migration plan (Q10) |
+| R13 | DynamoDB seed drifts from the legacy seed (IDs, audit fields, languages, live state, settings). There is no PostgreSQL data to migrate (user decision) | L / M | Fixed seed fixture checked against `AmendmentContext` and `SeedDatabase`; count and checksum verification (Phase 3, A15); the legacy `admin` user is replaced in Cognito (Phase 8) |
 | R14 | ~~Pre-existing failing test masks regressions~~ **Closed (§1B):** test fixture fixed; CI runs all tests | — | — |
 | R16 | ~~`azure-pipelines.yml` runs `dotnet publish` at the repository root, which picks up `Amendment.sln` and now includes net10.0 projects.~~ **Closed:** the Azure pipeline was unused and `azure-pipelines.yml` has been deleted (user decision). The Docker build (`Amendment.Server` only) is the remaining CI. | — | Phase 1A still pins the SDK in `global.json` and updates the Dockerfile / GitHub workflow SDK |
-| R15 | Domain contracts drift from what the legacy migration needs (int ids → string ids, `LanguageId` → codes) | M / M | Phase 3 migration maps `ENG/SPA/FRA` through `LanguageCode` and keeps an id map |
+| R15 | Domain contracts drift from what the legacy migration needs (int ids → string ids, `LanguageId` → codes) | M / M | Phase 3 seeding maps `ENG/SPA/FRA` through `LanguageCode`; there is no legacy database to migrate (user decision) |
 | R17 | ~~NU1903 known-vulnerability warnings: `AutoMapper` 14.0.0 and `Microsoft.AspNetCore.SignalR.Core` 1.1.0~~ **Closed (§1B):** both removed; no vulnerable packages reported | — | — |
 | R18 | On Windows, `BuildWebCompiler2022` reports `screen.less: --math=always is deprecated` as a build **error**. It happens only on full rebuilds (`--no-incremental`) and also on the pre-upgrade commit. Linux, CI and Docker builds are unaffected because the package is `Windows_NT` only | M / L | Adjust `compilerconfig.json` LESS options or replace the tool (separate change, needs approval) |
 | R19 | Blazorise has moved to a commercial license. 2.4.0 pulls in `Blazorise.Licensing` 1.3.0 transitively. Not blocking now (user decision, 2026-10-18) | M / M | Deferred: choose and migrate to a replacement UI component library in a later phase. Used by `Amendment.Client` via `Blazorise.Bootstrap5`, `.Components`, `.FluentValidation`, `.Icons.FontAwesome`, `.Markdown`, `.Snackbar` |

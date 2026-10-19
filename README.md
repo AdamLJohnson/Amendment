@@ -75,6 +75,11 @@ infra/scripts/destroy-stage.ps1 -Stage dev  # empties the site bucket, then cdk 
 fresh Floci container, deploys all dev stacks into it, checks status, tags and DNS records, publishes the web client,
 destroys the stage and checks the shared hosted zone is untouched. Run it before every real deployment.
 
+**Seed data:** `dotnet run --project scripts/seed-dynamodb -- seed --stage dev` writes the legacy seed (languages,
+settings, sample amendments, presentation) into `AmendmentData-dev`; `verify` checks counts and checksums. Seeding never
+overwrites existing items and skips sample amendments when other amendments exist. Use `--endpoint-url` for Floci;
+`prod` requires `--confirm-prod`.
+
 CDK assertion tests are in `test/Amendment.Cdk.Tests` and run with `dotnet test`. Production deployments need a reviewed
 `npx cdk diff --all -c stage=prod` and explicit approval.
 

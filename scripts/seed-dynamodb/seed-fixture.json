@@ -1,0 +1,296 @@
+{
+  "seededAt": "2018-01-01T00:00:00+00:00",
+  "seededBy": "system",
+  "languages": [
+    {
+      "code": "en",
+      "name": "English",
+      "legacyCode": "ENG",
+      "legacyId": 1
+    },
+    {
+      "code": "es",
+      "name": "Spanish",
+      "legacyCode": "SPA",
+      "legacyId": 2
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "legacyCode": "FRA",
+      "legacyId": 3
+    }
+  ],
+  "settings": [
+    {
+      "key": "ShowDeafSigner",
+      "value": "1",
+      "legacyId": 1
+    },
+    {
+      "key": "ShowDeafSignerBox",
+      "value": "1",
+      "legacyId": 2
+    },
+    {
+      "key": "InvertedSlideText",
+      "value": "1",
+      "legacyId": 3
+    }
+  ],
+  "amendments": [
+    {
+      "id": "01C2QG9400WRAS0MQW6SNR1EPD",
+      "legacyId": 1,
+      "createdAt": "2018-01-01T00:00:00+00:00",
+      "title": "Test Amendment 1",
+      "author": "Some Author",
+      "motion": "WC-1",
+      "legisId": "Legid 2",
+      "source": "Conference Floor",
+      "primaryLanguage": "en",
+      "bodies": [
+        {
+          "language": "en",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Just look at all this text. It boggles the mind."
+        }
+      ]
+    },
+    {
+      "id": "01C2QG94Z8D4WM1XQ25PXEVW5D",
+      "legacyId": 2,
+      "createdAt": "2018-01-01T00:00:01+00:00",
+      "title": "Test Amendment 2",
+      "author": "Another Author",
+      "motion": "WC-2",
+      "legisId": "Legid 3",
+      "source": "Conference Floor",
+      "primaryLanguage": "en",
+      "bodies": [
+        {
+          "language": "en",
+          "status": "Ready",
+          "pageCount": 3,
+          "markdown": "### Substitute Resolution for G-1\n\nAliquam nullam nulla, vitae nisi, augue. Mi, auctor auctor, amet feugiat eget. Praesent ante, taciti placerat, lobortis quis. Sagittis inceptos ornare erat himenaeos leo. Viverra laoreet, ultrices pulvinar ac, ut. Orci non, gravida sagittis ex, volutpat. Ligula, magna a litora primis posuere. Porta, blandit, accumsan ac bibendum, nibh. Aliquet condimentum vel, nostra, tortor, efficitur.\n**NEWSLIDE**\nVarius dapibus ultricies eleifend, arcu, ultrices. Mattis ultricies sit risus taciti eget. Malesuada lorem, torquent platea volutpat, sociosqu. Euismod, nulla sodales ac, lacus finibus. Duis ornare semper nunc, ipsum dignissim. Lorem varius eros lectus mollis molestie. Ultrices egestas erat laoreet pulvinar sollicitudin.\n**NEWSLIDE**\nConubia pretium dictumst platea tellus venenatis. Lacinia, sed, mauris duis lobortis condimentum. Vel scelerisque est sollicitudin maximus finibus. Ut cursus, in, commodo enim, maecenas. In at ipsum cras vestibulum, leo. Felis lacinia, et, sagittis, ullamcorper quis. Tempor auctor, maximus libero lacinia ultrices. Consectetur porta, neque, curabitur primis tellus."
+        },
+        {
+          "language": "es",
+          "status": "Ready",
+          "pageCount": 3,
+          "markdown": "### Substituci\u00F3n de la Resoluci\u00F3n G-1\n\nTempor accumsan erat, taciti efficitur enim. Efficitur nulla, dictumst posuere non lacinia. Semper torquent at bibendum maecenas elementum. Nisi tristique tortor euismod elit nullam. In semper pulvinar etiam rhoncus, fames. Mollis augue id, arcu lacus ornare. Vel imperdiet cursus felis ante, eget. Torquent aenean tortor nunc amet scelerisque. Placerat integer hendrerit congue eleifend ultricies.\n**NEWSLIDE**\nArcu, hac commodo vehicula elit non. Mauris, finibus ligula, vivamus leo nibh. Semper eros gravida nullam purus habitasse. Bibendum orci orci, tempus sapien eros. Lobortis cras iaculis tellus, risus posuere. Felis dui, elit, primis nullam augue. Nullam adipiscing ultricies feugiat, nisi, dapibus.\n**NEWSLIDE**\nEnim, dignissim lorem, consectetur aenean felis. Luctus ipsum feugiat vulputate libero non. Inceptos lorem, volutpat, luctus, in, sodales. Bibendum id, fringilla vivamus ac, eros. Commodo, posuere mattis nunc, per euismod. Nibh, venenatis vel, at metus maecenas. Consectetur justo nibh fringilla, tempus nunc. Leo rutrum morbi est at, praesent."
+        },
+        {
+          "language": "fr",
+          "status": "Ready",
+          "pageCount": 3,
+          "markdown": "### Substitution de la r\u00E9solution G-1\n\nUrna, leo, nulla, orci feugiat aenean. Vitae porta, enim neque elit euismod. Ornare quis feugiat, auctor, id, a. Non mattis porta, lacinia congue, torquent. Ac praesent laoreet, sociosqu quis, quis. Nunc nulla gravida tortor arcu bibendum. In, pharetra purus pulvinar, inceptos tempus. A, mi fermentum hendrerit duis magna. Pellentesque cursus dui vel, congue, sem.\n**NEWSLIDE**\nAuctor porttitor, et, adipiscing duis sagittis. Faucibus urna ac, mattis integer nec. Primis sollicitudin nisl placerat gravida fringilla. Turpis sagittis ligula odio, morbi maximus. Proin ligula, bibendum, inceptos odio massa. Interdum, neque, fusce malesuada at, amet. Per tortor, nullam dignissim varius, sociosqu.\n**NEWSLIDE**\nOrci maecenas gravida tristique accumsan lacinia. Sollicitudin nulla praesent maecenas nunc, curabitur. Interdum, pulvinar, blandit, vehicula maximus a. Feugiat varius adipiscing aptent cursus tortor. Ex, hendrerit quisque mauris phasellus consequat. Sollicitudin turpis quisque accumsan libero neque. Class id laoreet, lorem, himenaeos aptent. Mauris, vel, ex, metus sapien ultrices."
+        }
+      ]
+    },
+    {
+      "id": "01C2QG95YG7ADRJ9M5W00QW68A",
+      "legacyId": 3,
+      "createdAt": "2018-01-01T00:00:02+00:00",
+      "title": "Test Amendment 4",
+      "author": "Leo dui",
+      "motion": "WC-4",
+      "legisId": "Legid 4",
+      "source": "Conference Floor",
+      "primaryLanguage": "en",
+      "bodies": [
+        {
+          "language": "en",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "A, volutpat, varius, nisi, commodo leo. Et ac, id justo lobortis at. Ad et conubia nisi hac dictumst. Aptent orci ultrices primis vivamus bibendum. Nibh primis at, enim tellus, urna."
+        },
+        {
+          "language": "es",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Litora fames cras euismod, non, euismod. Pulvinar, sapien hac quam mollis pharetra. Tincidunt erat, finibus, nam ipsum aliquet. Metus tellus taciti at vehicula fringilla. Sit ad nunc, leo lorem donec."
+        },
+        {
+          "language": "fr",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Morbi euismod congue, phasellus blandit platea. Fermentum vitae, sociosqu lectus ligula elit. Nibh eros, vitae eu, volutpat, varius. Nibh, congue, facilisis ex, dui, cras. Tincidunt vivamus volutpat id, placerat dictumst."
+        }
+      ]
+    },
+    {
+      "id": "01C2QG96XRXEQVBPT0H7HAWTZN",
+      "legacyId": 4,
+      "createdAt": "2018-01-01T00:00:03+00:00",
+      "title": "Test Amendment 5",
+      "author": "Varius risus",
+      "motion": "WC-5",
+      "legisId": "Legid 5",
+      "source": "Conference Floor",
+      "primaryLanguage": "en",
+      "bodies": [
+        {
+          "language": "en",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Posuere aliquam interdum, adipiscing rhoncus, neque. Ut fringilla, eleifend laoreet, sapien quis. Ante maximus tellus, hendrerit nunc vehicula. Eu, adipiscing hendrerit feugiat, volutpat, risus. Fringilla sed, aliquam facilisis lectus, dictumst."
+        },
+        {
+          "language": "es",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Congue, maecenas sollicitudin erat, orci semper. Posuere aptent vel, iaculis eros, molestie. Laoreet conubia eleifend auctor, habitasse mauris. A magna, fermentum fringilla, mauris, auctor. Aenean quisque quam, nulla, ex leo."
+        },
+        {
+          "language": "fr",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Velit vehicula orci, purus ex, et. Nostra, vivamus elementum condimentum varius feugiat. A euismod ante, consectetur aptent condimentum. Pellentesque odio iaculis fusce in, cursus. Taciti sagittis, pharetra ipsum feugiat, ultricies."
+        }
+      ]
+    },
+    {
+      "id": "01C2QG97X0E7BZKJVCPBMDQ62M",
+      "legacyId": 5,
+      "createdAt": "2018-01-01T00:00:04+00:00",
+      "title": "Test Amendment 6",
+      "author": "In erat",
+      "motion": "WC-6",
+      "legisId": "Legid 6",
+      "source": "Conference Floor",
+      "primaryLanguage": "en",
+      "bodies": [
+        {
+          "language": "en",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Eget massa, dictum orci, lorem, magna. Rhoncus, vivamus suscipit donec suspendisse amet. In, venenatis ad mattis, fermentum inceptos. Nisi nulla quisque mi, ultrices enim. Proin et leo, nulla est pulvinar."
+        },
+        {
+          "language": "es",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Non vestibulum dapibus metus mauris, nisi. Tempus sagittis, scelerisque nibh, ad nisi. Luctus, lorem himenaeos id semper eget. Taciti elit, lacinia, porta, magna, ligula. Mauris placerat, volutpat duis porta, mauris."
+        },
+        {
+          "language": "fr",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Libero ultricies morbi ligula, odio pulvinar. Placerat lorem himenaeos dictumst condimentum elit. Dignissim dapibus mi nullam massa elit. Ac, consequat litora dui pulvinar, etiam. Vehicula massa, finibus libero vel dui."
+        }
+      ]
+    },
+    {
+      "id": "01C2QG98W8VPM5YYPJCG65AM44",
+      "legacyId": 6,
+      "createdAt": "2018-01-01T00:00:05+00:00",
+      "title": "Test Amendment 7",
+      "author": "Finibus eleifend",
+      "motion": "WC-7",
+      "legisId": "Legid 7",
+      "source": "Conference Floor",
+      "primaryLanguage": "en",
+      "bodies": [
+        {
+          "language": "en",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Eleifend, posuere turpis nulla varius est. Pulvinar dignissim tellus, faucibus eget vestibulum. Dignissim lacinia, quis tortor, in lectus. Sagittis pretium pharetra tempor lacus justo. Platea congue, consectetur class vestibulum nec."
+        },
+        {
+          "language": "es",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Bibendum venenatis nullam augue enim, feugiat. Fringilla, lacinia, urna orci massa auctor. Massa, leo, faucibus mauris nec laoreet. Lectus odio, ultrices erat eu, tempor. Et laoreet accumsan eget lectus, dui."
+        },
+        {
+          "language": "fr",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Platea scelerisque porta facilisis phasellus non. Interdum arcu, at, sagittis, nisi, sed. Diam volutpat non, pretium vel, facilisis. Pretium ante, sodales praesent urna dolor. Interdum sem at varius posuere consectetur."
+        }
+      ]
+    },
+    {
+      "id": "01C2QG99VG8MGH9J1J6N3H4027",
+      "legacyId": 7,
+      "createdAt": "2018-01-01T00:00:06+00:00",
+      "title": "Test Amendment 8",
+      "author": "Arcu nibh",
+      "motion": "WC-8",
+      "legisId": "Legid 8",
+      "source": "Conference Floor",
+      "primaryLanguage": "en",
+      "bodies": [
+        {
+          "language": "en",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Bibendum, lacus diam praesent a finibus. Iaculis lorem urna, tempor blandit, finibus. Molestie sociosqu eu cras justo mattis. Habitasse hendrerit ornare proin litora quam. Dapibus conubia scelerisque amet non tempor."
+        },
+        {
+          "language": "es",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Vitae suspendisse aliquet viverra ex tellus. Himenaeos massa, taciti tempus tortor, aptent. Varius, lacus ultricies tellus faucibus lacinia. Adipiscing pulvinar aptent venenatis conubia dictumst. Nibh, commodo, gravida mattis, sit lectus."
+        },
+        {
+          "language": "fr",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Bibendum, commodo sapien fringilla, ante luctus. Feugiat venenatis habitasse non, viverra varius. Aliquam eleifend venenatis nam a aptent. Nunc, inceptos vivamus id suscipit augue. Elit, maximus arcu, nisl leo, velit."
+        }
+      ]
+    },
+    {
+      "id": "01C2QG9ATRNYXTBF1VS202E1JW",
+      "legacyId": 8,
+      "createdAt": "2018-01-01T00:00:07+00:00",
+      "title": "Test Amendment 9",
+      "author": "Sagittis accumsan",
+      "motion": "WC-9",
+      "legisId": "Legid 9",
+      "source": "Conference Floor",
+      "primaryLanguage": "en",
+      "bodies": [
+        {
+          "language": "en",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Vestibulum maximus risus pulvinar tincidunt diam. Imperdiet duis pretium semper ex, mi. Velit venenatis cras ultrices dignissim nisi. Mi, vestibulum suscipit bibendum porta, elementum. Condimentum arcu, litora tristique auctor, dui."
+        },
+        {
+          "language": "es",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Aliquam et, enim, semper turpis egestas. Nisi, at tempor in, conubia fames. Luctus nisl elit erat sapien tortor. Nam lectus nunc vestibulum, odio est. Mollis lacinia blandit, ac, mi posuere."
+        },
+        {
+          "language": "fr",
+          "status": "Ready",
+          "pageCount": 1,
+          "markdown": "Turpis nec lectus, tortor eu, fringilla. Diam risus blandit massa neque tristique. Bibendum, leo, tortor, tortor placerat, eleifend. Viverra posuere, lectus, torquent non, nostra. Urna, per bibendum, commodo, at tempor."
+        }
+      ]
+    }
+  ],
+  "presentation": {
+    "activeAmendmentId": "01C2QG94Z8D4WM1XQ25PXEVW5D",
+    "languages": {
+      "en": {
+        "visible": true,
+        "page": 0
+      },
+      "es": {
+        "visible": true,
+        "page": 0
+      },
+      "fr": {
+        "visible": true,
+        "page": 0
+      }
+    }
+  }
+}
