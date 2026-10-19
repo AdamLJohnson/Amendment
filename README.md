@@ -71,6 +71,9 @@ infra/scripts/publish-web.ps1 -Stage dev    # publishes the Blazor client, write
 infra/scripts/destroy-stage.ps1 -Stage dev  # empties the site bucket, then cdk destroy --all (refuses production stages)
 ```
 
+Add `-EnableCognitoPreview` to `publish-web.ps1` to turn on Cognito sign-in (at `auth.<site domain>`) and the GraphQL
+preview page `/graphql-preview` for that upload. It is off by default, and the rest of the client keeps using the legacy server.
+
 **Local validation with [Floci](https://floci.io)** (no AWS account used): `infra/scripts/floci-validate.ps1` starts a
 fresh Floci container, deploys all dev stacks into it, checks status, tags and DNS records, publishes the web client,
 destroys the stage and checks the shared hosted zone is untouched. Run it before every real deployment.

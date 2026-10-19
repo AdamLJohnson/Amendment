@@ -24,6 +24,9 @@ public sealed record StageConfig(
 
     public string SiteUrl => $"https://{Domain.SiteDomainName}";
 
+    /// <summary>Custom domain of the Cognito sign-in pages, e.g. <c>auth.dev-amendments.adamlj.com</c>.</summary>
+    public string SignInDomainName => $"auth.{Domain.SiteDomainName}";
+
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     private sealed record StageFile(

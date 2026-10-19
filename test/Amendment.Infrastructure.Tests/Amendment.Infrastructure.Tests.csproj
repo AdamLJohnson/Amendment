@@ -27,8 +27,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Amendment.Infrastructure\Amendment.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Amendment.Api.Lambda\Amendment.Api.Lambda.csproj" />
     <ProjectReference Include="..\..\scripts\seed-dynamodb\Amendment.SeedDynamoDb.csproj" />
     <ProjectReference Include="..\..\src\Amendment.Server\Amendment.Server.csproj" />
+    <ProjectReference Include="..\..\src\Amendment.Client.Repository\Amendment.Client.Repository.csproj" />
   </ItemGroup>
 
 </Project>

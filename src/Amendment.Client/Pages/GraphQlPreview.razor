@@ -1,0 +1,96 @@
+@page "/graphql-preview"
+@using Amendment.Client.AuthProviders
+@using Amendment.Client.Repository.GraphQl
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject CognitoGraphQlPreview CognitoPreview
+@inject IServiceProvider Services
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<CustomPageTitle>GraphQL preview</CustomPageTitle>
+
+<div class="container mt-4">
+    <h2>GraphQL API preview</h2>
+    @if (!CognitoPreview.Enabled)
+    {
+        <p>The Cognito/GraphQL preview is turned off for this site (<code>@CognitoGraphQlPreview.FlagKey</code>).</p>
+    }
+    else
+    {
+        <AuthorizeView>
+            <Authorized>
+                <p>
+                    Signed in as <strong>@context.User.Identity?.Name</strong>.
+                    Groups: @(string.Join(", ", context.User.FindAll("cognito:groups").Select(c => c.Value)) is { Length: > 0 } groups ? groups : "none")
+                    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="SignOut">Sign out</button>
+                </p>
+                <button class="btn btn-primary mb-3" @onclick="LoadAsync" disabled="@_loading">Load from GraphQL API</button>
+                @if (_error is not null)
+                {
+                    <div class="alert alert-danger">@_error</div>
+                }
+                @if (_languages is not null)
+                {
+                    <p>Languages: @string.Join(", ", _languages.Select(l => $"{l.Name} ({l.Code})"))</p>
+                }
+                @if (_amendments is not null)
+                {
+                    <table class="table table-sm">
+                        <thead><tr><th>Title</th><th>Author</th><th>Languages</th><th>Approved</th><th>Version</th></tr></thead>
+                        <tbody>
+                            @foreach (var a in _amendments)
+                            {
+                                <tr>
+                                    <td>@a.Title</td>
+                                    <td>@a.Author</td>
+                                    <td>@string.Join(", ", a.Bodies.Select(b => b.Language))</td>
+                                    <td>@(a.IsApproved ? "Yes" : "No")</td>
+                                    <td>@a.Version</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </Authorized>
+            <NotAuthorized>
+                <p>Sign in with a Cognito user to call the GraphQL API.</p>
+                <button class="btn btn-primary" @onclick="SignIn">Sign in with Cognito</button>
+            </NotAuthorized>
+        </AuthorizeView>
+    }
+</div>
+
+@code {
+    private IReadOnlyList<ApiLanguage>? _languages;
+    private IReadOnlyList<ApiAmendment>? _amendments;
+    private string? _error;
+    private bool _loading;
+
+    private void SignIn() => Navigation.NavigateToLogin("authentication/login");
+
+    private async Task SignOut()
+    {
+        await JS.InvokeVoidAsync("sessionStorage.clear");
+        Navigation.NavigateTo(CognitoPreview.SignOutUrl(Navigation.BaseUri), forceLoad: true);
+    }
+
+    private async Task LoadAsync()
+    {
+        var api = Services.GetRequiredService<IAmendmentApi>();
+        _loading = true;
+        _error = null;
+        try
+        {
+            _languages = await api.GetLanguagesAsync();
+            _amendments = (await api.GetAmendmentsAsync()).Items;
+        }
+        catch (AmendmentApiException ex)
+        {
+            _error = $"{ex.ErrorType}: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

@@ -1,0 +1,17 @@
+@page "/authentication/{action}"
+@using Amendment.Client.AuthProviders
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject CognitoGraphQlPreview CognitoPreview
+
+@if (CognitoPreview.Enabled)
+{
+    <RemoteAuthenticatorView Action="@Action" />
+}
+else
+{
+    <p>Cognito sign-in is not enabled.</p>
+}
+
+@code {
+    [Parameter] public string? Action { get; set; }
+}

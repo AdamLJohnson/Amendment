@@ -15,7 +15,7 @@ public class SecurityAndCostTests
     [
         "AWS::CDK::Metadata", "AWS::S3::BucketPolicy", "AWS::SNS::TopicPolicy", "AWS::IAM::Policy",
         "AWS::AppSync::GraphQLSchema", "AWS::AppSync::DataSource", "AWS::AppSync::Resolver",
-        "AWS::Cognito::UserPoolClient", "AWS::Cognito::UserPoolGroup", "AWS::CloudFront::OriginAccessControl",
+        "AWS::Cognito::UserPoolClient", "AWS::Cognito::UserPoolGroup", "AWS::Cognito::UserPoolDomain", "AWS::CloudFront::OriginAccessControl",
         "AWS::Route53::RecordSet", "AWS::Budgets::Budget"
     ];
 
@@ -128,8 +128,9 @@ public class SecurityAndCostTests
     public void Api_logs_have_retention_and_api_errors_alarm(string stage)
     {
         var s = For(stage);
-        var logGroup = s.Resources().Single(r => r.Type == "AWS::Logs::LogGroup").Resource["Properties"]!;
-        Assert.Equal(s.Config.LogRetentionDays, (int)logGroup["RetentionInDays"]!);
+        var logGroups = s.Resources().Where(r => r.Type == "AWS::Logs::LogGroup").Select(r => r.Resource["Properties"]!).ToList();
+        Assert.Equal(2, logGroups.Count); // AppSync API + API Lambda
+        Assert.All(logGroups, g => Assert.Equal(s.Config.LogRetentionDays, (int)g["RetentionInDays"]!));
         var api = s.Resources().Single(r => r.Type == "AWS::AppSync::GraphQLApi").Resource["Properties"]!;
         Assert.Equal("ERROR", (string)api["LogConfig"]!["FieldLogLevel"]!);
         Assert.Equal("AMAZON_COGNITO_USER_POOLS", (string)api["AuthenticationType"]!);
@@ -137,5 +138,42 @@ public class SecurityAndCostTests
         var alarm = s.Resources().Single(r => r.Type == "AWS::CloudWatch::Alarm").Resource["Properties"]!;
         Assert.Equal("5XXError", (string)alarm["MetricName"]!);
         Assert.NotNull(alarm["AlarmActions"]);
+    }
+
+    [Theory, MemberData(nameof(Stages))]
+    public void Api_lambda_is_dotnet10_arm64_zip_with_least_privilege_table_access(string stage)
+    {
+        var s = For(stage);
+        var fn = s.Resources().Single(r => r.Type == "AWS::Lambda::Function").Resource["Properties"]!;
+        Assert.Equal("dotnet10", (string)fn["Runtime"]!);
+        Assert.Equal("arm64", (string)fn["Architectures"]![0]!);
+        Assert.Equal("Amendment.Api.Lambda::Amendment.Api.Lambda.Function::HandleAsync", (string)fn["Handler"]!);
+        Assert.NotNull(fn["Code"]!["S3Key"]);
+        Assert.NotNull(fn["Environment"]!["Variables"]!["AMENDMENT_TABLE_NAME"]);
+
+        var lambdaPolicy = s.Resources().Single(r => r.Type == "AWS::IAM::Policy" && r.LogicalId.StartsWith("ApiFunctionRole", StringComparison.Ordinal)).Resource.ToJsonString();
+        foreach (var action in new[] { "dynamodb:GetItem", "dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:ConditionCheckItem" })
+            Assert.Contains(action, lambdaPolicy);
+        Assert.DoesNotContain("dynamodb:Scan", lambdaPolicy);
+        Assert.DoesNotContain("dynamodb:DeleteTable", lambdaPolicy);
+    }
+
+    [Theory, MemberData(nameof(Stages))]
+    public void Reads_use_a_read_only_table_source_and_every_mutation_goes_through_the_lambda(string stage)
+    {
+        var s = For(stage);
+        var resolvers = s.Resources().Where(r => r.Type == "AWS::AppSync::Resolver").Select(r => r.Resource["Properties"]!).ToList();
+        string[] Fields(string type) => resolvers.Where(r => (string)r["TypeName"]! == type).Select(r => (string)r["FieldName"]!).Order().ToArray();
+
+        Assert.Equal(Amendment.Cdk.Stacks.ApiStack.MutationFields.Order().ToArray(), Fields("Mutation"));
+        Assert.Equal(["amendment", "amendments", "apiVersion", "languages"], Fields("Query"));
+        Assert.Equal(["bodies"], Fields("Amendment"));
+        Assert.All(resolvers, r => Assert.Equal("APPSYNC_JS", (string)r["Runtime"]!["Name"]!));
+
+        var readPolicy = s.Resources().Single(r => r.Type == "AWS::IAM::Policy" && r.LogicalId.StartsWith("TableReadSource", StringComparison.Ordinal)).Resource.ToJsonString();
+        Assert.Contains("dynamodb:Query", readPolicy);
+        Assert.DoesNotContain("dynamodb:PutItem", readPolicy);
+        Assert.DoesNotContain("dynamodb:DeleteItem", readPolicy);
+        Assert.DoesNotContain("dynamodb:UpdateItem", readPolicy);
     }
 }

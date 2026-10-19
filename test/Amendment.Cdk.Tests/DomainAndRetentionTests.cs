@@ -18,7 +18,9 @@ public class DomainAndRetentionTests
         var s = stage == "dev" ? Dev : Prod;
         Assert.DoesNotContain(s.Resources(), r => r.Type == "AWS::Route53::HostedZone");
 
-        var records = s.Resources().Where(r => r.Type == "AWS::Route53::RecordSet").Select(r => r.Resource["Properties"]!).ToList();
+        Assert.Equal(["A", "A", "AAAA"], s.Resources().Where(r => r.Type == "AWS::Route53::RecordSet").Select(r => (string)r.Resource["Properties"]!["Type"]!).Order());
+        var records = s.Json(s.Stacks.Web)["Resources"]!.AsObject().Select(r => r.Value!)
+            .Where(r => (string)r["Type"]! == "AWS::Route53::RecordSet").Select(r => r["Properties"]!).ToList();
         Assert.Equal(["A", "AAAA"], records.Select(r => (string)r["Type"]!).Order());
         foreach (var record in records)
         {
@@ -27,7 +29,7 @@ public class DomainAndRetentionTests
             Assert.Contains("Distribution", record["AliasTarget"]!["DNSName"]!.ToJsonString());
         }
 
-        var cert = s.Resources().Single(r => r.Type == "AWS::CertificateManager::Certificate").Resource["Properties"]!;
+        var cert = s.Resources().Single(r => r.Type == "AWS::CertificateManager::Certificate" && r.Stack == s.Stacks.Web).Resource["Properties"]!;
         Assert.Equal(host, (string)cert["DomainName"]!);
         Assert.Equal("DNS", (string)cert["ValidationMethod"]!);
         var aliases = s.Resources().Single(r => r.Type == "AWS::CloudFront::Distribution").Resource["Properties"]!["DistributionConfig"]!["Aliases"]!;
@@ -57,9 +59,9 @@ public class DomainAndRetentionTests
         {
             ["hostedZoneId"] = "ZOTHER", ["hostedZoneName"] = "example.org", ["siteDomainName"] = "app.example.org"
         });
-        var record = s.Resources().First(r => r.Type == "AWS::Route53::RecordSet").Resource["Properties"]!;
-        Assert.Equal("app.example.org.", (string)record["Name"]!);
-        Assert.Equal("ZOTHER", (string)record["HostedZoneId"]!);
+        var records = s.Resources().Where(r => r.Type == "AWS::Route53::RecordSet").Select(r => r.Resource["Properties"]!).ToList();
+        Assert.Equal(["app.example.org.", "app.example.org.", "auth.app.example.org."], records.Select(r => (string)r["Name"]!).Order());
+        Assert.All(records, r => Assert.Equal("ZOTHER", (string)r["HostedZoneId"]!));
     }
 
     [Fact]
@@ -129,10 +131,54 @@ public class DomainAndRetentionTests
         var pool = Dev.Resources().Single(r => r.Type == "AWS::Cognito::UserPool").Resource["Properties"]!;
         Assert.True((bool)pool["AdminCreateUserConfig"]!["AllowAdminCreateUserOnly"]!);
 
-        var client = Dev.Resources().Single(r => r.Type == "AWS::Cognito::UserPoolClient").Resource["Properties"]!;
+        var client = Dev.Resources().Single(r => r.Type == "AWS::Cognito::UserPoolClient" && r.LogicalId.Contains("WebClient")).Resource["Properties"]!;
         Assert.False((bool?)client["GenerateSecret"] ?? false);
         Assert.Equal("""["code"]""", client["AllowedOAuthFlows"]!.ToJsonString());
-        Assert.Contains("https://dev-amendments.adamlj.com/", client["CallbackURLs"]!.ToJsonString());
+        Assert.Equal(
+            ["https://dev-amendments.adamlj.com/authentication/login-callback", "https://localhost:5001/authentication/login-callback", "http://localhost:5165/authentication/login-callback"],
+            client["CallbackURLs"]!.AsArray().Select(u => (string)u!));
+        Assert.Equal(
+            ["https://dev-amendments.adamlj.com/", "https://localhost:5001/", "http://localhost:5165/"],
+            client["LogoutURLs"]!.AsArray().Select(u => (string)u!));
+        Assert.DoesNotContain("ADMIN_USER_PASSWORD", client.ToJsonString());
+    }
+
+    [Theory]
+    [InlineData("dev", "auth.dev-amendments.adamlj.com")]
+    [InlineData("prod", "auth.amendments.adamlj.com")]
+    public void Sign_in_pages_use_a_custom_domain_with_its_own_certificate_and_alias(string stage, string signInDomain)
+    {
+        var s = stage == "dev" ? Dev : Prod;
+        var resources = s.Json(s.Stacks.Identity)["Resources"]!.AsObject().Select(r => r.Value!).ToList();
+
+        var domain = Assert.Single(resources, r => (string)r["Type"]! == "AWS::Cognito::UserPoolDomain")["Properties"]!;
+        Assert.Equal(signInDomain, (string)domain["Domain"]!);
+        Assert.NotNull(domain["CustomDomainConfig"]!["CertificateArn"]);
+
+        var certificate = Assert.Single(resources, r => (string)r["Type"]! == "AWS::CertificateManager::Certificate")["Properties"]!;
+        Assert.Equal(signInDomain, (string)certificate["DomainName"]!);
+        Assert.Equal("DNS", (string)certificate["ValidationMethod"]!);
+
+        var alias = Assert.Single(resources, r => (string)r["Type"]! == "AWS::Route53::RecordSet")["Properties"]!;
+        Assert.Equal("A", (string)alias["Type"]!);
+        Assert.Equal(signInDomain + ".", (string)alias["Name"]!);
+        Assert.Equal("Z3A6EHPCI5BABT", (string)alias["HostedZoneId"]!);
+        Assert.Equal("Z2FDTNDATAQYW2", (string)alias["AliasTarget"]!["HostedZoneId"]!);
+        Assert.Contains("CloudFrontDistribution", alias["AliasTarget"]!["DNSName"]!.ToJsonString());
+
+        Assert.Contains(s.Stacks.Web, s.Stacks.Identity.Dependencies);
+    }
+
+    [Fact]
+    public void Api_test_client_exists_only_outside_production_and_only_allows_admin_password_auth()
+    {
+        var testClient = Dev.Resources().Single(r => r.Type == "AWS::Cognito::UserPoolClient" && r.LogicalId.Contains("TestClient")).Resource["Properties"]!;
+        Assert.Equal("""["ALLOW_ADMIN_USER_PASSWORD_AUTH","ALLOW_REFRESH_TOKEN_AUTH"]""", testClient["ExplicitAuthFlows"]!.ToJsonString());
+        Assert.Null(testClient["AllowedOAuthFlows"]);
+        Assert.False((bool?)testClient["GenerateSecret"] ?? false);
+
+        Assert.Single(Prod.Resources(), r => r.Type == "AWS::Cognito::UserPoolClient");
+        Assert.Null(Prod.Stacks.Identity.TestClient);
     }
 
     [Theory]

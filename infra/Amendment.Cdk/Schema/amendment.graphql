@@ -1,0 +1,80 @@
+# Amendment GraphQL API - Phase 4 (private, Cognito user pools only).
+# Reads resolve directly against DynamoDB; mutations go through the .NET 10 API Lambda (decision D15).
+# Versions are decimal strings of 64-bit integers (decision D19: AppSync has no 64-bit integer scalar).
+# Role rules are enforced server-side by RoleOperationMatrix (docs/modernization/contracts.md section 4).
+
+enum BodyStatus { NEW DRAFT UNDER_REVIEW READY }
+enum ApprovalFailureMode { ALL_OR_NOTHING BEST_EFFORT }
+
+type Audit { by: ID! at: AWSDateTime! }
+
+type Amendment {
+  id: ID!
+  title: String!
+  author: String!
+  motion: String
+  source: String
+  legisId: String
+  primaryLanguage: String!
+  isArchived: Boolean!
+  isApproved: Boolean!
+  parentAmendmentId: ID
+  version: String!
+  created: Audit!
+  updated: Audit!
+  bodies: [AmendmentBody!]!
+}
+
+type AmendmentBody {
+  amendmentId: ID!
+  language: String!
+  markdown: String!
+  status: BodyStatus!
+  pageCount: Int!
+  version: String!
+  created: Audit!
+  updated: Audit!
+}
+
+type AmendmentConnection { items: [Amendment!]! nextToken: String }
+
+type Language { code: String! name: String! sortOrder: Int! }
+
+type ApprovalResult {
+  amendment: Amendment!
+  approvalApplied: Boolean!
+  updatedChildLanguages: [String!]!
+  updatedParentLanguages: [String!]!
+  warnings: [String!]!
+}
+
+input AmendmentInput {
+  title: String!
+  author: String!
+  primaryLanguage: String!
+  motion: String
+  source: String
+  legisId: String
+  parentAmendmentId: ID
+}
+
+type Query {
+  apiVersion: String!
+  amendments(archived: Boolean = false, limit: Int = 50, nextToken: String): AmendmentConnection!
+  amendment(id: ID!): Amendment
+  languages: [Language!]!
+}
+
+type Mutation {
+  createAmendment(input: AmendmentInput!): Amendment!
+  updateAmendment(id: ID!, expectedVersion: String!, input: AmendmentInput!, isApproved: Boolean!): Amendment!
+  archiveAmendment(id: ID!, expectedVersion: String!, archived: Boolean!): Amendment!
+  cloneAmendment(sourceId: ID!, overrides: AmendmentInput): Amendment!
+  approveAmendment(id: ID!, expectedVersion: String!, cleanChildBodies: Boolean = true,
+                   failureMode: ApprovalFailureMode = ALL_OR_NOTHING): ApprovalResult!
+  deleteAmendment(id: ID!, expectedVersion: String!): ID!
+
+  createAmendmentBody(amendmentId: ID!, language: String!, markdown: String!, status: BodyStatus = NEW): AmendmentBody!
+  updateAmendmentBody(amendmentId: ID!, language: String!, expectedVersion: String!, markdown: String!, status: BodyStatus!): AmendmentBody!
+  deleteAmendmentBody(amendmentId: ID!, language: String!, expectedVersion: String!): String!
+}

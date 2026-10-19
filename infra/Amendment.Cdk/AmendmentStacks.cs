@@ -24,8 +24,9 @@ public sealed record AmendmentStacks(DataStack Data, IdentityStack Identity, Api
 
         var data = new DataStack(app, $"{config.Prefix}-Data", config, Props("Data"));
         var identity = new IdentityStack(app, $"{config.Prefix}-Identity", config, Props("Identity"));
-        var api = new ApiStack(app, $"{config.Prefix}-Api", config, identity.UserPool, Props("Api"));
+        var api = new ApiStack(app, $"{config.Prefix}-Api", config, identity.UserPool, data.Table, Props("Api"));
         var web = new WebStack(app, $"{config.Prefix}-Web", config, Props("Web"));
+        identity.AddDependency(web, "The Cognito custom sign-in domain needs the site domain's A record.");
         var observability = new ObservabilityStack(app, $"{config.Prefix}-Observability", config, api.Api, Props("Observability"));
 
         return new AmendmentStacks(data, identity, api, web, observability);

@@ -1,6 +1,6 @@
 # Phase 1 — Target Domain Contracts
 
-Code: `src/Amendment.Domain` (net10.0, no external packages). Tests: `test/Amendment.Domain.Tests`. GraphQL draft: `schema.draft.graphql`. Nothing here is wired into the legacy app or deployed.
+Code: `src/Amendment.Domain` (net10.0, no external packages). Tests: `test/Amendment.Domain.Tests`. GraphQL draft: `schema.draft.graphql`. The deployed Phase 4 subset is `infra/Amendment.Cdk/Schema/amendment.graphql` (decisions.md §1E). The legacy app does not use any of this yet.
 
 **[L]** = same as legacy; **[Δ]** = deliberate change from legacy (each one is covered by a test and listed in `decisions.md`).
 

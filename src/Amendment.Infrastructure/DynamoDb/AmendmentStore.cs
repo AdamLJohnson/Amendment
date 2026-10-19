@@ -16,6 +16,7 @@ namespace Amendment.Infrastructure.DynamoDb;
 public sealed class AmendmentStore(IAmazonDynamoDB client, string tableName)
 {
     public const int MaxPageSize = 100;
+    public const int MaxTransactionItems = 100;
     private const string VersionCondition = "attribute_exists(PK) AND #version = :expected";
     private const string NotExistsCondition = "attribute_not_exists(PK)";
 
@@ -140,6 +141,66 @@ public sealed class AmendmentStore(IAmazonDynamoDB client, string tableName)
     {
         var error = await PutVersionedAsync(ItemMapper.ToItem(next), next.Version, "Presentation", ct, missingCountsAsInitial: true);
         return error ?? DomainResult<PresentationState>.Success(next);
+    }
+
+    /// <summary>
+    /// Commits all writes atomically (<c>TransactWriteItems</c>) or none. A failed condition is reported with the
+    /// error of the write that failed; a concurrent transaction on the same items is a <c>Conflict</c>.
+    /// </summary>
+    public async Task<TransactionResult> TransactAsync(IReadOnlyList<StoreWrite> writes, CancellationToken ct = default)
+    {
+        if (writes.Count == 0)
+            return TransactionResult.Committed;
+        if (writes.Count > MaxTransactionItems)
+            return new(DomainError.Precondition($"The change touches {writes.Count} items; at most {MaxTransactionItems} can be written together."), null);
+
+        var items = writes.Select(w => w.Write).ToList();
+        foreach (var item in items)
+        {
+            if (item.Put is { } put) { put.TableName = TableName; put.ReturnValuesOnConditionCheckFailure = ReturnValuesOnConditionCheckFailure.ALL_OLD; }
+            if (item.Delete is { } del) { del.TableName = TableName; del.ReturnValuesOnConditionCheckFailure = ReturnValuesOnConditionCheckFailure.ALL_OLD; }
+            if (item.ConditionCheck is { } check) { check.TableName = TableName; check.ReturnValuesOnConditionCheckFailure = ReturnValuesOnConditionCheckFailure.ALL_OLD; }
+        }
+
+        try
+        {
+            await client.TransactWriteItemsAsync(new TransactWriteItemsRequest { TransactItems = items }, ct);
+            return TransactionResult.Committed;
+        }
+        catch (TransactionCanceledException ex)
+        {
+            var reasons = ex.CancellationReasons ?? [];
+            for (var i = 0; i < reasons.Count && i < writes.Count; i++)
+            {
+                switch (reasons[i].Code)
+                {
+                    case "ConditionalCheckFailed":
+                        var current = reasons[i].Item is { Count: > 0 } old ? old : await GetItemAsync(writes[i].Key, ct);
+                        return new(writes[i].OnConditionFailed(current), writes[i]);
+                    case "TransactionConflict":
+                        return new(DomainError.Conflict($"{writes[i].Description} is being changed by someone else. Reload and try again."), writes[i]);
+                    case "ThrottlingError" or "ProvisionedThroughputExceeded":
+                        return new(new DomainError(DomainErrorCode.RateLimited, "The service is busy. Try again shortly."), writes[i]);
+                }
+            }
+            return new(DomainError.Conflict("The change could not be saved because the data changed. Reload and try again."), null);
+        }
+    }
+
+    /// <summary>
+    /// Removes any items left in a deleted amendment's partition (for example a body created while the delete was in
+    /// flight). Call only after the amendment's <c>META</c> item was deleted.
+    /// </summary>
+    public async Task DeleteAmendmentPartitionAsync(string amendmentId, CancellationToken ct = default)
+    {
+        foreach (var item in await QueryAllAsync(ItemKeys.AmendmentPk(amendmentId), skPrefix: null, ct))
+        {
+            await client.DeleteItemAsync(new DeleteItemRequest
+            {
+                TableName = TableName,
+                Key = AmendmentTable.Key(item[AmendmentTable.Pk].S!, item[AmendmentTable.Sk].S!)
+            }, ct);
+        }
     }
 
     public async Task<IReadOnlyList<LanguageRecord>> GetLanguagesAsync(CancellationToken ct = default) =>

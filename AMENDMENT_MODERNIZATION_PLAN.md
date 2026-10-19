@@ -628,12 +628,12 @@ Each checkbox represents a deliverable/acceptance gate. **Do not proceed to the 
 
 **Objective:** Replace core server API behavior without touching projector operation.
 
-- [ ] Implement authenticated amendment lists/details, create/update/archive and translation-body operations.
-- [ ] Use direct DynamoDB resolvers for straightforward operations; use targeted Lambda for complex transactional use cases.
-- [ ] Enforce server-side validation and per-operation group/resource authorization.
-- [ ] Add consistent GraphQL errors and integration tests for roles, concurrent updates, invalid data.
-- [ ] Introduce typed Blazor API client behind feature flags/adapters; keep old backend working for other routes.
-- [ ] Implement conference approval transition using focused .NET 10 C# domain cleanup logic and a transactional/conditionally guarded Lambda-backed operation where required; preserve parent updates and output markup exactly, with safe retries and private/live notifications.
+- [x] Implement authenticated amendment lists/details, create/update/archive and translation-body operations.
+- [x] Use direct DynamoDB resolvers for straightforward operations; use targeted Lambda for complex transactional use cases.
+- [x] Enforce server-side validation and per-operation group/resource authorization.
+- [x] Add consistent GraphQL errors and integration tests for roles, concurrent updates, invalid data.
+- [x] Introduce typed Blazor API client behind feature flags/adapters; keep old backend working for other routes. *(Minimal per D20: typed client, Cognito sign-in and a preview page; porting the existing pages is deferred.)*
+- [x] Implement conference approval transition using focused .NET 10 C# domain cleanup logic and a transactional/conditionally guarded Lambda-backed operation where required; preserve parent updates and output markup exactly, with safe retries and private/live notifications. *(Notifications come from the Phase 6 stream publisher, which sees the committed parent body writes.)*
 
 **Checkpoint 4:** Existing edit workflows function against new API in dev. Unauthorized direct requests fail; duplicate body and blank body writes are rejected. **Conference approval parity checkpoint passes: approving a child correctly updates its parent with verified legacy cleanup semantics (remove deleted text; keep added text without underline tags), verified using rendered before/after fixtures, concurrency/retry tests, and authorization tests.** Regression suite passes.
 

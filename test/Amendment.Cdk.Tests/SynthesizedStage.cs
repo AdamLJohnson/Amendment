@@ -26,9 +26,19 @@ public sealed class SynthesizedStage
             _templates[stack.StackName] = File.ReadAllText(Path.Combine(assemblyDir, stack.TemplateFile));
     }
 
+    /// <summary>Stand-in for the published API Lambda folder; synthesis only needs the folder and the handler assembly name.</summary>
+    private static readonly Lazy<string> FakeLambdaPackage = new(() =>
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "amendment-cdk-tests", "api-lambda-package");
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "Amendment.Api.Lambda.dll"), "placeholder");
+        return dir;
+    });
+
     public static SynthesizedStage Create(string stage, IDictionary<string, object>? context = null)
     {
         var ctx = new Dictionary<string, object>(context ?? new Dictionary<string, object>()) { ["stage"] = stage };
+        ctx.TryAdd(Amendment.Cdk.Stacks.ApiStack.ApiLambdaPackageContextKey, FakeLambdaPackage.Value);
         var app = new App(new AppProps
         {
             Outdir = Path.Combine(Path.GetTempPath(), "amendment-cdk-tests", Guid.NewGuid().ToString("N")),

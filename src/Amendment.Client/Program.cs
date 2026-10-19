@@ -24,6 +24,9 @@ namespace Amendment.Client
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
+            await AddStageConfigAsync(builder);
+            var cognitoPreview = CognitoGraphQlPreview.FromConfiguration(builder.Configuration);
+
             builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) }.EnableIntercept(sp));
             builder.Services.AddHttpClientInterceptor();
@@ -31,7 +34,9 @@ namespace Amendment.Client
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
             builder.Services.AddAuthorizationCore();
-            builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
+            cognitoPreview.Register(builder.Services);
+            if (!cognitoPreview.Enabled)
+                builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
             builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             builder.Services.AddScoped<IAmendmentRepository, AmendmentRepository>();
             builder.Services.AddScoped<IAmendmentBodyRepository, AmendmentBodyRepository>();
@@ -67,6 +72,24 @@ namespace Amendment.Client
             interceptorService.RegisterEvent();
 
             await app.RunAsync();
+        }
+
+        /// <summary>
+        /// Adds the per-stage <c>amendment-config.json</c> written by <c>publish-web.ps1</c>, if present. Hosts that
+        /// fall back to <c>index.html</c> for unknown paths return HTML instead, which is ignored.
+        /// </summary>
+        private static async Task AddStageConfigAsync(WebAssemblyHostBuilder builder)
+        {
+            try
+            {
+                using var http = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
+                using var response = await http.GetAsync("amendment-config.json");
+                if (response.IsSuccessStatusCode && response.Content.Headers.ContentType?.MediaType == "application/json")
+                    builder.Configuration.AddJsonStream(new MemoryStream(await response.Content.ReadAsByteArrayAsync()));
+            }
+            catch (HttpRequestException)
+            {
+            }
         }
     }
 }

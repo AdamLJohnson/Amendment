@@ -21,6 +21,13 @@ public sealed record AmendmentWithBodies(AmendmentRecord Amendment, IReadOnlyLis
 /// <summary>One page of results. <c>NextPageToken</c> is null on the last page.</summary>
 public sealed record Page<T>(IReadOnlyList<T> Items, string? NextPageToken);
 
+/// <summary>Outcome of <see cref="AmendmentStore.TransactAsync"/>. <c>FailedWrite</c> is the write whose condition failed, when known.</summary>
+public sealed record TransactionResult(Amendment.Domain.DomainError? Error, StoreWrite? FailedWrite)
+{
+    public static TransactionResult Committed { get; } = new(null, null);
+    public bool IsCommitted => Error is null;
+}
+
 /// <summary>New amendment ids are ULIDs (contracts.md): sortable by creation time.</summary>
 public static class AmendmentIds
 {

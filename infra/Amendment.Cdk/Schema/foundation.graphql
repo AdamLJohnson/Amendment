@@ -1,4 +1,0 @@
-# Phase 2 placeholder schema. The full contract (docs/modernization/schema.draft.graphql) is introduced in Phase 4.
-type Query {
-  apiVersion: String!
-}

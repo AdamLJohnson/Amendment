@@ -5,13 +5,16 @@
   Reads stack outputs written by `cdk deploy --outputs-file`, generates the nonsecret frontend config
   (wwwroot/amendment-config.json), uploads the static files and invalidates the distribution.
   Uses the ambient AWS credentials/profile (or AWS_ENDPOINT_URL for Floci).
+  -EnableCognitoPreview turns on the Cognito sign-in and GraphQL preview page (/graphql-preview) for this upload;
+  it is off by default (decision D17).
 #>
 param(
     [string]$Stage = 'dev',
     [string]$Region = 'us-east-1',
     [string]$OutputsFile = (Join-Path $PSScriptRoot "..\Amendment.Cdk\cdk-outputs-$Stage.json"),
     [string]$PublishDir = (Join-Path $PSScriptRoot "..\..\artifacts\web-$Stage"),
-    [switch]$SkipInvalidation
+    [switch]$SkipInvalidation,
+    [switch]$EnableCognitoPreview
 )
 $ErrorActionPreference = 'Stop'
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..')
@@ -38,6 +41,8 @@ $frontendConfig = [ordered]@{
     graphqlUrl       = $api.GraphqlUrl
     userPoolId       = $identity.UserPoolId
     userPoolClientId = $identity.UserPoolClientId
+    signInDomain     = $identity.SignInDomainName
+    features         = [ordered]@{ cognitoGraphQlPreview = [bool]$EnableCognitoPreview }
 }
 [IO.File]::WriteAllText((Join-Path $wwwroot 'amendment-config.json'), ($frontendConfig | ConvertTo-Json))
 Write-Host "Wrote amendment-config.json for stage '$Stage'."

@@ -39,6 +39,10 @@ jobs:
       - name: Test (Release)
         run: dotnet test Amendment.sln -c Release --no-build
 
+      # CDK packages this folder as the API Lambda ZIP
+      - name: Publish API Lambda
+        run: dotnet publish src/Amendment.Api.Lambda/Amendment.Api.Lambda.csproj -c Release -o artifacts/lambda/api
+
       - name: CDK synth (dev + prod)
         working-directory: infra/Amendment.Cdk
         run: |

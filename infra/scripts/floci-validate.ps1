@@ -58,6 +58,9 @@ try {
     $zoneId = (aws route53 create-hosted-zone --name $zoneName --caller-reference "floci-$(Get-Random)" --query HostedZone.Id --output text) -replace '^/hostedzone/', ''
     Assert ($LASTEXITCODE -eq 0 -and $zoneId) "created stand-in hosted zone $zoneName ($zoneId)"
 
+    $repoRoot = Resolve-Path (Join-Path $cdkDir '..\..')
+    Invoke-Checked { dotnet publish (Join-Path $repoRoot 'src\Amendment.Api.Lambda\Amendment.Api.Lambda.csproj') -c Release -o (Join-Path $repoRoot 'artifacts\lambda\api') --nologo -v q }
+
     Push-Location $cdkDir
     try {
         $account = aws sts get-caller-identity --query Account --output text
@@ -75,9 +78,13 @@ try {
     $tags = aws dynamodb list-tags-of-resource --resource-arn $tableArn --output json | ConvertFrom-Json
     Assert (($tags.Tags | Where-Object { $_.Key -eq 'Application' -and $_.Value -eq 'Amendment' }) -ne $null) 'table has tag Application=Amendment'
     Assert (($tags.Tags | Where-Object { $_.Key -eq 'Environment' -and $_.Value -eq $Stage }) -ne $null) "table has tag Environment=$Stage"
+    $runtime = aws lambda get-function-configuration --function-name "$prefix-api" --query Runtime --output text
+    Assert ($runtime -eq 'dotnet10') "API Lambda $prefix-api exists with runtime dotnet10"
     $records = aws route53 list-resource-record-sets --hosted-zone-id $zoneId --output json | ConvertFrom-Json
     $aliases = @($records.ResourceRecordSets | Where-Object { $_.Name -eq "$siteDomain." -and $_.AliasTarget })
     Assert ($aliases.Count -eq 2) "A/AAAA alias records exist for $siteDomain"
+    $signIn = @($records.ResourceRecordSets | Where-Object { $_.Name -eq "auth.$siteDomain." -and $_.AliasTarget })
+    Assert ($signIn.Count -eq 1) "A alias record exists for the sign-in domain auth.$siteDomain"
 
     if (-not $SkipWebPublish) {
         & (Join-Path $PSScriptRoot 'publish-web.ps1') -Stage $Stage -Region $env:AWS_REGION -OutputsFile $outputsFile -PublishDir (Join-Path $cdkDir "..\..\artifacts\web-floci")

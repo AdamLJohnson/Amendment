@@ -1,11 +1,18 @@
 using Amazon.CDK;
+using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.Cognito;
+using Amazon.CDK.AWS.Route53;
+using Amazon.CDK.AWS.Route53.Targets;
 using Amendment.Cdk.Config;
 using Constructs;
 
 namespace Amendment.Cdk.Stacks;
 
-/// <summary>Cognito user pool, legacy role groups and a public SPA client (authorization code + PKCE).</summary>
+/// <summary>
+/// Cognito user pool, legacy role groups, a public SPA client (authorization code + PKCE) and the sign-in pages on a
+/// custom domain. Cognito requires the parent (site) domain to resolve before it creates the custom domain, so this
+/// stack deploys after <see cref="WebStack"/>.
+/// </summary>
 public sealed class IdentityStack : Stack
 {
     /// <summary>
@@ -22,6 +29,10 @@ public sealed class IdentityStack : Stack
 
     public UserPool UserPool { get; }
     public UserPoolClient WebClient { get; }
+    public UserPoolDomain SignInDomain { get; }
+
+    /// <summary>Path the Blazor OIDC library returns to after Cognito sign-in.</summary>
+    public const string LoginCallbackPath = "authentication/login-callback";
 
     public IdentityStack(Construct scope, string id, StageConfig config, IStackProps props) : base(scope, id, props)
     {
@@ -56,7 +67,8 @@ public sealed class IdentityStack : Stack
             });
         }
 
-        var callbackUrls = new[] { config.SiteUrl + "/" }.Concat(config.AdditionalCallbackUrls).ToArray();
+        var siteUrls = new[] { config.SiteUrl + "/" }.Concat(config.AdditionalCallbackUrls).ToArray();
+        var callbackUrls = siteUrls.Select(url => url + LoginCallbackPath).ToArray();
         WebClient = UserPool.AddClient("WebClient", new UserPoolClientOptions
         {
             UserPoolClientName = $"{config.Prefix}-web",
@@ -68,14 +80,63 @@ public sealed class IdentityStack : Stack
                 Flows = new OAuthFlows { AuthorizationCodeGrant = true },
                 Scopes = [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
                 CallbackUrls = callbackUrls,
-                LogoutUrls = callbackUrls
+                LogoutUrls = siteUrls
             },
             AccessTokenValidity = Duration.Minutes(60),
             IdTokenValidity = Duration.Minutes(60),
             RefreshTokenValidity = Duration.Days(30)
         });
 
+        var zone = HostedZone.FromHostedZoneAttributes(this, "SharedZone", new HostedZoneAttributes
+        {
+            HostedZoneId = config.Domain.HostedZoneId,
+            ZoneName = config.Domain.HostedZoneName
+        });
+        var signInCertificate = new Certificate(this, "SignInCertificate", new CertificateProps
+        {
+            DomainName = config.SignInDomainName,
+            Validation = CertificateValidation.FromDns(zone)
+        });
+        SignInDomain = UserPool.AddDomain("SignInDomain", new UserPoolDomainOptions
+        {
+            CustomDomain = new CustomDomainOptions { DomainName = config.SignInDomainName, Certificate = signInCertificate }
+        });
+        // L1 record: UserPoolDomainTarget adds a Lambda-backed custom resource unless a feature flag is set (D14).
+        _ = new CfnRecordSet(this, "SignInAliasA", new CfnRecordSetProps
+        {
+            HostedZoneId = config.Domain.HostedZoneId,
+            Name = config.SignInDomainName + ".",
+            Type = "A",
+            AliasTarget = new CfnRecordSet.AliasTargetProperty
+            {
+                DnsName = SignInDomain.CloudFrontEndpoint,
+                HostedZoneId = CloudFrontTarget.CLOUDFRONT_ZONE_ID
+            }
+        });
+
         _ = new CfnOutput(this, "UserPoolId", new CfnOutputProps { Value = UserPool.UserPoolId });
         _ = new CfnOutput(this, "UserPoolClientId", new CfnOutputProps { Value = WebClient.UserPoolClientId });
+        _ = new CfnOutput(this, "SignInDomainName", new CfnOutputProps { Value = config.SignInDomainName });
+
+        if (!config.IsProduction)
+        {
+            // Non-production only (decision D18): API tests sign in throwaway users with ADMIN_USER_PASSWORD_AUTH,
+            // which requires IAM credentials (cognito-idp:AdminInitiateAuth), so this client is not usable from a browser.
+            TestClient = UserPool.AddClient("TestClient", new UserPoolClientOptions
+            {
+                UserPoolClientName = $"{config.Prefix}-api-tests",
+                GenerateSecret = false,
+                AuthFlows = new AuthFlow { AdminUserPassword = true },
+                DisableOAuth = true,
+                PreventUserExistenceErrors = true,
+                AccessTokenValidity = Duration.Minutes(60),
+                IdTokenValidity = Duration.Minutes(60),
+                RefreshTokenValidity = Duration.Hours(1)
+            });
+            _ = new CfnOutput(this, "TestClientId", new CfnOutputProps { Value = TestClient.UserPoolClientId });
+        }
     }
+
+    /// <summary>Non-production API test client; null in production.</summary>
+    public UserPoolClient? TestClient { get; }
 }
