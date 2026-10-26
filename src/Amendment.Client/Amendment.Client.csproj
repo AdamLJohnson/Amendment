@@ -11,7 +11,7 @@
     <None Include="compilerconfig.json" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Blazorise.Bootstrap5" Version="2.4.0" />
+    <PackageReference Include="Blazorise.Bootstrap5" Version="2.4.1" />
     <PackageReference Include="Blazorise.Components" Version="2.4.0" />
     <PackageReference Include="Blazorise.FluentValidation" Version="2.4.0" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="2.4.0" />
